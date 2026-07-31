@@ -1,0 +1,178 @@
+# Post Task Hook
+
+Every time you finish implementing a feature, modifying files, or completing a task, perform the following quality assurance process before ending your work.
+
+---
+
+## 1. Verify Project Integrity
+
+Ensure the project remains in a working state.
+
+Run:
+
+```bash
+npm run lint
+npm run typecheck
+npm run build
+```
+
+If any command fails:
+
+- Identify the root cause.
+- Fix the issue.
+- Repeat the verification until all commands pass successfully.
+- Never leave the project in a broken state.
+
+---
+
+## 2. Code Review
+
+Review every file that was modified.
+
+Verify:
+
+- TypeScript types are correct.
+- No unused imports.
+- No unused variables.
+- No duplicated logic.
+- No dead code.
+- No commented-out code.
+- No temporary debugging code.
+- No console.log() statements.
+- No TODO or FIXME left behind.
+
+---
+
+## 3. Architecture Review
+
+Confirm that the implementation follows the SkillBridge architecture.
+
+Verify:
+
+- Business logic is not inside UI components.
+- Shared logic is extracted into services or utilities.
+- Components remain reusable.
+- Folder structure follows project conventions.
+- Existing utilities are reused instead of duplicated.
+
+---
+
+## 4. Security Review
+
+If authentication, authorization, uploads, or APIs were modified:
+
+Verify:
+
+- Authentication is enforced.
+- Authorization is role-based.
+- Inputs are validated.
+- Sensitive information is never exposed.
+- Uploaded files are validated.
+- Database access follows least privilege.
+
+Never trust client-side validation.
+
+---
+
+## 5. Database Review
+
+If database schema or queries were modified:
+
+Verify:
+
+- Foreign keys remain valid.
+- Relationships are correct.
+- No duplicated data.
+- Queries are efficient.
+- Verification history is never deleted.
+- Existing data integrity is preserved.
+
+---
+
+## 6. API Review
+
+If API routes were modified:
+
+Verify:
+
+- HTTP methods are correct.
+- Status codes are appropriate.
+- Responses follow the project standard.
+
+Successful response:
+
+```json
+{
+  "success": true,
+  "data": {}
+}
+```
+
+Error response:
+
+```json
+{
+  "success": false,
+  "message": "",
+  "errors": []
+}
+```
+
+---
+
+## 7. UI Review
+
+If UI was modified:
+
+Verify:
+
+- Responsive on desktop and mobile.
+- Consistent spacing.
+- Accessible labels.
+- Proper loading states.
+- Proper empty states.
+- Proper error states.
+- Consistent styling.
+
+---
+
+## 8. Performance Review
+
+Ensure the implementation:
+
+- Avoids unnecessary client rendering.
+- Avoids unnecessary API requests.
+- Uses lazy loading where appropriate.
+- Does not introduce unnecessary dependencies.
+
+---
+
+## 9. Sprint Validation
+
+Confirm the work belongs to the current sprint.
+
+Do not implement future sprint functionality unless explicitly instructed.
+
+---
+
+## 10. Final Checklist
+
+Before ending the task confirm:
+
+✓ Project builds successfully
+
+✓ TypeScript passes
+
+✓ ESLint passes
+
+✓ No runtime errors introduced
+
+✓ Code follows project architecture
+
+✓ Feature satisfies the requested task
+
+✓ No unrelated files were modified
+
+✓ Implementation strengthens the Verified Talent Ecosystem
+
+Only consider the task complete after every check passes.

@@ -1,0 +1,225 @@
+// Prisma schema for SkillBridge
+// Mirrors the domain model in @skillbridge/types, made relational for scale.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  student
+  employer
+  admin
+  factory
+  worker
+}
+
+enum ProjectStatus {
+  open
+  in_progress
+  completed
+  cancelled
+}
+
+enum ProjectType {
+  internship
+  part_time
+  freelance
+  full_time
+}
+
+enum ApplicationStatus {
+  pending
+  accepted
+  rejected
+  withdrawn
+}
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  passwordHash  String
+  role          UserRole
+  name          String
+  avatar        String?
+  emailVerified Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  student   Student?
+  employer  Employer?
+  factory   Factory?
+  worker    Worker?
+
+  @@index([role])
+}
+
+model Student {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  university    String?
+  major         String?
+  graduationYear Int?
+  skills        String[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  portfolioItems   PortfolioItem[]
+  workExperiences  WorkExperience[]
+  applications     Application[]
+  aiResumes        AIResume[]
+  careerRecs       CareerRecommendation[]
+
+  @@index([university])
+}
+
+model Employer {
+  id          String    @id @default(cuid())
+  userId      String    @unique
+  companyName String
+  industry    String?
+  companySize Int       @default(0)
+  verified    Boolean   @default(false)
+  verifiedAt  DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projects       Project[]
+  workExperiences WorkExperience[]
+
+  @@index([verified])
+}
+
+model Factory {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  name      String
+  location  String?
+  capacity  Int      @default(0)
+  verified  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Worker {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  skills    String[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Project {
+  id             String       @id @default(cuid())
+  title          String
+  description    String
+  employerId     String
+  type           ProjectType
+  status         ProjectStatus @default(open)
+  budget         Float?
+  startDate      DateTime?
+  endDate        DateTime?
+  skillsRequired String[]
+  location       String?
+  remote         Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  employer        Employer        @relation(fields: [employerId], references: [id], onDelete: Cascade)
+  applications    Application[]
+  workExperiences WorkExperience[]
+
+  @@index([employerId])
+  @@index([status])
+  @@index([type])
+}
+
+model Application {
+  id             String           @id @default(cuid())
+  projectId      String
+  studentId      String
+  status         ApplicationStatus @default(pending)
+  coverLetter    String?
+  proposedBudget Float?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, studentId])
+  @@index([projectId])
+  @@index([studentId])
+  @@index([status])
+}
+
+model PortfolioItem {
+  id          String   @id @default(cuid())
+  studentId   String
+  title       String
+  description String?
+  imageUrl    String?
+  projectUrl  String?
+  technologies String[]
+  createdAt   DateTime @default(now())
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([studentId])
+}
+
+model WorkExperience {
+  id          String   @id @default(cuid())
+  studentId   String
+  projectId   String?
+  employerId  String?
+  position    String
+  startDate   DateTime
+  endDate     DateTime?
+  description String?
+  verified    Boolean  @default(false)
+  verifiedAt  DateTime?
+  rating      Int?
+  createdAt   DateTime @default(now())
+
+  student  Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  project  Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  employer Employer? @relation(fields: [employerId], references: [id], onDelete: SetNull)
+
+  @@index([studentId])
+  @@index([verified])
+}
+
+model AIResume {
+  id        String   @id @default(cuid())
+  studentId String
+  content   String
+  template  String   @default("modern")
+  createdAt DateTime @default(now())
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([studentId])
+}
+
+model CareerRecommendation {
+  id                 String   @id @default(cuid())
+  studentId          String
+  recommendedProjectIds String[]
+  recommendedSkills  String[]
+  createdAt          DateTime @default(now())
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([studentId])
+}

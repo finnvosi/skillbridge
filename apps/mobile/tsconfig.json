@@ -1,0 +1,22 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "paths": {
+      "@skillbridge/config": ["../../packages/config/src"],
+      "@skillbridge/types": ["../../packages/types/src"],
+      "@skillbridge/ui": ["../../packages/ui/src"],
+      "@skillbridge/utils": ["../../packages/utils/src"]
+    },
+    "types": ["node"]
+  },
+  "include": [
+    "src/**/*",
+    "index.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "babel.config.js"
+  ]
+}

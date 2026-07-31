@@ -1,0 +1,26 @@
+{
+  "name": "skillbridge",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm --filter web dev",
+    "build": "pnpm --filter web build",
+    "lint": "pnpm --filter web lint",
+    "format": "prettier --write .",
+    "dev:mobile": "pnpm --filter mobile dev",
+    "dev:api": "pnpm --filter api dev",
+    "dev:all": "pnpm -r --parallel dev",
+    "build:all": "pnpm -r build",
+    "clean": "pnpm -r clean"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "pnpm": "^9.0.0",
+    "turbo": "^2.0.0"
+  },
+  "engines": {
+    "node": ">=18",
+    "pnpm": ">=9"
+  }
+}

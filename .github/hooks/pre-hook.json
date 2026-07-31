@@ -1,0 +1,212 @@
+# Pre Task Hook
+
+Before writing, modifying, or deleting any code, complete the following preparation process.
+
+Do not begin implementation until every step has been completed.
+
+---
+
+# 1. Understand the Task
+
+Read the user's request carefully.
+
+Identify:
+
+- The requested feature
+- Expected outcome
+- Constraints
+- Scope of work
+
+Do not assume requirements that were not explicitly stated.
+
+If requirements are ambiguous, ask for clarification before implementing.
+
+---
+
+# 2. Load Project Context
+
+Read the following project documents in order:
+
+1. AGENTS.md
+2. INSTRUCTIONS.md
+
+If additional documentation exists, load relevant documents such as:
+
+- README.md
+- DATABASE.md
+- API_SPEC.md
+- ARCHITECTURE.md
+- UI_GUIDELINES.md
+- Current Sprint Document
+
+These documents define the project's architecture, coding standards, and product philosophy.
+
+---
+
+# 3. Understand Existing Code
+
+Before creating anything new:
+
+- Search the codebase.
+- Understand the current implementation.
+- Identify reusable components.
+- Identify reusable hooks.
+- Identify reusable services.
+- Identify reusable utilities.
+- Identify existing API routes.
+
+Never duplicate existing functionality.
+
+Reuse existing architecture whenever possible.
+
+---
+
+# 4. Think Before Coding
+
+Before making changes, create a short internal implementation plan.
+
+Determine:
+
+- Files to modify
+- New files required
+- Database impact
+- API impact
+- UI impact
+- Authentication impact
+- Security considerations
+
+Prefer modifying existing code over introducing unnecessary files.
+
+---
+
+# 5. Respect Current Sprint
+
+Only implement features that belong to the current sprint.
+
+Do not:
+
+- Build future features
+- Add "nice-to-have" functionality
+- Introduce unrelated improvements
+- Perform unnecessary refactoring
+
+Stay focused on the requested task.
+
+---
+
+# 6. Verify Architecture
+
+Every implementation must follow SkillBridge architecture.
+
+Business logic belongs in:
+
+- services
+- features
+- lib
+
+Avoid placing business logic inside UI components.
+
+Keep components focused on presentation.
+
+---
+
+# 7. Security First
+
+Before touching authentication, APIs, uploads, or database logic, verify:
+
+- Authentication requirements
+- Authorization requirements
+- Input validation
+- File validation
+- Role permissions
+
+Never trust client-side validation.
+
+---
+
+# 8. Database Awareness
+
+If the task affects the database:
+
+Review:
+
+- Existing schema
+- Relationships
+- Foreign keys
+- Constraints
+- RLS policies
+
+Never duplicate data unnecessarily.
+
+Never remove verification history.
+
+Preserve data integrity.
+
+---
+
+# 9. UI Consistency
+
+Before creating new UI:
+
+Search for:
+
+- Existing components
+- Existing layouts
+- Existing design patterns
+
+Reuse components whenever possible.
+
+Maintain consistent spacing, typography, colors, and interactions.
+
+---
+
+# 10. Performance Awareness
+
+Before implementing:
+
+Consider:
+
+- Can this be server-side?
+- Does this require client-side rendering?
+- Can this reuse existing API calls?
+- Can database queries be optimized?
+- Can unnecessary renders be avoided?
+
+Choose the simplest scalable solution.
+
+---
+
+# 11. Verify Against Product Philosophy
+
+Every implementation must support the core mission of SkillBridge.
+
+Ask yourself:
+
+- Does this strengthen the Verified Talent Ecosystem?
+- Does this improve trust?
+- Does this improve maintainability?
+- Does this align with the project architecture?
+
+If the answer is no, reconsider the implementation.
+
+---
+
+# 12. Implementation Rules
+
+Only begin coding after:
+
+✓ Understanding the task
+
+✓ Understanding the existing architecture
+
+✓ Identifying reusable code
+
+✓ Reviewing relevant documentation
+
+✓ Planning the implementation
+
+✓ Confirming the work belongs to the current sprint
+
+Then proceed with implementation.
+
+Quality is always more important than speed.

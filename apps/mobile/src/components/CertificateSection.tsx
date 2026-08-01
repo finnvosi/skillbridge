@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
   },
   filePlaceholder: {
     borderWidth: 2,
-    borderDashOffset: 0,
+    borderStyle: 'dashed',
     borderColor: colors.separator,
     borderRadius: radius.md,
     padding: spacing.lg,

@@ -14,7 +14,7 @@ import { apiRequest } from '../../services/api';
 import { API_ENDPOINTS } from '../../config';
 import { Button, Input, Card, Badge } from '@skillbridge/ui';
 import { colors, spacing, typography, radius } from '../../theme';
-import CertificateSection from '../components/CertificateSection';
+import CertificateSection from '../../components/CertificateSection';
 
 interface ProfileShape {
   university?: string | null;

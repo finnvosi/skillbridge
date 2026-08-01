@@ -28,4 +28,9 @@ export const API_ENDPOINTS = {
     apply: (id: string) => `/projects/${id}/apply`,
     myApplications: '/projects/student/applications',
   },
+  certificates: {
+    upload: '/certificates',
+    list: '/certificates',
+    delete: (id: string) => `/certificates/${id}`,
+  },
 } as const;

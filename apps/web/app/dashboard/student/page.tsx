@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { getToken, clearToken, apiRequest, ApiError, API_ENDPOINTS, ApiUser } from '@/lib/api-client';
 
@@ -285,6 +285,9 @@ export default function StudentDashboard() {
           </div>
         </div>
 
+        {/* Certificates Section */}
+        <CertificatesSection token={token!} />
+
         {/* Save Button */}
         <div className="flex gap-4">
           <button
@@ -306,5 +309,190 @@ export default function StudentDashboard() {
   );
 }
 
+// ─── Certificates Section Component ───
+interface Certificate {
+  id: string;
+  title: string;
+  description?: string | null;
+  fileUrl: string;
+  mimeType: string;
+  fileSize: number;
+  verified: boolean;
+  createdAt: string;
+}
+
+function CertificatesSection({ token }: { token: string }) {
+  const [certificates, setCertificates] = React.useState<Certificate[]>([]);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
+  const [success, setSuccess] = React.useState<string | null>(null);
+  const [uploading, setUploading] = React.useState(false);
+
+  const [certTitle, setCertTitle] = React.useState('');
+  const [certDesc, setCertDesc] = React.useState('');
+  const [certFile, setCertFile] = React.useState<File | null>(null);
+
+  const loadCerts = React.useCallback(async () => {
+    try {
+      const data = await apiRequest<{ certificates: Certificate[] }>(
+        API_ENDPOINTS.certificates.list,
+        { method: 'GET', token }
+      );
+      setCertificates(data.certificates);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Failed to load certificates');
+    } finally {
+      setLoading(false);
+    }
+  }, [token]);
+
+  React.useEffect(() => {
+    loadCerts();
+  }, [loadCerts]);
+
+  const fileToBase64 = (file: File): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = reader.result as string;
+        // Strip the data URL prefix (e.g. "data:application/pdf;base64,")
+        resolve(result.split(',')[1]);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+
+  const handleUpload = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!certTitle.trim() || !certFile) {
+      setError('Please provide a title and select a file');
+      return;
+    }
+    setUploading(true);
+    setError(null);
+    setSuccess(null);
+    try {
+      const base64 = await fileToBase64(certFile);
+      await apiRequest(API_ENDPOINTS.certificates.upload, {
+        method: 'POST',
+        token,
+        body: {
+          title: certTitle,
+          description: certDesc || undefined,
+          file: {
+            base64,
+            mimeType: certFile.type,
+            originalName: certFile.name,
+          },
+        },
+      });
+      setSuccess('Certificate uploaded!');
+      setCertTitle('');
+      setCertDesc('');
+      setCertFile(null);
+      loadCerts();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Upload failed');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const formatSize = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  };
+
+  return (
+    <div className="bg-white rounded-lg shadow p-6 mb-6">
+      <h3 className="text-lg font-semibold text-gray-900 mb-4">Certificates</h3>
+
+      {/* Upload Form */}
+      <form onSubmit={handleUpload} className="space-y-4 mb-6">
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Title</label>
+          <input
+            type="text"
+            value={certTitle}
+            onChange={(e) => setCertTitle(e.target.value)}
+            placeholder="e.g. AWS Certified Developer"
+            className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Description (optional)</label>
+          <textarea
+            value={certDesc}
+            onChange={(e) => setCertDesc(e.target.value)}
+            rows={2}
+            placeholder="What is this certification for?"
+            className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700">File (PDF, image, etc.)</label>
+          <input
+            type="file"
+            accept=".pdf,.jpg,.jpeg,.png,.gif,.doc,.docx"
+            onChange={(e) => setCertFile(e.target.files?.[0] || null)}
+            className="mt-1 w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+          />
+          {certFile && (
+            <p className="text-xs text-gray-500 mt-1">
+              {certFile.name} ({formatSize(certFile.size)})
+            </p>
+          )}
+        </div>
+        {error && (
+          <div className="p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-700">{error}</div>
+        )}
+        {success && (
+          <div className="p-3 bg-green-50 border border-green-200 rounded-md text-sm text-green-700">{success}</div>
+        )}
+        <button
+          type="submit"
+          disabled={uploading || !certTitle || !certFile}
+          className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 font-medium"
+        >
+          {uploading ? 'Uploading...' : 'Upload Certificate'}
+        </button>
+      </form>
+
+      {/* Certificates List */}
+      {loading ? (
+        <div className="text-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {certificates.map((cert) => (
+            <div key={cert.id} className="border border-gray-200 rounded-lg p-4 flex justify-between items-center">
+              <div>
+                <h4 className="font-medium text-gray-900">{cert.title}</h4>
+                {cert.description && <p className="text-sm text-gray-600 mt-1">{cert.description}</p>}
+                <p className="text-xs text-gray-500 mt-1">
+                  {formatSize(cert.fileSize)} · {new Date(cert.createdAt).toLocaleDateString()}
+                  {cert.verified && ' · ✅ Verified'}
+                </p>
+              </div>
+              <a
+                href={cert.fileUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs px-3 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
+              >
+                View
+              </a>
+            </div>
+          ))}
+          {certificates.length === 0 && (
+            <p className="text-center text-gray-500 py-8">No certificates uploaded yet.</p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // Fix: useState isn't defined in JSX context — this was causing a conflict
-// The page is 'use client' and uses native destructuring, no conflict.

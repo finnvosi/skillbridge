@@ -11,6 +11,8 @@ import { appConfig } from '@skillbridge/config';
 import authRoutes from './routes/auth.routes';
 import usersRoutes from './routes/users.routes';
 import projectsRoutes from './routes/projects.routes';
+import certificatesRoutes from './routes/certificates.routes';
+import * as path from 'path';
 
 // Initialize Express app
 const app = express();
@@ -49,6 +51,10 @@ app.get('/health', (req, res) => {
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/users', usersRoutes);
 app.use('/api/v1/projects', projectsRoutes);
+app.use('/api/v1/certificates', certificatesRoutes);
+
+// Serve uploaded files statically
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 // API info endpoint
 app.get('/api/v1', (req, res) => {

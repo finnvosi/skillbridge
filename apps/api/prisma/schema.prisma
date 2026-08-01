@@ -74,6 +74,7 @@ model Student {
   applications     Application[]
   aiResumes        AIResume[]
   careerRecs       CareerRecommendation[]
+  certificates     Certificate[]   // <-- NEW
 
   @@index([university])
 }
@@ -161,6 +162,26 @@ model Application {
   @@index([projectId])
   @@index([studentId])
   @@index([status])
+}
+
+model Certificate {
+  id          String   @id @default(cuid())
+  studentId   String
+  title       String
+  description String?
+  fileUrl     String
+  fileKey     String   // path/key for storage backend
+  mimeType    String
+  fileSize    Int      // bytes
+  verified    Boolean  @default(false)
+  verifiedAt  DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([studentId])
+  @@index([verified])
 }
 
 model PortfolioItem {

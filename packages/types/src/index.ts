@@ -114,6 +114,21 @@ export interface CareerRecommendation {
   createdAt: Date;
 }
 
+// Certificate types
+export interface Certificate {
+  id: string;
+  studentId: string;
+  title: string;
+  description?: string | null;
+  fileUrl: string;
+  mimeType: string;
+  fileSize: number;
+  verified: boolean;
+  verifiedAt?: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 // API Response types
 export interface ApiResponse<T> {
   success: boolean;

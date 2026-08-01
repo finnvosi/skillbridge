@@ -56,6 +56,20 @@ interface RequestOptions {
   query?: Record<string, string | number | boolean | undefined>;
 }
 
+interface ErrorBody {
+  error?: string;
+  message?: string;
+  details?: unknown;
+}
+
+function isErrorBody(value: unknown): value is ErrorBody {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    !(value instanceof String)
+  );
+}
+
 function buildUrl(path: string, query?: RequestOptions['query']): string {
   const url = new URL(`${API_URL}${path}`);
   if (query) {
@@ -68,7 +82,7 @@ function buildUrl(path: string, query?: RequestOptions['query']): string {
   return url.toString();
 }
 
-export async function apiRequest<T = any>(
+export async function apiRequest<T = unknown>(
   path: string,
   { method = 'GET', body, token, query }: RequestOptions = {}
 ): Promise<T> {
@@ -86,7 +100,7 @@ export async function apiRequest<T = any>(
     credentials: 'include', // for any cookie-based flows
   });
 
-  let data: any = null;
+  let data: unknown = null;
   const text = await res.text();
   if (text) {
     try {
@@ -98,8 +112,10 @@ export async function apiRequest<T = any>(
 
   if (!res.ok) {
     const message =
-      (data && (data.error || data.message)) || `Request failed (${res.status})`;
-    throw new ApiError(message, res.status, data?.details);
+      (isErrorBody(data) && (data.error || data.message)) ||
+      `Request failed (${res.status})`;
+    const details = isErrorBody(data) ? data.details : undefined;
+    throw new ApiError(message, res.status, details);
   }
 
   return data as T;

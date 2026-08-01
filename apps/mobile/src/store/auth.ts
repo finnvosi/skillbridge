@@ -1,12 +1,20 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import type { User } from '@skillbridge/types';
 import { apiRequest, ApiError } from '../services/api';
 import { API_ENDPOINTS } from '../config';
 
-// Mirror the API's user shape (id, email, name, role)
-type ApiUser = User;
+/**
+ * Shape of the user object returned by the SkillBridge Express API.
+ * The API uses `name` (camelCase) — NOT `full_name` (which the old
+ * Supabase-based Next.js auth used).
+ */
+export interface ApiUser {
+  id: string;
+  email: string;
+  name: string;
+  role: 'student' | 'employer' | 'factory' | 'admin' | 'worker';
+}
 
 interface AuthState {
   user: ApiUser | null;
@@ -98,13 +106,13 @@ export const useAuthStore = create<AuthState>()(
       logout: async () => {
         const { token } = get();
         try {
-          // Best-effort server logout (stateless; safe to ignore failures)
+          // Best-effort server logout (stateless API; safe to ignore failures)
           await apiRequest(API_ENDPOINTS.auth.logout, {
             method: 'POST',
             token,
           });
         } catch {
-          /* noop */
+          // noop — client-side cleanup is what matters
         }
         set({
           user: null,
@@ -125,7 +133,7 @@ export const useAuthStore = create<AuthState>()(
           );
           set({ user: data.user });
         } catch {
-          // Token may be invalid — keep stored state
+          // Token may be invalid — keep stored state, user can re-auth
         }
       },
 

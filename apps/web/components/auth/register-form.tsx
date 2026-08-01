@@ -1,25 +1,17 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { UserRole } from '@/types';
+import { apiRequest, ApiError, AuthResponse, API_ENDPOINTS, storeToken } from '@/lib/api-client';
 
 export function RegisterForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [fullName, setFullName] = useState('');
-  const [role, setRole] = useState<UserRole>('student');
+  const [name, setName] = useState('');
+  const [role, setRole] = useState<'student' | 'employer'>('student');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-
-  const roles: { value: UserRole; label: string }[] = [
-    { value: 'student', label: 'Student' },
-    { value: 'worker', label: 'Job Seeker / Worker' },
-    { value: 'employer', label: 'Employer' },
-    { value: 'factory_admin', label: 'Factory Manager' },
-  ];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,28 +19,28 @@ export function RegisterForm() {
     setLoading(true);
 
     try {
-      const response = await fetch('/api/auth/register', {
+      const data = await apiRequest<AuthResponse>(API_ENDPOINTS.auth.register, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email,
-          password,
-          full_name: fullName,
-          role,
-        }),
+        body: { email, password, name, role },
       });
 
-      const data = await response.json();
+      storeToken(data.token, data.refreshToken);
 
-      if (!data.success) {
-        setError(data.error || 'Registration failed');
-        return;
-      }
+      const roleRedirects: Record<string, string> = {
+        student: '/dashboard/student',
+        worker: '/dashboard/worker',
+        employer: '/dashboard/employer',
+        factory: '/dashboard/factory',
+        admin: '/dashboard/admin',
+      };
 
-      // Redirect to email verification page
-      router.push(`/auth/verify-email?email=${encodeURIComponent(email)}`);
+      router.push(roleRedirects[data.user.role] || '/dashboard');
     } catch (err) {
-      setError('An error occurred. Please try again.');
+      setError(
+        err instanceof ApiError
+          ? err.message
+          : 'An error occurred. Please try again.'
+      );
     } finally {
       setLoading(false);
     }
@@ -58,14 +50,14 @@ export function RegisterForm() {
     <div className="w-full max-w-md mx-auto">
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="fullName" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="name" className="block text-sm font-medium text-gray-700">
             Full Name
           </label>
           <input
-            id="fullName"
+            id="name"
             type="text"
-            value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
             required
             className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             placeholder="John Doe"
@@ -112,14 +104,11 @@ export function RegisterForm() {
           <select
             id="role"
             value={role}
-            onChange={(e) => setRole(e.target.value as UserRole)}
+            onChange={(e) => setRole(e.target.value as 'student' | 'employer')}
             className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
           >
-            {roles.map((r) => (
-              <option key={r.value} value={r.value}>
-                {r.label}
-              </option>
-            ))}
+            <option value="student">Student</option>
+            <option value="employer">Employer</option>
           </select>
         </div>
 
@@ -140,9 +129,12 @@ export function RegisterForm() {
 
       <div className="mt-4 text-center text-sm text-gray-600">
         Already have an account?{' '}
-        <Link href="/auth/login" className="text-blue-600 hover:text-blue-700 font-medium">
+        <a
+          href="/auth/login"
+          className="text-blue-600 hover:text-blue-700 font-medium"
+        >
           Sign in
-        </Link>
+        </a>
       </div>
     </div>
   );

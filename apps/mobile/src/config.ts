@@ -6,7 +6,7 @@
 //   EXPO_PUBLIC_API_URL=http://192.168.1.10:3001
 // (Find your IP with `ipconfig getifaddr en0`.)
 const API_BASE_URL =
-  (process.env.EXPO_PUBLIC_API_URL as string | undefined) ?? 'http://localhost:3001';
+  (process.env.EXPO_PUBLIC_API_URL as string | undefined) ?? 'http://localhost:3000';
 
 export const API_URL = `${API_BASE_URL}/api/v1`;
 

@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { getToken, clearToken, apiRequest, API_ENDPOINTS } from '@/lib/api-client';
+import type { ApiUser } from '@/lib/api-client';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -9,25 +11,28 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const fetchUser = async () => {
+      const token = getToken();
+      if (!token) {
+        router.push('/auth/login');
+        return;
+      }
       try {
-        const response = await fetch('/api/auth/me');
-        const data = await response.json();
-
-        if (!data.success) {
-          router.push('/auth/login');
-          return;
-        }
+        const data = await apiRequest<{ user: ApiUser }>(API_ENDPOINTS.auth.me, {
+          method: 'GET',
+          token,
+        });
 
         const roleRedirects: Record<string, string> = {
           student: '/dashboard/student',
           worker: '/dashboard/worker',
           employer: '/dashboard/employer',
-          factory_admin: '/dashboard/factory',
+          factory: '/dashboard/factory',
           admin: '/dashboard/admin',
         };
 
         router.push(roleRedirects[data.user.role] || '/auth/login');
-      } catch (error) {
+      } catch {
+        clearToken();
         router.push('/auth/login');
       } finally {
         setLoading(false);

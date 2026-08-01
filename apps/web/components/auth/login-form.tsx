@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { apiRequest, ApiError, AuthResponse, API_ENDPOINTS, storeToken } from '@/lib/api-client';
 
 export function LoginForm() {
   const [email, setEmail] = useState('');
@@ -17,32 +17,28 @@ export function LoginForm() {
     setLoading(true);
 
     try {
-      const response = await fetch('/api/auth/login', {
+      const data = await apiRequest<AuthResponse>(API_ENDPOINTS.auth.login, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: { email, password },
       });
 
-      const data = await response.json();
+      storeToken(data.token, data.refreshToken);
 
-      if (!data.success) {
-        setError(data.error || 'Login failed');
-        return;
-      }
-
-      // Redirect based on role
       const roleRedirects: Record<string, string> = {
         student: '/dashboard/student',
         worker: '/dashboard/worker',
         employer: '/dashboard/employer',
-        factory_admin: '/dashboard/factory',
+        factory: '/dashboard/factory',
         admin: '/dashboard/admin',
       };
 
-      const redirectUrl = roleRedirects[data.user.role] || '/dashboard';
-      router.push(redirectUrl);
+      router.push(roleRedirects[data.user.role] || '/dashboard');
     } catch (err) {
-      setError('An error occurred. Please try again.');
+      setError(
+        err instanceof ApiError
+          ? err.message
+          : 'An error occurred. Please try again.'
+      );
     } finally {
       setLoading(false);
     }
@@ -98,15 +94,12 @@ export function LoginForm() {
 
       <div className="mt-4 text-center text-sm text-gray-600">
         Don't have an account?{' '}
-        <Link href="/auth/register" className="text-blue-600 hover:text-blue-700 font-medium">
+        <a
+          href="/auth/register"
+          className="text-blue-600 hover:text-blue-700 font-medium"
+        >
           Sign up
-        </Link>
-      </div>
-
-      <div className="mt-2 text-center text-sm">
-        <Link href="/auth/forgot-password" className="text-blue-600 hover:text-blue-700">
-          Forgot password?
-        </Link>
+        </a>
       </div>
     </div>
   );

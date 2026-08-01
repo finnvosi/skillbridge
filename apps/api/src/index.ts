@@ -1,15 +1,16 @@
+import dotenv from 'dotenv';
+
+// Load environment variables FIRST so appConfig picks up correct port/JWT values
+dotenv.config();
+
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
-import dotenv from 'dotenv';
 import { appConfig } from '@skillbridge/config';
 import authRoutes from './routes/auth.routes';
 import usersRoutes from './routes/users.routes';
 import projectsRoutes from './routes/projects.routes';
-
-// Load environment variables
-dotenv.config();
 
 // Initialize Express app
 const app = express();

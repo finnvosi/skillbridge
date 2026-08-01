@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useCallback } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { getToken, clearToken, apiRequest, ApiError, API_ENDPOINTS, ApiUser } from '@/lib/api-client';
 
@@ -17,7 +18,6 @@ interface ProfileShape {
 export default function StudentDashboard() {
   const router = useRouter();
   const [user, setUser] = useState<ApiUser | null>(null);
-  const [profile, setProfile] = useState<ProfileShape>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -143,10 +143,11 @@ export default function StudentDashboard() {
       <nav className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
           <h1 className="text-2xl font-bold text-gray-900">SkillBridge</h1>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-gray-600">
-              {user.name} ({user.role})
-            </span>
+          <div className="flex items-center gap-6">
+            <Link href="/dashboard/student" className="text-gray-600 hover:text-gray-900">Profile</Link>
+            <Link href="/dashboard/student/projects" className="text-gray-600 hover:text-gray-900">Projects</Link>
+            <Link href="/dashboard/student/applications" className="text-gray-600 hover:text-gray-900">Applications</Link>
+            <span className="text-sm text-gray-600">{user?.name}</span>
             <button
               onClick={() => {
                 clearToken();

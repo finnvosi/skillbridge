@@ -117,7 +117,7 @@ export default function Home() {
       <footer className="bg-gray-900 text-white py-8 mt-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <p className="text-gray-400">© 2024 SkillBridge. All rights reserved.</p>
-          <p className="text-gray-400 mt-2">Cambodia's Trusted Workforce Development Platform</p>
+          <p className="text-gray-400 mt-2">Cambodia&apos;s Trusted Workforce Development Platform</p>
         </div>
       </footer>
     </div>

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-// Protected routes that require authentication (JWT in localStorage)
-const protectedRoutes = ['/dashboard', '/profile', '/apply', '/employer'];
+// Public routes that never require authentication
 const publicRoutes = ['/auth', '/login', '/register'];
 
 export async function middleware(request: NextRequest) {

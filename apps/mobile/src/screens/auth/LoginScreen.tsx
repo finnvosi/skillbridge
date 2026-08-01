@@ -1,8 +1,19 @@
 import React from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+} from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { Button, Input } from '@skillbridge/ui';
 import { useAuthStore } from '../../store/auth';
 import type { RootStackParamList } from '../../App';
+import { colors, spacing, typography, radius } from '../../theme';
 
 type LoginScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Login'>;
 
@@ -31,104 +42,81 @@ export default function LoginScreen({ navigation }: Props) {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>SkillBridge</Text>
-      <Text style={styles.subtitle}>Login to your account</Text>
+    <KeyboardAvoidingView
+      style={styles.flex}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+        <View style={styles.brand}>
+          <Text style={styles.logo}>SkillBridge</Text>
+          <Text style={styles.tagline}>Bridge your skills to real work.</Text>
+        </View>
 
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-          keyboardType="email-address"
-          placeholderTextColor="#999"
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          placeholderTextColor="#999"
-        />
-      </View>
+        <View style={styles.form}>
+          <Input
+            label="Email"
+            placeholder="you@example.com"
+            value={email}
+            onChangeText={setEmail}
+            autoCapitalize="none"
+            keyboardType="email-address"
+          />
+          <Input
+            label="Password"
+            placeholder="••••••••"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+          />
 
-      <TouchableOpacity
-        style={[styles.button, loading && styles.buttonDisabled]}
-        onPress={handleLogin}
-        disabled={loading}
-      >
-        <Text style={styles.buttonText}>
-          {loading ? 'Logging in...' : 'Login'}
-        </Text>
-      </TouchableOpacity>
+          <Button
+            onPress={handleLogin}
+            loading={loading}
+            disabled={loading}
+            fullWidth
+          >
+            {loading ? 'Signing in...' : 'Sign In'}
+          </Button>
+        </View>
 
-      <TouchableOpacity
-        style={styles.linkButton}
-        onPress={() => navigation.navigate('Register')}
-      >
-        <Text style={styles.linkText}>
-          Don't have an account? Sign Up
-        </Text>
-      </TouchableOpacity>
-    </View>
+        <TouchableOpacity
+          style={styles.linkRow}
+          onPress={() => navigation.navigate('Register')}
+        >
+          <Text style={styles.linkText}>
+            New here? <Text style={styles.linkAccent}>Create an account</Text>
+          </Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
+  flex: { flex: 1, backgroundColor: colors.background },
   container: {
-    flex: 1,
+    flexGrow: 1,
     justifyContent: 'center',
-    padding: 24,
-    backgroundColor: '#fff',
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.xxxl,
   },
-  title: {
-    fontSize: 36,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 8,
-    color: '#333',
+  brand: { marginBottom: spacing.xxxl, alignItems: 'flex-start' },
+  logo: {
+    fontSize: typography.size.display,
+    fontWeight: typography.weight.bold as any,
+    color: colors.textPrimary,
+    letterSpacing: -0.5,
   },
-  subtitle: {
-    fontSize: 16,
-    textAlign: 'center',
-    marginBottom: 32,
-    color: '#666',
+  tagline: {
+    fontSize: typography.size.md,
+    color: colors.textSecondary,
+    marginTop: spacing.xs,
   },
-  inputContainer: {
-    marginBottom: 24,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    fontSize: 16,
-    backgroundColor: '#fafafa',
-  },
-  button: {
-    backgroundColor: '#007AFF',
-    borderRadius: 12,
-    padding: 16,
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  linkButton: {
-    alignItems: 'center',
-  },
-  linkText: {
-    color: '#007AFF',
-    fontSize: 16,
+  form: { gap: spacing.sm },
+  linkRow: { marginTop: spacing.xl, alignItems: 'center' },
+  linkText: { fontSize: typography.size.base, color: colors.textSecondary },
+  linkAccent: {
+    color: colors.primary,
+    fontWeight: typography.weight.semibold as any,
   },
 });

@@ -7,20 +7,24 @@ import {
   FlatList,
   ActivityIndicator,
   Alert,
+  RefreshControl,
 } from 'react-native';
-import type { Project } from '@skillbridge/types';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { Card, Badge, Button } from '@skillbridge/ui';
 import { apiRequest } from '../../services/api';
 import { API_ENDPOINTS } from '../../config';
 import { useAuthStore } from '../../store/auth';
+import type { RootStackParamList } from '../../App';
+import { colors, spacing, typography, radius } from '../../theme';
 
-// API uses snake_case project types; map to display labels
+type ProjectsScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Projects'>;
+
 const TYPE_LABELS: Record<string, string> = {
   internship: 'Internship',
   part_time: 'Part-time',
   freelance: 'Freelance',
   full_time: 'Full-time',
 };
-
 const TYPE_COLORS: Record<string, string> = {
   internship: '#E3F2FD',
   part_time: '#F3E5F5',
@@ -28,225 +32,149 @@ const TYPE_COLORS: Record<string, string> = {
   full_time: '#FFF3E0',
 };
 
-type ApiProject = Omit<Project, 'type'> & { type: string };
+type ApiProject = {
+  id: string;
+  title: string;
+  description: string;
+  type: string;
+  budget?: number | null;
+  skillsRequired: string[];
+  location?: string | null;
+  remote: boolean;
+  employer?: { user?: { name?: string } };
+};
 
-export default function ProjectsScreen() {
+interface Props {
+  navigation: ProjectsScreenNavigationProp;
+}
+
+export default function ProjectsScreen({ navigation }: Props) {
   const token = useAuthStore((s) => s.token);
   const user = useAuthStore((s) => s.user);
   const [projects, setProjects] = React.useState<ApiProject[]>([]);
   const [loading, setLoading] = React.useState(true);
-  const [applyingId, setApplyingId] = React.useState<string | null>(null);
+  const [refreshing, setRefreshing] = React.useState(false);
 
-  const loadProjects = React.useCallback(async () => {
-    setLoading(true);
+  const load = React.useCallback(async () => {
     try {
-      const data = await apiRequest<{ projects: ApiProject[] }>(
-        API_ENDPOINTS.projects.list,
-        { method: 'GET', token }
-      );
+      const data = await apiRequest<{ projects: ApiProject[] }>(API_ENDPOINTS.projects.list, {
+        method: 'GET',
+        token,
+      });
       setProjects(data.projects);
     } catch (err: any) {
       Alert.alert('Error', err?.message || 'Failed to load projects');
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   }, [token]);
 
   React.useEffect(() => {
-    loadProjects();
-  }, [loadProjects]);
+    load();
+  }, [load]);
 
-  const handleApply = async (project: ApiProject) => {
+  const apply = async (p: ApiProject) => {
     if (user?.role !== 'student') {
       Alert.alert('Only students can apply', 'Switch to a student account to apply.');
       return;
     }
-    setApplyingId(project.id);
     try {
-      await apiRequest(API_ENDPOINTS.projects.apply(project.id), {
+      await apiRequest(API_ENDPOINTS.projects.apply(p.id), {
         method: 'POST',
         token,
         body: { coverLetter: 'I would love to work on this project.' },
       });
-      Alert.alert('Applied!', `You applied to "${project.title}".`);
+      Alert.alert('Applied!', `You applied to "${p.title}".`);
     } catch (err: any) {
       Alert.alert('Error', err?.message || 'Failed to apply');
-    } finally {
-      setApplyingId(null);
     }
   };
 
-  const renderProjectCard = ({ item }: { item: ApiProject }) => (
-    <View style={styles.projectCard}>
-      <View style={styles.projectHeader}>
-        <Text style={styles.projectTitle}>{item.title}</Text>
-        <View
-          style={[
-            styles.typeBadge,
-            { backgroundColor: TYPE_COLORS[item.type] || '#F5F5F5' },
-          ]}
-        >
-          <Text style={styles.typeText}>
-            {TYPE_LABELS[item.type] || item.type}
+  const renderItem = ({ item }: { item: ApiProject }) => (
+    <TouchableOpacity activeOpacity={0.9} onPress={() => navigation.navigate('ProjectDetail', { projectId: item.id })}>
+      <Card style={styles.card}>
+        <View style={styles.cardHead}>
+          <Text style={styles.cardTitle} numberOfLines={2}>{item.title}</Text>
+          <Badge
+            label={TYPE_LABELS[item.type] || item.type}
+            color={colors.primary}
+            backgroundColor={TYPE_COLORS[item.type] || colors.primaryLight}
+          />
+        </View>
+        <Text style={styles.cardDesc} numberOfLines={2}>{item.description}</Text>
+        <View style={styles.cardMeta}>
+          <Text style={styles.cardBudget}>{item.budget ? `$${item.budget}` : 'Budget TBD'}</Text>
+          <Text style={styles.cardSkills} numberOfLines={1}>
+            {item.skillsRequired.join(' · ')}
           </Text>
         </View>
-      </View>
-      <Text style={styles.projectDesc} numberOfLines={3}>
-        {item.description}
-      </Text>
-      <View style={styles.projectMeta}>
-        <Text style={styles.projectBudget}>
-          {item.budget ? `$${item.budget}` : 'Budget TBD'}
-        </Text>
-        <Text style={styles.projectSkills}>
-          {item.skillsRequired.join(' • ')}
-        </Text>
-      </View>
-      {item.location ? (
-        <Text style={styles.projectLocation}>📍 {item.location}</Text>
-      ) : null}
-      <TouchableOpacity
-        style={[styles.applyButton, applyingId === item.id && styles.buttonDisabled]}
-        onPress={() => handleApply(item)}
-        disabled={applyingId === item.id}
-      >
-        <Text style={styles.applyButtonText}>
-          {applyingId === item.id ? 'Applying...' : 'Apply Now'}
-        </Text>
-      </TouchableOpacity>
-    </View>
+        {item.location ? (
+          <Text style={styles.cardLocation}>
+            📍 {item.location}{item.remote ? ' · Remote' : ''}
+          </Text>
+        ) : item.remote ? (
+          <Text style={styles.cardLocation}>🌐 Remote</Text>
+        ) : null}
+        <Button
+          variant={user?.role === 'student' ? 'primary' : 'secondary'}
+          size="sm"
+          onPress={() => apply(item)}
+          disabled={user?.role !== 'student'}
+        >
+          {user?.role === 'student' ? 'Apply' : 'Employer'}
+        </Button>
+      </Card>
+    </TouchableOpacity>
   );
 
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color="#007AFF" />
-        <Text style={styles.loadingText}>Loading projects...</Text>
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Available Projects</Text>
+    <View style={styles.flex}>
+      <View style={styles.headerBar}>
+        <Text style={styles.headerTitle}>Projects</Text>
+      </View>
       <FlatList
         data={projects}
-        renderItem={renderProjectCard}
-        keyExtractor={(item) => item.id}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 24 }}
-        refreshing={loading}
-        onRefresh={loadProjects}
-        ListEmptyComponent={
-          <Text style={styles.emptyText}>No projects available yet.</Text>
-        }
+        renderItem={renderItem}
+        keyExtractor={(i) => i.id}
+        contentContainerStyle={styles.list}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={load} tintColor={colors.primary} />}
+        ListEmptyComponent={<Text style={styles.empty}>No projects available yet.</Text>}
       />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    padding: 16,
+  flex: { flex: 1, backgroundColor: colors.surface },
+  center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.surface },
+  headerBar: { paddingHorizontal: spacing.xl, paddingTop: spacing.lg, paddingBottom: spacing.sm },
+  headerTitle: {
+    fontSize: typography.size.xl,
+    fontWeight: typography.weight.bold as any,
+    color: colors.textPrimary,
   },
-  center: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-  },
-  loadingText: {
-    marginTop: 12,
-    color: '#666',
-    fontSize: 14,
-  },
-  emptyText: {
-    textAlign: 'center',
-    color: '#999',
-    marginTop: 40,
-    fontSize: 14,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 16,
-  },
-  projectCard: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  projectHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 8,
-  },
-  projectTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
+  list: { padding: spacing.xl, gap: spacing.md, paddingBottom: spacing.xxxl },
+  card: { gap: spacing.sm },
+  cardHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', gap: spacing.sm },
+  cardTitle: {
+    fontSize: typography.size.lg,
+    fontWeight: typography.weight.semibold as any,
+    color: colors.textPrimary,
     flex: 1,
   },
-  typeBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  typeText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#333',
-  },
-  projectDesc: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 12,
-    lineHeight: 20,
-  },
-  projectMeta: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  projectBudget: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#007AFF',
-  },
-  projectSkills: {
-    fontSize: 12,
-    color: '#999',
-    flexShrink: 1,
-    textAlign: 'right',
-  },
-  projectLocation: {
-    fontSize: 13,
-    color: '#666',
-    marginBottom: 12,
-  },
-  applyButton: {
-    backgroundColor: '#007AFF',
-    borderRadius: 12,
-    padding: 12,
-    alignItems: 'center',
-  },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  applyButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
+  cardDesc: { fontSize: typography.size.base, color: colors.textSecondary, lineHeight: 22 },
+  cardMeta: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  cardBudget: { fontSize: typography.size.md, fontWeight: typography.weight.bold as any, color: colors.primary },
+  cardSkills: { fontSize: typography.size.sm, color: colors.textTertiary, flexShrink: 1, textAlign: 'right' },
+  cardLocation: { fontSize: typography.size.sm, color: colors.textSecondary },
+  empty: { textAlign: 'center', color: colors.textTertiary, marginTop: spacing.xxl, fontSize: typography.size.base },
 });

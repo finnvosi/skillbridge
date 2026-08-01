@@ -1,8 +1,19 @@
 import React from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+} from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { Button, Input } from '@skillbridge/ui';
 import { useAuthStore } from '../../store/auth';
 import type { RootStackParamList } from '../../App';
+import { colors, spacing, typography, radius } from '../../theme';
 
 type RegisterScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Register'>;
 
@@ -42,186 +53,119 @@ export default function RegisterScreen({ navigation }: Props) {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>SkillBridge</Text>
-      <Text style={styles.subtitle}>Create your account</Text>
-
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="Full Name"
-          value={name}
-          onChangeText={setName}
-          placeholderTextColor="#999"
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-          keyboardType="email-address"
-          placeholderTextColor="#999"
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          placeholderTextColor="#999"
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Confirm Password"
-          value={confirmPassword}
-          onChangeText={setConfirmPassword}
-          secureTextEntry
-          placeholderTextColor="#999"
-        />
-
-        <View style={styles.roleContainer}>
-          <Text style={styles.roleLabel}>I am a:</Text>
-          <View style={styles.roleOptions}>
-            <TouchableOpacity
-              style={[
-                styles.roleOption,
-                role === 'student' && styles.roleOptionSelected,
-              ]}
-              onPress={() => setRole('student')}
-            >
-              <Text style={[
-                styles.roleOptionText,
-                role === 'student' && styles.roleOptionTextSelected,
-              ]}>
-                Student
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.roleOption,
-                role === 'employer' && styles.roleOptionSelected,
-              ]}
-              onPress={() => setRole('employer')}
-            >
-              <Text style={[
-                styles.roleOptionText,
-                role === 'employer' && styles.roleOptionTextSelected,
-              ]}>
-                Employer
-              </Text>
-            </TouchableOpacity>
-          </View>
+    <KeyboardAvoidingView
+      style={styles.flex}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+        <View style={styles.brand}>
+          <Text style={styles.logo}>Create account</Text>
+          <Text style={styles.tagline}>Join SkillBridge in a few taps.</Text>
         </View>
-      </View>
 
-      <TouchableOpacity
-        style={[styles.button, loading && styles.buttonDisabled]}
-        onPress={handleRegister}
-        disabled={loading}
-      >
-        <Text style={styles.buttonText}>
-          {loading ? 'Creating Account...' : 'Sign Up'}
-        </Text>
-      </TouchableOpacity>
+        <View style={styles.form}>
+          <Input label="Full Name" placeholder="e.g. Sokha Chan" value={name} onChangeText={setName} />
+          <Input
+            label="Email"
+            placeholder="you@example.com"
+            value={email}
+            onChangeText={setEmail}
+            autoCapitalize="none"
+            keyboardType="email-address"
+          />
+          <Input
+            label="Password"
+            placeholder="At least 8 characters"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+          />
+          <Input
+            label="Confirm Password"
+            placeholder="Re-enter password"
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+            secureTextEntry
+          />
 
-      <TouchableOpacity
-        style={styles.linkButton}
-        onPress={() => navigation.navigate('Login')}
-      >
-        <Text style={styles.linkText}>
-          Already have an account? Login
-        </Text>
-      </TouchableOpacity>
-    </View>
+          <View style={styles.roleBlock}>
+            <Text style={styles.roleLabel}>I am a</Text>
+            <View style={styles.roleOptions}>
+              {(['student', 'employer'] as const).map((r) => (
+                <TouchableOpacity
+                  key={r}
+                  style={[styles.roleOption, role === r && styles.roleOptionActive]}
+                  onPress={() => setRole(r)}
+                >
+                  <Text style={[styles.roleOptionText, role === r && styles.roleOptionTextActive]}>
+                    {r === 'student' ? 'Student' : 'Employer'}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+
+          <Button onPress={handleRegister} loading={loading} disabled={loading} fullWidth>
+            {loading ? 'Creating...' : 'Create Account'}
+          </Button>
+        </View>
+
+        <TouchableOpacity style={styles.linkRow} onPress={() => navigation.navigate('Login')}>
+          <Text style={styles.linkText}>
+            Already have an account? <Text style={styles.linkAccent}>Sign in</Text>
+          </Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
+  flex: { flex: 1, backgroundColor: colors.background },
   container: {
-    flex: 1,
+    flexGrow: 1,
     justifyContent: 'center',
-    padding: 24,
-    backgroundColor: '#fff',
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.xxxl,
   },
-  title: {
-    fontSize: 36,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 8,
-    color: '#333',
+  brand: { marginBottom: spacing.xl },
+  logo: {
+    fontSize: typography.size.xxl,
+    fontWeight: typography.weight.bold as any,
+    color: colors.textPrimary,
+    letterSpacing: -0.4,
   },
-  subtitle: {
-    fontSize: 16,
-    textAlign: 'center',
-    marginBottom: 32,
-    color: '#666',
-  },
-  inputContainer: {
-    marginBottom: 24,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    fontSize: 16,
-    backgroundColor: '#fafafa',
-  },
-  roleContainer: {
-    marginBottom: 12,
-  },
+  tagline: { fontSize: typography.size.md, color: colors.textSecondary, marginTop: spacing.xs },
+  form: { gap: spacing.sm },
+  roleBlock: { marginTop: spacing.sm },
   roleLabel: {
-    fontSize: 16,
-    marginBottom: 8,
-    color: '#333',
+    fontSize: typography.size.sm,
+    fontWeight: typography.weight.medium as any,
+    color: colors.textSecondary,
+    marginBottom: spacing.xs,
+    marginLeft: spacing.xs,
   },
-  roleOptions: {
-    flexDirection: 'row',
-    gap: 12,
-  },
+  roleOptions: { flexDirection: 'row', gap: spacing.sm },
   roleOption: {
     flex: 1,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
-    borderRadius: 12,
-    padding: 16,
+    borderColor: colors.separator,
+    borderRadius: radius.md,
+    paddingVertical: spacing.md,
     alignItems: 'center',
-    backgroundColor: '#fafafa',
+    backgroundColor: colors.background,
   },
-  roleOptionSelected: {
-    backgroundColor: '#007AFF',
-    borderColor: '#007AFF',
+  roleOptionActive: {
+    borderColor: colors.primary,
+    backgroundColor: colors.primaryLight,
   },
   roleOptionText: {
-    fontSize: 16,
-    color: '#666',
+    fontSize: typography.size.base,
+    color: colors.textSecondary,
+    fontWeight: typography.weight.medium as any,
   },
-  roleOptionTextSelected: {
-    color: '#fff',
-    fontWeight: 'bold',
-  },
-  button: {
-    backgroundColor: '#007AFF',
-    borderRadius: 12,
-    padding: 16,
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  linkButton: {
-    alignItems: 'center',
-  },
-  linkText: {
-    color: '#007AFF',
-    fontSize: 16,
-  },
+  roleOptionTextActive: { color: colors.primary, fontWeight: typography.weight.semibold as any },
+  linkRow: { marginTop: spacing.xl, alignItems: 'center' },
+  linkText: { fontSize: typography.size.base, color: colors.textSecondary },
+  linkAccent: { color: colors.primary, fontWeight: typography.weight.semibold as any },
 });

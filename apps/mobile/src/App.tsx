@@ -1,15 +1,17 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { StatusBar } from 'expo-status-bar';
 import { useAuthStore } from './store/auth';
 
-// Import screens
 import LoginScreen from './screens/auth/LoginScreen';
 import RegisterScreen from './screens/auth/RegisterScreen';
 import HomeScreen from './screens/home/HomeScreen';
 import ProfileScreen from './screens/profile/ProfileScreen';
 import ProjectsScreen from './screens/projects/ProjectsScreen';
+import ProjectDetailScreen from './screens/projects/ProjectDetailScreen';
+import { colors, typography } from './theme';
 
 export type RootStackParamList = {
   Login: undefined;
@@ -17,70 +19,65 @@ export type RootStackParamList = {
   Home: undefined;
   Profile: undefined;
   Projects: undefined;
+  ProjectDetail: { projectId: string };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
+const Tab = createBottomTabNavigator();
+
+function AuthenticatedTabs() {
+  return (
+    <Tab.Navigator
+      screenOptions={{
+        headerStyle: { backgroundColor: colors.background },
+        headerTitleStyle: { fontWeight: typography.weight.semibold as any, color: colors.textPrimary },
+        tabBarStyle: {
+          backgroundColor: colors.background,
+          borderTopColor: colors.separator,
+          borderTopWidth: 1,
+          paddingBottom: 4,
+          height: 60,
+        },
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.textTertiary,
+        tabBarLabelStyle: { fontSize: 11, fontWeight: typography.weight.medium as any },
+      }}
+    >
+      <Tab.Screen name="Home" component={HomeScreen} options={{ title: '🏠  Home' }} />
+      <Tab.Screen name="Projects" component={ProjectsScreen} options={{ title: '💼  Projects' }} />
+      <Tab.Screen name="Profile" component={ProfileScreen} options={{ title: '👤  Profile' }} />
+    </Tab.Navigator>
+  );
+}
 
 export default function App() {
   const { initialized, user } = useAuthStore();
   const [isReady, setIsReady] = React.useState(false);
 
   React.useEffect(() => {
-    // Simulate app initialization (check auth, load fonts, etc.)
-    setTimeout(() => setIsReady(true), 1000);
+    const t = setTimeout(() => setIsReady(true), 800);
+    return () => clearTimeout(t);
   }, []);
 
-  if (!isReady || !initialized) {
-    // Could show splash screen here
-    return null;
-  }
+  if (!isReady || !initialized) return null;
 
   return (
     <NavigationContainer>
-      <StatusBar style="auto" />
-      <Stack.Navigator
-        screenOptions={{
-          headerStyle: {
-            backgroundColor: '#f5f5f5',
-          },
-          headerTintColor: '#333',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
-        }}
-      >
+      <StatusBar style="dark" />
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
         {user ? (
-          // Authenticated routes
           <>
-            <Stack.Screen 
-              name="Home" 
-              component={HomeScreen} 
-              options={{ title: 'SkillBridge' }}
-            />
-            <Stack.Screen 
-              name="Profile" 
-              component={ProfileScreen} 
-              options={{ title: 'My Profile' }}
-            />
-            <Stack.Screen 
-              name="Projects" 
-              component={ProjectsScreen} 
-              options={{ title: 'Projects' }}
+            <Stack.Screen name="Home" component={AuthenticatedTabs} />
+            <Stack.Screen
+              name="ProjectDetail"
+              component={ProjectDetailScreen}
+              options={{ headerShown: true, title: 'Project' }}
             />
           </>
         ) : (
-          // Auth routes
           <>
-            <Stack.Screen 
-              name="Login" 
-              component={LoginScreen} 
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen 
-              name="Register" 
-              component={RegisterScreen} 
-              options={{ headerShown: false }}
-            />
+            <Stack.Screen name="Login" component={LoginScreen} />
+            <Stack.Screen name="Register" component={RegisterScreen} />
           </>
         )}
       </Stack.Navigator>

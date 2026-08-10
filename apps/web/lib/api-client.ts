@@ -8,10 +8,10 @@
 // mobile + web share one auth + data layer.
 //
 // The API base URL must be set via NEXT_PUBLIC_API_URL in .env.local.
-// In dev it defaults to http://localhost:3001/api/v1 (the Express server).
-
-export const API_URL =
-  process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
+// In dev it defaults to /api/v1 (same-origin) which Next.js rewrites to the
+// Express server on :3001. This keeps requests on the Next.js origin so the
+// dev Content Security Policy doesn't block cross-origin fetches.
+export const API_URL = process.env.NEXT_PUBLIC_API_URL || '/api/v1';
 
 export const API_ENDPOINTS = {
   auth: {
@@ -79,7 +79,14 @@ function isErrorBody(value: unknown): value is ErrorBody {
 }
 
 function buildUrl(path: string, query?: RequestOptions['query']): string {
-  const url = new URL(`${API_URL}${path}`);
+  // API_URL is now a same-origin path (e.g. /api/v1) so requests stay on the
+  // Next.js origin and pass the dev Content Security Policy. The Next rewrite
+  // proxies /api/v1/* -> the Express backend on :3001.
+  const base =
+    typeof window !== 'undefined' && API_URL.startsWith('/')
+      ? `${window.location.origin}${API_URL}`
+      : API_URL;
+  const url = new URL(`${base}${path}`);
   if (query) {
     for (const [key, value] of Object.entries(query)) {
       if (value !== undefined && value !== '') {

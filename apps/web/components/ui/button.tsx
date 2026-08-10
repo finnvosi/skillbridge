@@ -43,7 +43,7 @@ export function Button({
   const base = cn("btn", sizeClasses[size], variantClasses[variant], className);
 
   if (asChild) {
-    const child = children as ReactElement<any>;
+    const child = children as ReactElement<Record<string, unknown>>;
     const childClassName = (child.props as { className?: string })?.className;
     return cloneElement(child, {
       className: cn(base, childClassName),

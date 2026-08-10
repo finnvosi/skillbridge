@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiRequest, API_ENDPOINTS, getToken } from '@/lib/api-client';
-import { Application, STATUS_LABELS } from '@/lib/types';
+import { Application, ApplicationStatus, STATUS_LABELS } from '@/lib/types';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -82,7 +82,7 @@ export default function ApplicationsPage() {
                     Applied {new Date(a.createdAt).toLocaleDateString()}
                   </p>
                 </div>
-                <StatusBadge status={a.status as any} />
+                <StatusBadge status={a.status as ApplicationStatus} />
               </li>
             ))}
           </ul>

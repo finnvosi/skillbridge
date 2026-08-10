@@ -5,13 +5,22 @@ import { Footer } from "@/components/layout/footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { Reveal } from "@/components/motion/reveal";
+import {
+  FadeUp,
+  Stagger,
+  StaggerItem,
+  WordReveal,
+  CountUp,
+  Parallax,
+  ScrollVelocityMarquee,
+  Tilt,
+} from "@/components/motion";
 
 const stats = [
-  { value: "2,400+", label: "Verified students" },
-  { value: "310", label: "Partner employers" },
-  { value: "1,900", label: "Completed projects" },
-  { value: "94%", label: "Hire-through rate" },
+  { value: 2400, suffix: "+", label: "Verified students" },
+  { value: 310, suffix: "", label: "Partner employers" },
+  { value: 1900, suffix: "", label: "Completed projects" },
+  { value: 94, suffix: "%", label: "Hire-through rate" },
 ];
 
 const proof = [
@@ -102,39 +111,40 @@ export default function Home() {
             <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-8">
               {/* Left: editorial headline column */}
               <div className="lg:col-span-8">
-                <Reveal>
+                <FadeUp>
                   <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1">
                     <span className="relative flex h-1.5 w-1.5">
                       <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-60" />
                       <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-primary" />
                     </span>
-                    <span className="label-mono">Cambodia&apos;s verified talent network</span>
-                  </div>
-                </Reveal>
-
-                <Reveal delay={80}>
-                  <h1 className="display mt-6 text-5xl leading-[0.95] sm:text-6xl lg:text-7xl xl:text-8xl">
-                    Stop sending
-                    <br />
-                    resumes.
-                    <br />
-                    <span className="bg-gradient-to-r from-primary to-primary-light bg-clip-text text-transparent">
-                      Start showing
+                    <span className="label-mono">
+                      Cambodia&apos;s verified talent network
                     </span>
-                    <br />
-                    proof.
-                  </h1>
-                </Reveal>
+                  </div>
+                </FadeUp>
 
-                <Reveal delay={160}>
+                {/* Word-by-word reveal headline */}
+                <h1 className="display mt-6 text-5xl leading-[0.95] sm:text-6xl lg:text-7xl xl:text-8xl">
+                  <WordReveal text="Stop sending" delay={0.1} />
+                  <br />
+                  <WordReveal text="resumes." delay={0.25} />
+                  <br />
+                  <span className="bg-gradient-to-r from-primary to-primary-light bg-clip-text text-transparent">
+                    <WordReveal text="Start showing" delay={0.4} />
+                  </span>
+                  <br />
+                  <WordReveal text="proof." delay={0.55} />
+                </h1>
+
+                <FadeUp delay={0.7}>
                   <p className="mt-8 max-w-xl text-lg leading-relaxed text-gray-600">
                     SkillBridge is where Cambodian students turn real projects
                     into verified work history — and where employers hire on
                     what&apos;s been done, not what&apos;s been claimed.
                   </p>
-                </Reveal>
+                </FadeUp>
 
-                <Reveal delay={240}>
+                <FadeUp delay={0.85}>
                   <div className="mt-10 flex flex-col gap-4 sm:flex-row">
                     <Button asChild variant="primary" size="lg" className="shadow-soft">
                       <Link href="/auth/register">Get started free</Link>
@@ -143,12 +153,12 @@ export default function Home() {
                       <Link href="/#how">See how it works</Link>
                     </Button>
                   </div>
-                </Reveal>
+                </FadeUp>
               </div>
 
-              {/* Right: live-network stat card, soft glass elevation */}
+              {/* Right: live-network stat card, parallax + soft glass elevation */}
               <div className="lg:col-span-4">
-                <Reveal delay={200}>
+                <Parallax speed={0.5}>
                   <Card className="overflow-hidden rounded-2xl border-gray-200 shadow-soft-lg">
                     <div className="border-b border-gray-100 bg-gradient-to-r from-primary to-primary-light px-5 py-3">
                       <p className="font-mono text-xs font-medium uppercase tracking-[0.14em] text-primary-contrast">
@@ -161,7 +171,9 @@ export default function Home() {
                           key={s.label}
                           className="flex items-baseline justify-between px-5 py-4"
                         >
-                          <span className="display text-3xl">{s.value}</span>
+                          <span className="display text-3xl">
+                            <CountUp value={s.value} suffix={s.suffix} />
+                          </span>
                           <span className="text-right text-xs uppercase tracking-wide text-gray-500">
                             {s.label}
                           </span>
@@ -169,28 +181,21 @@ export default function Home() {
                       ))}
                     </div>
                   </Card>
-                </Reveal>
+                </Parallax>
               </div>
             </div>
           </div>
         </section>
 
-        {/* ============ PROOF MARQUEE ============ */}
+        {/* ============ PROOF MARQUEE (scroll-velocity driven) ============ */}
         <section className="overflow-hidden border-y border-gray-200 bg-gray-50 py-5">
-          <div className="marquee-track font-mono text-sm uppercase tracking-[0.18em] text-gray-500">
-            {[...proof, ...proof].map((name, i) => (
-              <span key={i} className="mx-8 inline-flex items-center gap-8">
-                {name}
-                <span className="text-primary/50">/</span>
-              </span>
-            ))}
-          </div>
+          <ScrollVelocityMarquee items={proof} />
         </section>
 
-        {/* ============ HOW IT WORKS ============ */}
+        {/* ============ HOW IT WORKS (staggered) ============ */}
         <section id="how" className="border-b border-gray-200 px-4 py-20 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-7xl">
-            <Reveal>
+            <FadeUp>
               <div className="flex items-end justify-between gap-6 border-b border-gray-200 pb-6">
                 <h2 className="display text-4xl sm:text-5xl">
                   How it works
@@ -199,12 +204,12 @@ export default function Home() {
                   Four steps · No theatre
                 </p>
               </div>
-            </Reveal>
+            </FadeUp>
 
-            <div className="mt-12 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
-              {steps.map((step, i) => (
-                <Reveal key={step.n} delay={i * 80} as="div">
-                  <Card className="h-full rounded-2xl border-gray-200 shadow-soft transition-all duration-300 hover:-translate-y-1 hover:shadow-soft-lg">
+            <Stagger className="mt-12 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
+              {steps.map((step) => (
+                <StaggerItem key={step.n} as="div">
+                  <Card className="h-full rounded-2xl border-gray-200 shadow-soft transition-shadow duration-300 hover:shadow-soft-lg">
                     <div className="flex h-full flex-col p-6">
                       <span className="display text-5xl bg-gradient-to-br from-primary to-primary-light bg-clip-text text-transparent">
                         {step.n}
@@ -217,16 +222,16 @@ export default function Home() {
                       </p>
                     </div>
                   </Card>
-                </Reveal>
+                </StaggerItem>
               ))}
-            </div>
+            </Stagger>
           </div>
         </section>
 
-        {/* ============ OPPORTUNITIES ============ */}
+        {/* ============ OPPORTUNITIES (tilt cards) ============ */}
         <section className="border-b border-gray-200 px-4 py-20 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-7xl">
-            <Reveal>
+            <FadeUp>
               <div className="flex flex-col gap-4 border-b border-gray-200 pb-6 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                   <p className="label-mono">Open now</p>
@@ -241,32 +246,34 @@ export default function Home() {
                   Browse all →
                 </Link>
               </div>
-            </Reveal>
+            </FadeUp>
 
             <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {opportunities.map((opp, i) => (
-                <Reveal key={opp.title} delay={i * 80} as="div">
-                  <Card className="group h-full rounded-2xl border-gray-200 shadow-soft transition-all duration-300 hover:-translate-y-1 hover:shadow-soft-lg">
-                    <div className="flex h-full flex-col p-6">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <h3 className="font-display text-lg font-bold text-gray-900">
-                            {opp.title}
-                          </h3>
-                          <p className="mt-1 text-sm text-gray-500">
-                            {opp.company}
-                          </p>
+                <FadeUp key={opp.title} delay={i * 0.1} as="div">
+                  <Tilt intensity={6}>
+                    <Card className="group h-full rounded-2xl border-gray-200 shadow-soft transition-shadow duration-300 hover:shadow-soft-lg">
+                      <div className="flex h-full flex-col p-6">
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <h3 className="font-display text-lg font-bold text-gray-900">
+                              {opp.title}
+                            </h3>
+                            <p className="mt-1 text-sm text-gray-500">
+                              {opp.company}
+                            </p>
+                          </div>
+                          <Badge variant="primary">{opp.type}</Badge>
                         </div>
-                        <Badge variant="primary">{opp.type}</Badge>
+                        <div className="mt-6 flex items-center gap-2 text-xs uppercase tracking-wide text-gray-500">
+                          <span>📍 {opp.loc}</span>
+                          <span className="text-gray-300">·</span>
+                          <span className="text-primary">{opp.skill}</span>
+                        </div>
                       </div>
-                      <div className="mt-6 flex items-center gap-2 text-xs uppercase tracking-wide text-gray-500">
-                        <span>📍 {opp.loc}</span>
-                        <span className="text-gray-300">·</span>
-                        <span className="text-primary">{opp.skill}</span>
-                      </div>
-                    </div>
-                  </Card>
-                </Reveal>
+                    </Card>
+                  </Tilt>
+                </FadeUp>
               ))}
             </div>
           </div>
@@ -275,7 +282,7 @@ export default function Home() {
         {/* ============ STUDENTS / EMPLOYERS ============ */}
         <section className="grid grid-cols-1 border-b border-gray-200 lg:grid-cols-2">
           <div id="students" className="border-b border-gray-200 px-4 py-16 sm:px-6 lg:border-b-0 lg:border-r lg:px-8">
-            <Reveal>
+            <FadeUp>
               <p className="label-mono">For students</p>
               <h3 className="display mt-4 text-3xl sm:text-4xl">
                 Your work is your résumé.
@@ -293,11 +300,11 @@ export default function Home() {
               <Button asChild variant="primary" className="mt-8 shadow-soft">
                 <Link href="/auth/register">Create student profile</Link>
               </Button>
-            </Reveal>
+            </FadeUp>
           </div>
 
           <div id="employers" className="px-4 py-16 sm:px-6 lg:px-8">
-            <Reveal>
+            <FadeUp>
               <p className="label-mono">For employers</p>
               <h3 className="display mt-4 text-3xl sm:text-4xl">
                 Hire on proof,
@@ -317,7 +324,7 @@ export default function Home() {
               <Button asChild variant="outline" className="mt-8">
                 <Link href="/auth/register">Post a role</Link>
               </Button>
-            </Reveal>
+            </FadeUp>
           </div>
         </section>
 
@@ -325,7 +332,7 @@ export default function Home() {
         <section id="trust" className="relative overflow-hidden border-b border-gray-200 px-4 py-20 sm:px-6 lg:px-8">
           <div className="glow-purple absolute inset-0 -z-10 opacity-60" />
           <div className="mx-auto max-w-4xl text-center">
-            <Reveal>
+            <FadeUp>
               <p className="label-mono">The bet</p>
               <h2 className="display mt-4 text-4xl leading-tight sm:text-5xl">
                 A degree tells us you showed up.
@@ -344,7 +351,7 @@ export default function Home() {
                 <Badge variant="outline">Skill attestations</Badge>
                 <Badge variant="outline">Secure by design</Badge>
               </div>
-            </Reveal>
+            </FadeUp>
           </div>
         </section>
 
@@ -353,7 +360,7 @@ export default function Home() {
           <div className="glow-purple absolute inset-0 -z-10 opacity-40" />
           <div className="bg-grain absolute inset-0 -z-10 opacity-30" />
           <div className="mx-auto flex max-w-5xl flex-col items-start justify-between gap-8 lg:flex-row lg:items-center">
-            <Reveal>
+            <FadeUp>
               <h2 className="display text-4xl leading-tight text-primary-contrast sm:text-5xl">
                 Ready to bridge the gap?
               </h2>
@@ -361,12 +368,12 @@ export default function Home() {
                 Join the students and employers building Cambodia&apos;s
                 verified talent network.
               </p>
-            </Reveal>
-            <Reveal delay={120}>
+            </FadeUp>
+            <FadeUp delay={0.15}>
               <Button asChild size="lg" className="bg-white text-primary shadow-soft hover:bg-gray-100 focus-visible:ring-white">
                 <Link href="/auth/register">Get started free</Link>
               </Button>
-            </Reveal>
+            </FadeUp>
           </div>
         </section>
       </main>

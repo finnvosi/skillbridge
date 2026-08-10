@@ -134,41 +134,6 @@
   }
 }
 
-/* Reveal-on-scroll: elements start slightly down + transparent, animate in
-   when .is-visible is added by the Reveal client component. */
-.reveal {
-  opacity: 0;
-  transform: translateY(16px);
-  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
-    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: opacity, transform;
-}
-.reveal.is-visible {
-  opacity: 1;
-  transform: none;
-}
-@media (prefers-reduced-motion: reduce) {
-  .reveal {
-    opacity: 1;
-    transform: none;
-    transition: none;
-  }
-}
-
-/* Marquee strip — seamless horizontal scroll for the "trusted by" band. */
-@keyframes marquee {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
-}
-.marquee-track {
-  display: inline-flex;
-  white-space: nowrap;
-  animation: marquee 28s linear infinite;
-}
-@media (prefers-reduced-motion: reduce) {
-  .marquee-track { animation: none; }
-}
-
 /* Subtle grain overlay — very fine noise, premium editorial texture.
    Inline SVG fractal noise, no network request. */
 .bg-grain {

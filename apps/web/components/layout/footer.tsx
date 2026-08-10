@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Reveal } from "@/components/motion/reveal";
 
 const columns = [
   {

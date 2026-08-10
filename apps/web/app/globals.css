@@ -116,12 +116,12 @@
   .label-mono-muted {
     @apply font-mono text-xs font-medium uppercase tracking-[0.18em] text-gray-500;
   }
-  /* Hard hairline rule used to divide editorial sections. */
+  /* Hairline rule used to divide editorial sections (subtle by default). */
   .rule {
-    @apply border-t border-gray-900;
-  }
-  .rule-soft {
     @apply border-t border-gray-200;
+  }
+  .rule-strong {
+    @apply border-t border-gray-900;
   }
   /* Oversized display headline with tight tracking + ink color. */
   .display {
@@ -169,10 +169,36 @@
   .marquee-track { animation: none; }
 }
 
-/* Subtle grid texture for hero / section backgrounds (brutalist paper). */
-.bg-grid {
-  background-image:
-    linear-gradient(to right, rgba(17,17,17,0.06) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(17,17,17,0.06) 1px, transparent 1px);
-  background-size: 56px 56px;
+/* Subtle grain overlay — very fine noise, premium editorial texture.
+   Inline SVG fractal noise, no network request. */
+.bg-grain {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+}
+
+/* Soft, layered elevation shadow (Apple/Linear feel) — not a hard offset. */
+.shadow-soft {
+  box-shadow:
+    0 1px 2px rgba(17, 17, 17, 0.04),
+    0 8px 24px -8px rgba(17, 17, 17, 0.10),
+    0 2px 6px -2px rgba(60, 9, 108, 0.06);
+}
+.shadow-soft-lg {
+  box-shadow:
+    0 2px 4px rgba(17, 17, 17, 0.05),
+    0 18px 40px -12px rgba(17, 17, 17, 0.14),
+    0 6px 16px -6px rgba(60, 9, 108, 0.08);
+}
+
+/* Purple light effect — ambient glow, used behind hero/CTA. */
+.glow-purple {
+  background:
+    radial-gradient(60% 55% at 50% 0%, rgba(123, 44, 191, 0.16), transparent 70%),
+    radial-gradient(40% 40% at 85% 20%, rgba(56, 189, 248, 0.10), transparent 70%);
+}
+
+/* Glass surface (nav, floating chrome). */
+.glass {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
 }

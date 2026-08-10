@@ -93,18 +93,23 @@ export default function Home() {
 
       <main className="flex-1">
         {/* ============ HERO ============ */}
-        <section className="relative overflow-hidden border-b border-gray-900">
-          <div className="bg-grid absolute inset-0 -z-10 opacity-70" />
-          <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-primary/[0.06] to-transparent" />
+        <section className="relative overflow-hidden">
+          <div className="glow-purple absolute inset-0 -z-10" />
+          <div className="bg-grain absolute inset-0 -z-10" />
+          <div className="bg-gradient-to-b from-transparent to-white/40 absolute inset-0 -z-10" />
 
           <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
             <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-8">
               {/* Left: editorial headline column */}
               <div className="lg:col-span-8">
                 <Reveal>
-                  <p className="label-mono">
-                    Cambodia&apos;s verified talent network
-                  </p>
+                  <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1">
+                    <span className="relative flex h-1.5 w-1.5">
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-60" />
+                      <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-primary" />
+                    </span>
+                    <span className="label-mono">Cambodia&apos;s verified talent network</span>
+                  </div>
                 </Reveal>
 
                 <Reveal delay={80}>
@@ -113,7 +118,9 @@ export default function Home() {
                     <br />
                     resumes.
                     <br />
-                    <span className="text-primary">Start showing</span>
+                    <span className="bg-gradient-to-r from-primary to-primary-light bg-clip-text text-transparent">
+                      Start showing
+                    </span>
                     <br />
                     proof.
                   </h1>
@@ -129,7 +136,7 @@ export default function Home() {
 
                 <Reveal delay={240}>
                   <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-                    <Button asChild variant="primary" size="lg">
+                    <Button asChild variant="primary" size="lg" className="shadow-soft">
                       <Link href="/auth/register">Get started free</Link>
                     </Button>
                     <Button asChild variant="outline" size="lg">
@@ -139,16 +146,16 @@ export default function Home() {
                 </Reveal>
               </div>
 
-              {/* Right: proof / stat card, brutalist framed */}
+              {/* Right: live-network stat card, soft glass elevation */}
               <div className="lg:col-span-4">
                 <Reveal delay={200}>
-                  <Card className="overflow-hidden rounded-none border-gray-900 shadow-[8px_8px_0_0_#3C096C]">
-                    <div className="border-b border-gray-900 bg-primary px-5 py-3">
+                  <Card className="overflow-hidden rounded-2xl border-gray-200 shadow-soft-lg">
+                    <div className="border-b border-gray-100 bg-gradient-to-r from-primary to-primary-light px-5 py-3">
                       <p className="font-mono text-xs font-medium uppercase tracking-[0.14em] text-primary-contrast">
                         Live network
                       </p>
                     </div>
-                    <div className="divide-y divide-gray-200">
+                    <div className="divide-y divide-gray-100">
                       {stats.map((s) => (
                         <div
                           key={s.label}
@@ -169,22 +176,22 @@ export default function Home() {
         </section>
 
         {/* ============ PROOF MARQUEE ============ */}
-        <section className="overflow-hidden border-b border-gray-900 bg-gray-900 py-5">
-          <div className="marquee-track font-mono text-sm uppercase tracking-[0.18em] text-gray-100">
+        <section className="overflow-hidden border-y border-gray-200 bg-gray-50 py-5">
+          <div className="marquee-track font-mono text-sm uppercase tracking-[0.18em] text-gray-500">
             {[...proof, ...proof].map((name, i) => (
               <span key={i} className="mx-8 inline-flex items-center gap-8">
                 {name}
-                <span className="text-primary">/</span>
+                <span className="text-primary/50">/</span>
               </span>
             ))}
           </div>
         </section>
 
         {/* ============ HOW IT WORKS ============ */}
-        <section id="how" className="border-b border-gray-900 px-4 py-20 sm:px-6 lg:px-8">
+        <section id="how" className="border-b border-gray-200 px-4 py-20 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-7xl">
             <Reveal>
-              <div className="flex items-end justify-between gap-6 border-b border-gray-900 pb-6">
+              <div className="flex items-end justify-between gap-6 border-b border-gray-200 pb-6">
                 <h2 className="display text-4xl sm:text-5xl">
                   How it works
                 </h2>
@@ -194,20 +201,22 @@ export default function Home() {
               </div>
             </Reveal>
 
-            <div className="mt-12 grid grid-cols-1 gap-px bg-gray-200 md:grid-cols-2 lg:grid-cols-4">
+            <div className="mt-12 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
               {steps.map((step, i) => (
-                <Reveal key={step.n} delay={i * 80} as="div" className="bg-white">
-                  <div className="flex h-full flex-col p-6">
-                    <span className="display text-5xl text-primary">
-                      {step.n}
-                    </span>
-                    <h3 className="mt-6 font-display text-xl font-bold text-gray-900">
-                      {step.t}
-                    </h3>
-                    <p className="mt-3 text-sm leading-relaxed text-gray-600">
-                      {step.d}
-                    </p>
-                  </div>
+                <Reveal key={step.n} delay={i * 80} as="div">
+                  <Card className="h-full rounded-2xl border-gray-200 shadow-soft transition-all duration-300 hover:-translate-y-1 hover:shadow-soft-lg">
+                    <div className="flex h-full flex-col p-6">
+                      <span className="display text-5xl bg-gradient-to-br from-primary to-primary-light bg-clip-text text-transparent">
+                        {step.n}
+                      </span>
+                      <h3 className="mt-6 font-display text-xl font-bold text-gray-900">
+                        {step.t}
+                      </h3>
+                      <p className="mt-3 text-sm leading-relaxed text-gray-600">
+                        {step.d}
+                      </p>
+                    </div>
+                  </Card>
                 </Reveal>
               ))}
             </div>
@@ -215,10 +224,10 @@ export default function Home() {
         </section>
 
         {/* ============ OPPORTUNITIES ============ */}
-        <section className="border-b border-gray-900 px-4 py-20 sm:px-6 lg:px-8">
+        <section className="border-b border-gray-200 px-4 py-20 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-7xl">
             <Reveal>
-              <div className="flex flex-col gap-4 border-b border-gray-900 pb-6 sm:flex-row sm:items-end sm:justify-between">
+              <div className="flex flex-col gap-4 border-b border-gray-200 pb-6 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                   <p className="label-mono">Open now</p>
                   <h2 className="display mt-3 text-4xl sm:text-5xl">
@@ -237,7 +246,7 @@ export default function Home() {
             <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {opportunities.map((opp, i) => (
                 <Reveal key={opp.title} delay={i * 80} as="div">
-                  <Card className="group h-full rounded-none border-gray-900 transition-all hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#3C096C]">
+                  <Card className="group h-full rounded-2xl border-gray-200 shadow-soft transition-all duration-300 hover:-translate-y-1 hover:shadow-soft-lg">
                     <div className="flex h-full flex-col p-6">
                       <div className="flex items-start justify-between">
                         <div>
@@ -264,8 +273,8 @@ export default function Home() {
         </section>
 
         {/* ============ STUDENTS / EMPLOYERS ============ */}
-        <section className="grid grid-cols-1 border-b border-gray-900 lg:grid-cols-2">
-          <div id="students" className="border-b border-gray-900 px-4 py-16 sm:px-6 lg:border-b-0 lg:border-r lg:px-8">
+        <section className="grid grid-cols-1 border-b border-gray-200 lg:grid-cols-2">
+          <div id="students" className="border-b border-gray-200 px-4 py-16 sm:px-6 lg:border-b-0 lg:border-r lg:px-8">
             <Reveal>
               <p className="label-mono">For students</p>
               <h3 className="display mt-4 text-3xl sm:text-4xl">
@@ -273,7 +282,7 @@ export default function Home() {
               </h3>
               <ul className="mt-8 space-y-4">
                 {studentPoints.map((p) => (
-                  <li key={p} className="flex items-start gap-3 border-t border-gray-200 pt-4">
+                  <li key={p} className="flex items-start gap-3 border-t border-gray-100 pt-4">
                     <span className="mt-1 font-mono text-sm font-bold text-primary">
                       →
                     </span>
@@ -281,7 +290,7 @@ export default function Home() {
                   </li>
                 ))}
               </ul>
-              <Button asChild variant="primary" className="mt-8">
+              <Button asChild variant="primary" className="mt-8 shadow-soft">
                 <Link href="/auth/register">Create student profile</Link>
               </Button>
             </Reveal>
@@ -297,7 +306,7 @@ export default function Home() {
               </h3>
               <ul className="mt-8 space-y-4">
                 {employerPoints.map((p) => (
-                  <li key={p} className="flex items-start gap-3 border-t border-gray-200 pt-4">
+                  <li key={p} className="flex items-start gap-3 border-t border-gray-100 pt-4">
                     <span className="mt-1 font-mono text-sm font-bold text-primary">
                       →
                     </span>
@@ -313,7 +322,8 @@ export default function Home() {
         </section>
 
         {/* ============ TRUST / MANIFESTO ============ */}
-        <section id="trust" className="border-b border-gray-900 px-4 py-20 sm:px-6 lg:px-8">
+        <section id="trust" className="relative overflow-hidden border-b border-gray-200 px-4 py-20 sm:px-6 lg:px-8">
+          <div className="glow-purple absolute inset-0 -z-10 opacity-60" />
           <div className="mx-auto max-w-4xl text-center">
             <Reveal>
               <p className="label-mono">The bet</p>
@@ -339,7 +349,9 @@ export default function Home() {
         </section>
 
         {/* ============ FINAL CTA ============ */}
-        <section className="bg-primary px-4 py-20 sm:px-6 lg:px-8">
+        <section className="relative overflow-hidden bg-primary px-4 py-20 sm:px-6 lg:px-8">
+          <div className="glow-purple absolute inset-0 -z-10 opacity-40" />
+          <div className="bg-grain absolute inset-0 -z-10 opacity-30" />
           <div className="mx-auto flex max-w-5xl flex-col items-start justify-between gap-8 lg:flex-row lg:items-center">
             <Reveal>
               <h2 className="display text-4xl leading-tight text-primary-contrast sm:text-5xl">
@@ -351,7 +363,7 @@ export default function Home() {
               </p>
             </Reveal>
             <Reveal delay={120}>
-              <Button asChild size="lg" className="bg-white text-primary hover:bg-gray-100 focus-visible:ring-white">
+              <Button asChild size="lg" className="bg-white text-primary shadow-soft hover:bg-gray-100 focus-visible:ring-white">
                 <Link href="/auth/register">Get started free</Link>
               </Button>
             </Reveal>

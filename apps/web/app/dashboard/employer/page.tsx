@@ -9,6 +9,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/ui/empty-state';
+import { PageHeader, StatCard } from '@/components/layout/page-header';
+import { Briefcase, Users, Clock } from 'lucide-react';
 import { TYPE_LABELS } from '@/lib/types';
 
 interface ProjectWithCount extends Project {
@@ -62,42 +64,26 @@ export default function EmployerDashboardPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="font-display text-3xl font-extrabold text-gray-900">
-            Employer dashboard
-          </h1>
-          <p className="mt-1 text-gray-600">
-            Manage your opportunities and candidates.
-          </p>
-        </div>
-        <Button asChild>
-          <Link href="/dashboard/employer/projects/new">Post opportunity</Link>
-        </Button>
-      </div>
+      <PageHeader
+        eyebrow="Employer"
+        title="Employer dashboard"
+        subtitle="Manage your opportunities and candidates."
+        actions={
+          <Button asChild>
+            <Link href="/dashboard/employer/projects/new">Post opportunity</Link>
+          </Button>
+        }
+      />
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <Card>
-          <p className="text-sm text-gray-500">Active opportunities</p>
-          <p className="mt-1 text-3xl font-bold text-primary">
-            {projects.length}
-          </p>
-        </Card>
-        <Card>
-          <p className="text-sm text-gray-500">Total applicants</p>
-          <p className="mt-1 text-3xl font-bold text-gray-900">{apps.length}</p>
-        </Card>
-        <Card>
-          <p className="text-sm text-gray-500">Needs review</p>
-          <p className="mt-1 text-3xl font-bold text-amber-600">{needsReview}</p>
-        </Card>
+        <StatCard icon={Briefcase} label="Active opportunities" value={projects.length} />
+        <StatCard icon={Users} label="Total applicants" value={apps.length} accent="text-gray-900" />
+        <StatCard icon={Clock} label="Needs review" value={needsReview} accent="text-amber-600" />
       </div>
 
       <section>
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-gray-900">
-            Your opportunities
-          </h2>
+          <h2 className="display text-2xl">Your opportunities</h2>
           <Link
             href="/dashboard/employer/projects"
             className="text-sm font-medium text-primary hover:text-primary-hover"

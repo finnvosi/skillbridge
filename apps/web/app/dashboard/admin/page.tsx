@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import { apiRequest, API_ENDPOINTS, getToken } from '@/lib/api-client';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { PageHeader, StatCard } from '@/components/layout/page-header';
+import { GraduationCap, Building2, Briefcase, FileCheck2 } from 'lucide-react';
 
 export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true);
@@ -32,18 +34,13 @@ export default function AdminDashboardPage() {
     })();
   }, [token]);
 
-  const cards = [
-    { label: 'Total Students', value: stats.students },
-    { label: 'Total Employers', value: stats.employers },
-    { label: 'Active Opportunities', value: stats.opportunities },
-    { label: 'Total Applications', value: stats.applications },
-  ];
-
   return (
-    <div className="space-y-6">
-      <h1 className="font-display text-3xl font-extrabold text-gray-900">
-        Platform overview
-      </h1>
+    <div className="space-y-8">
+      <PageHeader
+        eyebrow="Admin"
+        title="Platform overview"
+        subtitle="Everything happening across the network, at a glance."
+      />
 
       {loading ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -53,12 +50,10 @@ export default function AdminDashboardPage() {
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {cards.map((c) => (
-            <Card key={c.label}>
-              <p className="text-sm text-gray-500">{c.label}</p>
-              <p className="mt-1 text-4xl font-bold text-primary">{c.value}</p>
-            </Card>
-          ))}
+          <StatCard icon={GraduationCap} label="Total Students" value={stats.students} />
+          <StatCard icon={Building2} label="Total Employers" value={stats.employers} accent="text-gray-900" />
+          <StatCard icon={Briefcase} label="Active Opportunities" value={stats.opportunities} />
+          <StatCard icon={FileCheck2} label="Total Applications" value={stats.applications} accent="text-gray-900" />
         </div>
       )}
     </div>

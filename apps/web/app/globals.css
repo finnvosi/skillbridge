@@ -1,5 +1,20 @@
 @import "tailwindcss";
 
+/* Soft, layered elevation shadows as real Tailwind utilities so both
+   @apply and className="shadow-soft" work (Apple/Linear feel). */
+@utility shadow-soft {
+  box-shadow:
+    0 1px 2px rgba(17, 17, 17, 0.04),
+    0 8px 24px -8px rgba(17, 17, 17, 0.10),
+    0 2px 6px -2px rgba(60, 9, 108, 0.06);
+}
+@utility shadow-soft-lg {
+  box-shadow:
+    0 2px 4px rgba(17, 17, 17, 0.05),
+    0 18px 40px -12px rgba(17, 17, 17, 0.14),
+    0 6px 16px -6px rgba(60, 9, 108, 0.08);
+}
+
 @theme inline {
   /* ===== SkillBridge brand color system (light-mode first) ===== */
   /* Primary brand: deep purple. Used for accents, logos, key CTAs. */
@@ -105,7 +120,7 @@
     @apply text-gray-600 hover:bg-gray-100 hover:text-gray-900 focus-visible:ring-gray-500;
   }
   .card {
-    @apply rounded-xl bg-card shadow-sm ring-1 ring-card-border;
+    @apply rounded-2xl bg-card shadow-soft ring-1 ring-card-border;
   }
 
   /* ===== Editorial / Swiss-Brutalist primitives ===== */

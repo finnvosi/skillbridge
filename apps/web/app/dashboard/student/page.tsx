@@ -10,6 +10,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/ui/empty-state';
+import { PageHeader, StatCard } from '@/components/layout/page-header';
+import { ClipboardList, CheckCircle2, Briefcase } from 'lucide-react';
 import { TYPE_LABELS, STATUS_LABELS } from '@/lib/types';
 
 export default function StudentDashboardPage() {
@@ -63,44 +65,42 @@ export default function StudentDashboardPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="font-display text-3xl font-extrabold text-gray-900">
-            Your dashboard
-          </h1>
-          <p className="mt-1 text-gray-600">
-            Discover opportunities and track your applications.
-          </p>
-        </div>
-        <Button asChild>
-          <Link href="/dashboard/student/discover">Browse opportunities</Link>
-        </Button>
-      </div>
+      <PageHeader
+        eyebrow="Student"
+        title="Your dashboard"
+        subtitle="Discover opportunities and track your applications."
+        actions={
+          <Button asChild>
+            <Link href="/dashboard/student/discover">Browse opportunities</Link>
+          </Button>
+        }
+      />
 
       {/* Application status summary */}
       <div className="grid gap-4 sm:grid-cols-3">
-        <Card>
-          <p className="text-sm text-gray-500">Active applications</p>
-          <p className="mt-1 text-3xl font-bold text-primary">{activeApps.length}</p>
-        </Card>
-        <Card>
-          <p className="text-sm text-gray-500">Accepted</p>
-          <p className="mt-1 text-3xl font-bold text-green-600">
-            {apps.filter((a) => a.status === 'accepted').length}
-          </p>
-        </Card>
-        <Card>
-          <p className="text-sm text-gray-500">Total applications</p>
-          <p className="mt-1 text-3xl font-bold text-gray-900">{apps.length}</p>
-        </Card>
+        <StatCard
+          icon={ClipboardList}
+          label="Active applications"
+          value={activeApps.length}
+        />
+        <StatCard
+          icon={CheckCircle2}
+          label="Accepted"
+          value={apps.filter((a) => a.status === 'accepted').length}
+          accent="text-green-600"
+        />
+        <StatCard
+          icon={Briefcase}
+          label="Total applications"
+          value={apps.length}
+          accent="text-gray-900"
+        />
       </div>
 
       {/* Recommended opportunities */}
       <section>
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-gray-900">
-            Recommended opportunities
-          </h2>
+          <h2 className="display text-2xl">Recommended opportunities</h2>
           <Link
             href="/dashboard/student/discover"
             className="text-sm font-medium text-primary hover:text-primary-hover"
@@ -150,9 +150,7 @@ export default function StudentDashboardPage() {
       {/* Recent applications */}
       {apps.length > 0 && (
         <section>
-          <h2 className="mb-4 text-xl font-semibold text-gray-900">
-            Recent applications
-          </h2>
+          <h2 className="display mb-4 text-2xl">Recent applications</h2>
           <Card className="p-0">
             <ul className="divide-y divide-gray-100">
               {apps.slice(0, 5).map((a) => (

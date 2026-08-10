@@ -107,4 +107,72 @@
   .card {
     @apply rounded-xl bg-card shadow-sm ring-1 ring-card-border;
   }
+
+  /* ===== Editorial / Swiss-Brutalist primitives ===== */
+  /* Monospace micro-label — used for kicker/eyebrow tags and metadata. */
+  .label-mono {
+    @apply font-mono text-xs font-medium uppercase tracking-[0.18em] text-primary;
+  }
+  .label-mono-muted {
+    @apply font-mono text-xs font-medium uppercase tracking-[0.18em] text-gray-500;
+  }
+  /* Hard hairline rule used to divide editorial sections. */
+  .rule {
+    @apply border-t border-gray-900;
+  }
+  .rule-soft {
+    @apply border-t border-gray-200;
+  }
+  /* Oversized display headline with tight tracking + ink color. */
+  .display {
+    @apply font-display font-extrabold tracking-[-0.03em] text-gray-900;
+    text-wrap: balance;
+  }
+  /* Red alert accent for "verified / priority" pops. */
+  .accent-red {
+    @apply text-[#FF0000];
+  }
+}
+
+/* Reveal-on-scroll: elements start slightly down + transparent, animate in
+   when .is-visible is added by the Reveal client component. */
+.reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* Marquee strip — seamless horizontal scroll for the "trusted by" band. */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.marquee-track {
+  display: inline-flex;
+  white-space: nowrap;
+  animation: marquee 28s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track { animation: none; }
+}
+
+/* Subtle grid texture for hero / section backgrounds (brutalist paper). */
+.bg-grid {
+  background-image:
+    linear-gradient(to right, rgba(17,17,17,0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(17,17,17,0.06) 1px, transparent 1px);
+  background-size: 56px 56px;
 }

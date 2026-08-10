@@ -1,9 +1,90 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Navbar } from "@/components/layout/navbar";
+import { Footer } from "@/components/layout/footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { Reveal } from "@/components/motion/reveal";
+
+const stats = [
+  { value: "2,400+", label: "Verified students" },
+  { value: "310", label: "Partner employers" },
+  { value: "1,900", label: "Completed projects" },
+  { value: "94%", label: "Hire-through rate" },
+];
+
+const proof = [
+  "Phnom Penh Labs",
+  "Mekong Studio",
+  "CamTech Solutions",
+  "Angkor Dev",
+  "Tonle Sap Foods",
+  "Battambang Ventures",
+  "Cardamom Group",
+  "Siem Reap Digital",
+];
+
+const steps = [
+  {
+    n: "01",
+    t: "Build a verified profile",
+    d: "Students prove skills with real coursework and projects. Employers verify — so the record means something.",
+  },
+  {
+    n: "02",
+    t: "Post & discover",
+    d: "Employers publish real roles. Students find work matched to what they can actually do, not a wish list.",
+  },
+  {
+    n: "03",
+    t: "Apply, work, get reviewed",
+    d: "Students ship real work. Employers attest it. Every completed project becomes permanent, portable proof.",
+  },
+  {
+    n: "04",
+    t: "Get hired on proof",
+    d: "No inflated resumes. Hiring decisions ride on verified experience both sides can trust.",
+  },
+];
+
+const opportunities = [
+  {
+    title: "Frontend Internship",
+    company: "Phnom Penh Labs",
+    loc: "Phnom Penh",
+    type: "Internship",
+    skill: "React",
+  },
+  {
+    title: "UX Research Assistant",
+    company: "Mekong Studio",
+    loc: "Remote",
+    type: "Part-time",
+    skill: "Research",
+  },
+  {
+    title: "Junior Data Analyst",
+    company: "CamTech Solutions",
+    loc: "Siem Reap",
+    type: "Full-time",
+    skill: "SQL",
+  },
+];
+
+const studentPoints = [
+  "Find roles matched to what you can actually do",
+  "Turn coursework into a verified, portable record",
+  "Track every application in one place",
+  "Get discovered by employers who hire on proof",
+];
+
+const employerPoints = [
+  "Publish real opportunities in minutes",
+  "Review applicants backed by verified work",
+  "Hire without the resume theatre",
+  "Build a pipeline of proven local talent",
+];
 
 export default function Home() {
   return (
@@ -11,211 +92,274 @@ export default function Home() {
       <Navbar />
 
       <main className="flex-1">
-        {/* 1. Hero */}
-        <section className="relative overflow-hidden px-4 py-24 sm:px-6 lg:px-8">
-          <div
-            className="pointer-events-none absolute inset-0 -z-10 opacity-60"
-            style={{
-              background:
-                "radial-gradient(60% 50% at 50% 0%, rgba(123,44,191,0.18), transparent 70%)",
-            }}
-          />
-          <div className="mx-auto max-w-5xl text-center">
-            <Badge variant="primary" className="mb-6">
-              Cambodia&apos;s workforce bridge
-            </Badge>
-            <h1 className="font-display text-5xl font-extrabold tracking-tight text-gray-900 sm:text-6xl md:text-7xl">
-              Bridge your skills to{" "}
-              <span className="text-primary">real opportunities.</span>
-            </h1>
-            <p className="mx-auto mt-6 max-w-2xl text-lg text-gray-600">
-              SkillBridge connects students with employers through meaningful
-              projects, jobs, and career opportunities. Build experience, get
-              verified, and launch your career.
-            </p>
-            <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <Button asChild variant="primary" size="lg">
-                <Link href="/auth/register">Get started free</Link>
-              </Button>
-              <Button asChild variant="outline" size="lg">
-                <Link href="/auth/login">I already have an account</Link>
-              </Button>
+        {/* ============ HERO ============ */}
+        <section className="relative overflow-hidden border-b border-gray-900">
+          <div className="bg-grid absolute inset-0 -z-10 opacity-70" />
+          <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-primary/[0.06] to-transparent" />
+
+          <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
+            <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-8">
+              {/* Left: editorial headline column */}
+              <div className="lg:col-span-8">
+                <Reveal>
+                  <p className="label-mono">
+                    Cambodia&apos;s verified talent network
+                  </p>
+                </Reveal>
+
+                <Reveal delay={80}>
+                  <h1 className="display mt-6 text-5xl leading-[0.95] sm:text-6xl lg:text-7xl xl:text-8xl">
+                    Stop sending
+                    <br />
+                    resumes.
+                    <br />
+                    <span className="text-primary">Start showing</span>
+                    <br />
+                    proof.
+                  </h1>
+                </Reveal>
+
+                <Reveal delay={160}>
+                  <p className="mt-8 max-w-xl text-lg leading-relaxed text-gray-600">
+                    SkillBridge is where Cambodian students turn real projects
+                    into verified work history — and where employers hire on
+                    what&apos;s been done, not what&apos;s been claimed.
+                  </p>
+                </Reveal>
+
+                <Reveal delay={240}>
+                  <div className="mt-10 flex flex-col gap-4 sm:flex-row">
+                    <Button asChild variant="primary" size="lg">
+                      <Link href="/auth/register">Get started free</Link>
+                    </Button>
+                    <Button asChild variant="outline" size="lg">
+                      <Link href="/#how">See how it works</Link>
+                    </Button>
+                  </div>
+                </Reveal>
+              </div>
+
+              {/* Right: proof / stat card, brutalist framed */}
+              <div className="lg:col-span-4">
+                <Reveal delay={200}>
+                  <Card className="overflow-hidden rounded-none border-gray-900 shadow-[8px_8px_0_0_#3C096C]">
+                    <div className="border-b border-gray-900 bg-primary px-5 py-3">
+                      <p className="font-mono text-xs font-medium uppercase tracking-[0.14em] text-primary-contrast">
+                        Live network
+                      </p>
+                    </div>
+                    <div className="divide-y divide-gray-200">
+                      {stats.map((s) => (
+                        <div
+                          key={s.label}
+                          className="flex items-baseline justify-between px-5 py-4"
+                        >
+                          <span className="display text-3xl">{s.value}</span>
+                          <span className="text-right text-xs uppercase tracking-wide text-gray-500">
+                            {s.label}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </Card>
+                </Reveal>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* 2. Value proposition */}
-        <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-            <Card>
-              <div className="text-3xl font-bold text-primary">01</div>
-              <h3 className="mt-3 text-lg font-semibold">Discover</h3>
-              <p className="mt-2 text-sm text-gray-600">
-                Browse curated internships, projects, and entry-level roles
-                matched to your skills.
-              </p>
-            </Card>
-            <Card>
-              <div className="text-3xl font-bold text-primary">02</div>
-              <h3 className="mt-3 text-lg font-semibold">Build</h3>
-              <p className="mt-2 text-sm text-gray-600">
-                Apply, complete real work, and grow a verified profile
-                employers trust.
-              </p>
-            </Card>
-            <Card>
-              <div className="text-3xl font-bold text-primary">03</div>
-              <h3 className="mt-3 text-lg font-semibold">Connect</h3>
-              <p className="mt-2 text-sm text-gray-600">
-                Get hired by employers who value proof of work over paper
-                credentials.
-              </p>
-            </Card>
+        {/* ============ PROOF MARQUEE ============ */}
+        <section className="overflow-hidden border-b border-gray-900 bg-gray-900 py-5">
+          <div className="marquee-track font-mono text-sm uppercase tracking-[0.18em] text-gray-100">
+            {[...proof, ...proof].map((name, i) => (
+              <span key={i} className="mx-8 inline-flex items-center gap-8">
+                {name}
+                <span className="text-primary">/</span>
+              </span>
+            ))}
           </div>
         </section>
 
-        {/* 3. How SkillBridge works */}
-        <section className="border-y border-gray-100 bg-gray-50 px-4 py-16 sm:px-6 lg:px-8">
+        {/* ============ HOW IT WORKS ============ */}
+        <section id="how" className="border-b border-gray-900 px-4 py-20 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-7xl">
-            <h2 className="font-display text-3xl font-extrabold text-gray-900 text-center">
-              How SkillBridge works
-            </h2>
-            <div className="mt-12 grid grid-cols-1 gap-8 md:grid-cols-4">
-              {[
-                { n: "1", t: "Create your profile", d: "Students and employers sign up and build a verified presence." },
-                { n: "2", t: "Post & discover", d: "Employers post opportunities; students browse and filter." },
-                { n: "3", t: "Apply & work", d: "Students apply, employers review, and verified work happens." },
-                { n: "4", t: "Grow your career", d: "Build a portable, trusted record of real experience." },
-              ].map((step) => (
-                <div key={step.n} className="text-center">
-                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary text-lg font-bold text-primary-contrast">
-                    {step.n}
+            <Reveal>
+              <div className="flex items-end justify-between gap-6 border-b border-gray-900 pb-6">
+                <h2 className="display text-4xl sm:text-5xl">
+                  How it works
+                </h2>
+                <p className="label-mono-muted hidden sm:block">
+                  Four steps · No theatre
+                </p>
+              </div>
+            </Reveal>
+
+            <div className="mt-12 grid grid-cols-1 gap-px bg-gray-200 md:grid-cols-2 lg:grid-cols-4">
+              {steps.map((step, i) => (
+                <Reveal key={step.n} delay={i * 80} as="div" className="bg-white">
+                  <div className="flex h-full flex-col p-6">
+                    <span className="display text-5xl text-primary">
+                      {step.n}
+                    </span>
+                    <h3 className="mt-6 font-display text-xl font-bold text-gray-900">
+                      {step.t}
+                    </h3>
+                    <p className="mt-3 text-sm leading-relaxed text-gray-600">
+                      {step.d}
+                    </p>
                   </div>
-                  <h3 className="mt-4 font-semibold text-gray-900">{step.t}</h3>
-                  <p className="mt-2 text-sm text-gray-600">{step.d}</p>
-                </div>
+                </Reveal>
               ))}
             </div>
           </div>
         </section>
 
-        {/* 4. Opportunity discovery preview */}
-        <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-          <h2 className="font-display text-3xl font-extrabold text-gray-900 text-center">
-            Opportunities, made findable
-          </h2>
-          <p className="mx-auto mt-3 max-w-2xl text-center text-gray-600">
-            Search, filter, and sort by category, location, work type, and
-            skills. Every card shows what matters at a glance.
-          </p>
-          <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {[
-              { title: "Frontend Internship", company: "Phnom Penh Labs", loc: "Phnom Penh", type: "Internship" },
-              { title: "UX Research Assistant", company: "Mekong Studio", loc: "Remote", type: "Part-time" },
-              { title: "Junior Data Analyst", company: "CamTech Solutions", loc: "Siem Reap", type: "Full-time" },
-            ].map((opp) => (
-              <Card key={opp.title} className="transition-shadow hover:shadow-md">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="font-semibold text-gray-900">{opp.title}</h3>
-                    <p className="text-sm text-gray-500">{opp.company}</p>
-                  </div>
-                  <Badge variant="primary">{opp.type}</Badge>
+        {/* ============ OPPORTUNITIES ============ */}
+        <section className="border-b border-gray-900 px-4 py-20 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-7xl">
+            <Reveal>
+              <div className="flex flex-col gap-4 border-b border-gray-900 pb-6 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <p className="label-mono">Open now</p>
+                  <h2 className="display mt-3 text-4xl sm:text-5xl">
+                    Real opportunities
+                  </h2>
                 </div>
-                <p className="mt-3 text-sm text-gray-500">📍 {opp.loc}</p>
-              </Card>
-            ))}
-          </div>
-        </section>
+                <Link
+                  href="/auth/register"
+                  className="font-mono text-xs font-medium uppercase tracking-[0.14em] text-primary hover:underline"
+                >
+                  Browse all →
+                </Link>
+              </div>
+            </Reveal>
 
-        {/* 5. Student / employer benefits */}
-        <section className="bg-gray-50 px-4 py-16 sm:px-6 lg:px-8">
-          <div className="mx-auto grid max-w-7xl grid-cols-1 gap-10 md:grid-cols-2">
-            <Card className="border-primary/20">
-              <h3 className="font-display text-2xl font-bold text-primary">
-                For Students
-              </h3>
-              <ul className="mt-4 space-y-2 text-sm text-gray-600">
-                <li>✓ Find projects and roles matched to your skills</li>
-                <li>✓ Build a verified, portable career record</li>
-                <li>✓ Track applications in one place</li>
-                <li>✓ Get discovered by real employers</li>
-              </ul>
-            </Card>
-            <Card className="border-primary/20">
-              <h3 className="font-display text-2xl font-bold text-primary">
-                For Employers
-              </h3>
-              <ul className="mt-4 space-y-2 text-sm text-gray-600">
-                <li>✓ Post opportunities in minutes</li>
-                <li>✓ Review applicants with verified experience</li>
-                <li>✓ Manage hiring without the busywork</li>
-                <li>✓ Hire talent proven by real work</li>
-              </ul>
-            </Card>
-          </div>
-        </section>
-
-        {/* 6. Trust / verification concept */}
-        <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-3xl text-center">
-            <h2 className="font-display text-3xl font-extrabold text-gray-900">
-              Trust, by verification
-            </h2>
-            <p className="mt-4 text-gray-600">
-              Every completed opportunity and review is verified and attributed.
-              No fake resumes, no inflated claims — just proof of work that both
-              sides can rely on.
-            </p>
-            <div className="mt-8 flex flex-wrap justify-center gap-3">
-              <Badge variant="outline">Verified profiles</Badge>
-              <Badge variant="outline">Reviewed experience</Badge>
-              <Badge variant="outline">Skill attestations</Badge>
-              <Badge variant="outline">Secure by design</Badge>
+            <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {opportunities.map((opp, i) => (
+                <Reveal key={opp.title} delay={i * 80} as="div">
+                  <Card className="group h-full rounded-none border-gray-900 transition-all hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#3C096C]">
+                    <div className="flex h-full flex-col p-6">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <h3 className="font-display text-lg font-bold text-gray-900">
+                            {opp.title}
+                          </h3>
+                          <p className="mt-1 text-sm text-gray-500">
+                            {opp.company}
+                          </p>
+                        </div>
+                        <Badge variant="primary">{opp.type}</Badge>
+                      </div>
+                      <div className="mt-6 flex items-center gap-2 text-xs uppercase tracking-wide text-gray-500">
+                        <span>📍 {opp.loc}</span>
+                        <span className="text-gray-300">·</span>
+                        <span className="text-primary">{opp.skill}</span>
+                      </div>
+                    </div>
+                  </Card>
+                </Reveal>
+              ))}
             </div>
           </div>
         </section>
 
-        {/* 7. CTA */}
-        <section className="px-4 py-20 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-4xl rounded-2xl bg-primary px-8 py-14 text-center">
-            <h2 className="font-display text-3xl font-extrabold text-primary-contrast sm:text-4xl">
-              Ready to bridge the gap?
-            </h2>
-            <p className="mx-auto mt-4 max-w-xl text-primary-contrast/80">
-              Join students and employers building Cambodia&apos;s verified
-              talent ecosystem.
-            </p>
-            <div className="mt-8 flex justify-center">
-              <Button asChild variant="secondary" size="lg">
+        {/* ============ STUDENTS / EMPLOYERS ============ */}
+        <section className="grid grid-cols-1 border-b border-gray-900 lg:grid-cols-2">
+          <div id="students" className="border-b border-gray-900 px-4 py-16 sm:px-6 lg:border-b-0 lg:border-r lg:px-8">
+            <Reveal>
+              <p className="label-mono">For students</p>
+              <h3 className="display mt-4 text-3xl sm:text-4xl">
+                Your work is your résumé.
+              </h3>
+              <ul className="mt-8 space-y-4">
+                {studentPoints.map((p) => (
+                  <li key={p} className="flex items-start gap-3 border-t border-gray-200 pt-4">
+                    <span className="mt-1 font-mono text-sm font-bold text-primary">
+                      →
+                    </span>
+                    <span className="text-sm text-gray-700">{p}</span>
+                  </li>
+                ))}
+              </ul>
+              <Button asChild variant="primary" className="mt-8">
+                <Link href="/auth/register">Create student profile</Link>
+              </Button>
+            </Reveal>
+          </div>
+
+          <div id="employers" className="px-4 py-16 sm:px-6 lg:px-8">
+            <Reveal>
+              <p className="label-mono">For employers</p>
+              <h3 className="display mt-4 text-3xl sm:text-4xl">
+                Hire on proof,
+                <br />
+                not promises.
+              </h3>
+              <ul className="mt-8 space-y-4">
+                {employerPoints.map((p) => (
+                  <li key={p} className="flex items-start gap-3 border-t border-gray-200 pt-4">
+                    <span className="mt-1 font-mono text-sm font-bold text-primary">
+                      →
+                    </span>
+                    <span className="text-sm text-gray-700">{p}</span>
+                  </li>
+                ))}
+              </ul>
+              <Button asChild variant="outline" className="mt-8">
+                <Link href="/auth/register">Post a role</Link>
+              </Button>
+            </Reveal>
+          </div>
+        </section>
+
+        {/* ============ TRUST / MANIFESTO ============ */}
+        <section id="trust" className="border-b border-gray-900 px-4 py-20 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-4xl text-center">
+            <Reveal>
+              <p className="label-mono">The bet</p>
+              <h2 className="display mt-4 text-4xl leading-tight sm:text-5xl">
+                A degree tells us you showed up.
+                <br />
+                <span className="accent-red">Proof</span> tells us you can do
+                the work.
+              </h2>
+              <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-gray-600">
+                Every completed project and review on SkillBridge is verified
+                and attributed. No fake resumes, no inflated claims — just a
+                portable record of real experience that both sides can rely on.
+              </p>
+              <div className="mt-10 flex flex-wrap justify-center gap-3">
+                <Badge variant="outline">Verified profiles</Badge>
+                <Badge variant="outline">Reviewed experience</Badge>
+                <Badge variant="outline">Skill attestations</Badge>
+                <Badge variant="outline">Secure by design</Badge>
+              </div>
+            </Reveal>
+          </div>
+        </section>
+
+        {/* ============ FINAL CTA ============ */}
+        <section className="bg-primary px-4 py-20 sm:px-6 lg:px-8">
+          <div className="mx-auto flex max-w-5xl flex-col items-start justify-between gap-8 lg:flex-row lg:items-center">
+            <Reveal>
+              <h2 className="display text-4xl leading-tight text-primary-contrast sm:text-5xl">
+                Ready to bridge the gap?
+              </h2>
+              <p className="mt-4 max-w-xl text-primary-contrast/80">
+                Join the students and employers building Cambodia&apos;s
+                verified talent network.
+              </p>
+            </Reveal>
+            <Reveal delay={120}>
+              <Button asChild size="lg" className="bg-white text-primary hover:bg-gray-100 focus-visible:ring-white">
                 <Link href="/auth/register">Get started free</Link>
               </Button>
-            </div>
+            </Reveal>
           </div>
         </section>
       </main>
 
-      {/* 8. Footer */}
-      <footer className="border-t border-gray-100 bg-white px-4 py-10 sm:px-6 lg:px-8">
-        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 sm:flex-row">
-          <div className="flex items-center gap-2">
-            <Image
-              src="/skillbridge-logo.svg"
-              alt="SkillBridge"
-              width={28}
-              height={28}
-              className="h-7 w-auto"
-            />
-            <span className="font-display text-lg font-extrabold text-primary">
-              SkillBridge
-            </span>
-          </div>
-          <p className="text-sm text-gray-500">
-            © {new Date().getFullYear()} SkillBridge. Cambodia&apos;s trusted
-            workforce development platform.
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

@@ -91,6 +91,56 @@ router.get(
   })
 );
 
+// Get the current employer's own projects
+// NOTE: declared before '/:id' so 'employer' is not captured as :id
+router.get(
+  '/employer/projects',
+  authenticate,
+  asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (req.user!.role !== 'employer') {
+      return res.status(403).json({ error: 'Only employers can view their projects' });
+    }
+    const employer = await prisma.employer.findUnique({
+      where: { userId: req.user!.id },
+    });
+    if (!employer) return res.status(404).json({ error: 'Employer profile not found' });
+
+    const projects = await prisma.project.findMany({
+      where: { employerId: employer.id },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        _count: { select: { applications: true } },
+      },
+    });
+    res.json({ projects });
+  })
+);
+
+// Get all applications across the current employer's projects
+router.get(
+  '/employer/applications',
+  authenticate,
+  asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (req.user!.role !== 'employer') {
+      return res.status(403).json({ error: 'Only employers can view applications' });
+    }
+    const employer = await prisma.employer.findUnique({
+      where: { userId: req.user!.id },
+    });
+    if (!employer) return res.status(404).json({ error: 'Employer profile not found' });
+
+    const applications = await prisma.application.findMany({
+      where: { project: { employerId: employer.id } },
+      include: {
+        project: { select: { id: true, title: true } },
+        student: { include: { user: { select: { name: true, email: true } } } },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+    res.json({ applications });
+  })
+);
+
 // Get project by ID
 router.get(
   '/:id',

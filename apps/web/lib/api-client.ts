@@ -20,6 +20,8 @@ export const API_ENDPOINTS = {
     logout: '/auth/logout',
     me: '/auth/me',
     refresh: '/auth/refresh',
+    forgotPassword: '/auth/forgot-password',
+    resetPassword: '/auth/reset-password',
   },
   users: {
     profile: '/users/profile',
@@ -30,11 +32,17 @@ export const API_ENDPOINTS = {
     detail: (id: string) => `/projects/${id}`,
     apply: (id: string) => `/projects/${id}/apply`,
     myApplications: '/projects/student/applications',
+    employerProjects: '/projects/employer/projects',
+    employerApplications: '/projects/employer/applications',
   },
-  certificates: {
-    upload: '/certificates',
-    list: '/certificates',
-    delete: (id: string) => `/certificates/${id}`,
+  admin: {
+    overview: '/admin/overview',
+    users: '/users',
+    opportunities: '/admin/opportunities',
+    applications: '/admin/applications',
+    deleteUser: (id: string) => `/admin/users/${id}`,
+    deleteOpportunity: (id: string) => `/admin/opportunities/${id}`,
+    updateApplication: (id: string) => `/admin/applications/${id}`,
   },
 } as const;
 

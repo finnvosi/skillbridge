@@ -1,58 +1,66 @@
-import Link from 'next/link';
+'use client';
 
-export const metadata = {
-  title: 'Admin Dashboard - SkillBridge',
-};
+import { useEffect, useState } from 'react';
+import { apiRequest, API_ENDPOINTS, getToken } from '@/lib/api-client';
+import { Card } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 
-export default function AdminDashboard() {
+export default function AdminDashboardPage() {
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    students: 0,
+    employers: 0,
+    opportunities: 0,
+    applications: 0,
+  });
+  const token = getToken();
+
+  useEffect(() => {
+    if (!token) return;
+    (async () => {
+      try {
+        const data = await apiRequest<typeof stats>(
+          API_ENDPOINTS.admin.overview,
+          { method: 'GET', token }
+        );
+        setStats(data);
+      } catch {
+        // leave zeros
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [token]);
+
+  const cards = [
+    { label: 'Total Students', value: stats.students },
+    { label: 'Total Employers', value: stats.employers },
+    { label: 'Active Opportunities', value: stats.opportunities },
+    { label: 'Total Applications', value: stats.applications },
+  ];
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-900">SkillBridge</h1>
-          <Link href="/api/auth/logout" className="text-gray-600 hover:text-gray-900">
-            Logout
-          </Link>
+    <div className="space-y-6">
+      <h1 className="font-display text-3xl font-extrabold text-gray-900">
+        Platform overview
+      </h1>
+
+      {loading ? (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {[0, 1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-28 w-full" />
+          ))}
         </div>
-      </nav>
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <h2 className="text-3xl font-bold text-gray-900 mb-8">Admin Dashboard</h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">User Verification</h3>
-            <p className="text-gray-600">Verify students, workers, companies, and factories</p>
-            <button className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-              Verify Users
-            </button>
-          </div>
-
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Project Moderation</h3>
-            <p className="text-gray-600">Review and approve projects</p>
-            <button className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-              Moderate
-            </button>
-          </div>
-
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Analytics</h3>
-            <p className="text-gray-600">View platform statistics and reports</p>
-            <button className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-              View Analytics
-            </button>
-          </div>
-
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">User Management</h3>
-            <p className="text-gray-600">Manage all platform users</p>
-            <button className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-              Manage Users
-            </button>
-          </div>
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {cards.map((c) => (
+            <Card key={c.label}>
+              <p className="text-sm text-gray-500">{c.label}</p>
+              <p className="mt-1 text-4xl font-bold text-primary">{c.value}</p>
+            </Card>
+          ))}
         </div>
-      </main>
+      )}
     </div>
   );
 }

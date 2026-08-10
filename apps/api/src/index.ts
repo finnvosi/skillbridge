@@ -12,6 +12,7 @@ import authRoutes from './routes/auth.routes';
 import usersRoutes from './routes/users.routes';
 import projectsRoutes from './routes/projects.routes';
 import certificatesRoutes from './routes/certificates.routes';
+import adminRoutes from './routes/admin.routes';
 import * as path from 'path';
 
 // Initialize Express app
@@ -52,6 +53,7 @@ app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/users', usersRoutes);
 app.use('/api/v1/projects', projectsRoutes);
 app.use('/api/v1/certificates', certificatesRoutes);
+app.use('/api/v1/admin', adminRoutes);
 
 // Serve uploaded files statically
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));

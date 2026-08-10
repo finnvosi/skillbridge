@@ -1,58 +1,136 @@
+'use client';
+
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import { apiRequest, API_ENDPOINTS, getToken } from '@/lib/api-client';
+import { Project, Application } from '@/lib/types';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { EmptyState } from '@/components/ui/empty-state';
+import { TYPE_LABELS } from '@/lib/types';
 
-export const metadata = {
-  title: 'Employer Dashboard - SkillBridge',
-};
+interface ProjectWithCount extends Project {
+  _count?: { applications: number };
+}
 
-export default function EmployerDashboard() {
+export default function EmployerDashboardPage() {
+  const [loading, setLoading] = useState(true);
+  const [projects, setProjects] = useState<ProjectWithCount[]>([]);
+  const [apps, setApps] = useState<Application[]>([]);
+  const token = getToken();
+
+  useEffect(() => {
+    if (!token) return;
+    (async () => {
+      try {
+        const [p, a] = await Promise.all([
+          apiRequest<{ projects: ProjectWithCount[] }>(
+            API_ENDPOINTS.projects.employerProjects,
+            { method: 'GET', token }
+          ).catch(() => ({ projects: [] as ProjectWithCount[] })),
+          apiRequest<{ applications: Application[] }>(
+            API_ENDPOINTS.projects.employerApplications,
+            { method: 'GET', token }
+          ).catch(() => ({ applications: [] as Application[] })),
+        ]);
+        setProjects(p.projects ?? []);
+        setApps(a.applications ?? []);
+      } catch {
+        // empty
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [token]);
+
+  const needsReview = apps.filter((a) => a.status === 'pending').length;
+
+  if (loading) {
+    return (
+      <div className="space-y-4">
+        <Skeleton className="h-9 w-64" />
+        <div className="grid gap-4 sm:grid-cols-3">
+          {[0, 1, 2].map((i) => (
+            <Skeleton key={i} className="h-24 w-full" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-900">SkillBridge</h1>
-          <Link href="/api/auth/logout" className="text-gray-600 hover:text-gray-900">
-            Logout
+    <div className="space-y-8">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h1 className="font-display text-3xl font-extrabold text-gray-900">
+            Employer dashboard
+          </h1>
+          <p className="mt-1 text-gray-600">
+            Manage your opportunities and candidates.
+          </p>
+        </div>
+        <Button asChild>
+          <Link href="/dashboard/employer/projects/new">Post opportunity</Link>
+        </Button>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-3">
+        <Card>
+          <p className="text-sm text-gray-500">Active opportunities</p>
+          <p className="mt-1 text-3xl font-bold text-primary">
+            {projects.length}
+          </p>
+        </Card>
+        <Card>
+          <p className="text-sm text-gray-500">Total applicants</p>
+          <p className="mt-1 text-3xl font-bold text-gray-900">{apps.length}</p>
+        </Card>
+        <Card>
+          <p className="text-sm text-gray-500">Needs review</p>
+          <p className="mt-1 text-3xl font-bold text-amber-600">{needsReview}</p>
+        </Card>
+      </div>
+
+      <section>
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-xl font-semibold text-gray-900">
+            Your opportunities
+          </h2>
+          <Link
+            href="/dashboard/employer/projects"
+            className="text-sm font-medium text-primary hover:text-primary-hover"
+          >
+            Manage all
           </Link>
         </div>
-      </nav>
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <h2 className="text-3xl font-bold text-gray-900 mb-8">Employer Dashboard</h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Company Profile</h3>
-            <p className="text-gray-600">Manage your company information</p>
-            <button className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-              Manage
-            </button>
+        {projects.length === 0 ? (
+          <EmptyState
+            title="No opportunities posted yet"
+            description="Post your first opportunity to start receiving applications."
+            actionLabel="Post opportunity"
+            onAction={() =>
+              (window.location.href = '/dashboard/employer/projects/new')
+            }
+          />
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {projects.slice(0, 6).map((p) => (
+              <Card key={p.id} className="transition-shadow hover:shadow-md">
+                <div className="flex items-start justify-between">
+                  <h3 className="font-semibold text-gray-900">{p.title}</h3>
+                  <Badge variant="primary">{TYPE_LABELS[p.type]}</Badge>
+                </div>
+                <p className="mt-1 text-sm text-gray-500">{p.location || 'Remote'}</p>
+                <p className="mt-3 text-sm text-gray-600">
+                  {p._count?.applications ?? 0} applicants
+                </p>
+              </Card>
+            ))}
           </div>
-
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Post Opportunity</h3>
-            <p className="text-gray-600">Post projects, internships, or jobs</p>
-            <button className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-              Post
-            </button>
-          </div>
-
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Candidate Search</h3>
-            <p className="text-gray-600">Find and filter talented candidates</p>
-            <button className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-              Search
-            </button>
-          </div>
-
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Applications</h3>
-            <p className="text-gray-600">Review and manage applications</p>
-            <button className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-              View
-            </button>
-          </div>
-        </div>
-      </main>
+        )}
+      </section>
     </div>
   );
 }

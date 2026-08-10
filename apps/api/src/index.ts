@@ -18,6 +18,11 @@ import * as path from 'path';
 // Initialize Express app
 const app = express();
 
+// Trust the proxy hop (Next.js dev rewrite / reverse proxy) so rate-limit can
+// read X-Forwarded-For instead of throwing ERR_ERL_UNEXPECTED_X_FORWARDED_FOR.
+// `1` = trust the single proxy immediately in front of us.
+app.set('trust proxy', 1);
+
 // Middleware
 app.use(helmet());
 app.use(cors({

@@ -16,8 +16,8 @@ const router = Router();
 // In production put a real client IP behind a proxy via `trust proxy`.
 // ---------------------------------------------------------------------------
 const authRateLimit = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 10,
+  windowMs: parseInt(process.env.AUTH_RATE_LIMIT_WINDOW_MS || '60000'), // 1 minute
+  max: parseInt(process.env.AUTH_RATE_LIMIT_MAX || '100'), // 100/min — brute-force-safe (bcrypt makes 100/min already heavy) yet demo-friendly
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Too many attempts, please try again later.' },

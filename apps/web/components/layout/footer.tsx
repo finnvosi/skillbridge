@@ -131,8 +131,7 @@ export function Footer() {
         {/* ===== Bottom bar ===== */}
         <div className="rule mt-14 flex flex-col items-start justify-between gap-4 pt-6 sm:flex-row sm:items-center">
           <p className="text-xs text-gray-500">
-            © {new Date().getFullYear()} SkillBridge. A TradeLink Technologies
-            venture.
+            © {new Date().getFullYear()} SkillBridge. All rights reserved.
           </p>
           <div className="flex items-center gap-3">
             <Magnetic strength={0.5}>

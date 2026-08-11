@@ -60,7 +60,7 @@ export function AuthShell({
         </div>
 
         <p className="text-xs text-primary-contrast/60">
-          TradeLink Technologies · Phnom Penh
+          SkillBridge · Phnom Penh, Cambodia
         </p>
       </aside>
 

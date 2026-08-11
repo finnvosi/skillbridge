@@ -42,13 +42,6 @@ const navItems: NavItem[] = [
   { label: "Applications", href: "/dashboard/admin/applications", roles: ["admin"], icon: FileCheck2, section: "admin" },
 ];
 
-const sectionLabels: Record<NavItem["section"], string> = {
-  main: "",
-  student: "Student",
-  employer: "Employer",
-  admin: "Admin",
-};
-
 export function DashboardShell({
   user,
   children,
@@ -60,20 +53,6 @@ export function DashboardShell({
   const router = useRouter();
 
   const items = navItems.filter((i) => !user || i.roles.includes(user.role));
-
-  // Group items by section for visual separation
-  const groups: { section: string; items: typeof items }[] = [];
-  let currentSection = "";
-  for (const item of items) {
-    if (item.section !== "main" && item.section !== currentSection) {
-      currentSection = item.section;
-      groups.push({ section: sectionLabels[item.section], items: [] });
-    }
-    const group = groups.at(-1) || { section: "", items: [] };
-    if (!group) continue;
-    const idx = groups.indexOf(group);
-    groups[idx].items.push(item);
-  }
 
   const logout = () => {
     clearToken();

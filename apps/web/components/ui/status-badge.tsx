@@ -7,19 +7,19 @@ const statusConfig: Record<
 > = {
   pending: {
     label: "Submitted",
-    className: "bg-gray-100 text-gray-700",
+    className: "bg-gray-100 text-gray-700 ring-1 ring-inset ring-gray-200",
   },
   accepted: {
     label: "Accepted",
-    className: "bg-green-100 text-green-800",
+    className: "bg-green-50 text-green-700 ring-1 ring-inset ring-green-200",
   },
   rejected: {
     label: "Rejected",
-    className: "bg-red-100 text-red-800",
+    className: "bg-red-50 text-red-700 ring-1 ring-inset ring-red-200",
   },
   withdrawn: {
     label: "Withdrawn",
-    className: "bg-amber-100 text-amber-800",
+    className: "bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-200",
   },
 };
 

@@ -30,7 +30,9 @@
   --color-accent: #38BDF8;
   --color-accent-hover: #0EA5E9;
 
-  /* Neutral surface stack */
+  /* Neutral surface stack — light-mode-first, agency editorial.
+     Titanium field (#F3F3F1) for page canvases, soft white cards with
+     hairline borders so frosted/glass and cards read as one system. */
   --color-white: #ffffff;
   --color-light: #F9FAFB;
   --color-gray-100: #F3F4F6;
@@ -44,12 +46,20 @@
   --color-charcoal: #2D2D2D;
   --color-near-black: #111111;
 
+  /* Titanium canvas + surface system (matches landing/auth worlds) */
+  --color-titanium: #F3F3F1;
+  --color-surface: #FFFFFF;
+  --color-surface-border: #ECECEA;
+
   /* Semantic aliases */
   --color-background: var(--color-white);
   --color-foreground: var(--color-gray-800);
-  --color-card: var(--color-white);
-  --color-card-border: var(--color-gray-200);
-  --color-muted: var(--color-gray-100);
+  --color-card: var(--color-surface);
+  --color-card-border: var(--color-surface-border);
+  --color-muted: var(--color-titanium);
+  /* Dashboard canvas uses the titanium field so it belongs to the same
+     world as the landing hero + auth form side. */
+  --color-canvas: var(--color-titanium);
 
   /* Typography families.
      Brand spec: Urbanist (display/headings) + Poppins (body).

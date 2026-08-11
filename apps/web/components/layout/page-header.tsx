@@ -19,7 +19,7 @@ export function PageHeader({
   return (
     <FadeUp
       className={cn(
-        "flex flex-wrap items-end justify-between gap-4 border-b border-gray-200 pb-6",
+        "flex flex-wrap items-end justify-between gap-4 border-b border-card-border pb-6",
         className
       )}
     >

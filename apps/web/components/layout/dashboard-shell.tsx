@@ -16,7 +16,7 @@ import {
   FileCheck2,
   LogOut,
 } from "lucide-react";
-import { getToken, clearToken } from "@/lib/api-client";
+import { clearToken } from "@/lib/api-client";
 import { cn } from "@/lib/utils";
 import type { ApiUser } from "@/lib/api-client";
 
@@ -62,10 +62,11 @@ export function DashboardShell({
     pathname === href || pathname.startsWith(href + "/");
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      {/* Sidebar */}
-      <aside className="relative hidden w-64 flex-col border-r border-gray-200 bg-white md:flex">
-        <div className="flex h-16 items-center border-b border-gray-200 px-6">
+    <div className="flex min-h-screen bg-canvas">
+      {/* Editorial glass sidebar */}
+      <aside className="relative hidden w-64 flex-col border-r border-white/70 bg-white/70 backdrop-blur-xl md:flex">
+        <div className="bg-grain pointer-events-none absolute inset-0 opacity-[0.35] mix-blend-overlay" />
+        <div className="relative flex h-16 items-center border-b border-white/70 px-6">
           <Link href="/" className="flex items-center gap-2">
             <Image
               src="/skillbridge-logo.svg"
@@ -79,7 +80,7 @@ export function DashboardShell({
             </span>
           </Link>
         </div>
-        <nav className="flex-1 space-y-1 px-3 py-4">
+        <nav className="relative flex-1 space-y-1 px-3 py-4">
           {items.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.href);
@@ -88,19 +89,24 @@ export function DashboardShell({
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors",
+                  "group flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all duration-200",
                   active
                     ? "bg-primary/10 text-primary shadow-soft"
-                    : "text-gray-700 hover:bg-gray-100"
+                    : "text-gray-600 hover:bg-white hover:text-gray-900 hover:shadow-soft"
                 )}
               >
-                <Icon className={cn("h-4 w-4", active ? "text-primary" : "text-gray-400")} />
+                <Icon
+                  className={cn(
+                    "h-4 w-4 transition-colors",
+                    active ? "text-primary" : "text-gray-400 group-hover:text-primary-light"
+                  )}
+                />
                 {item.label}
               </Link>
             );
           })}
         </nav>
-        <div className="border-t border-gray-200 p-4">
+        <div className="relative border-t border-white/70 p-4">
           {user && (
             <p className="mb-2 truncate text-sm font-medium text-gray-900">
               {user.name}
@@ -108,7 +114,7 @@ export function DashboardShell({
           )}
           <button
             onClick={logout}
-            className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100"
+            className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-medium text-gray-600 transition-colors hover:bg-white hover:text-gray-900"
           >
             <LogOut className="h-4 w-4" />
             Log out
@@ -118,7 +124,7 @@ export function DashboardShell({
 
       {/* Mobile top bar */}
       <div className="flex flex-1 flex-col">
-        <header className="flex h-16 items-center justify-between border-b border-gray-200 bg-white px-4 md:hidden">
+        <header className="flex h-16 items-center justify-between border-b border-white/70 bg-white/70 px-4 backdrop-blur-xl md:hidden">
           <span className="font-display text-lg font-extrabold text-primary">
             SkillBridge
           </span>
@@ -127,7 +133,7 @@ export function DashboardShell({
           </button>
         </header>
 
-        <main className="flex-1 p-4 sm:p-8">{children}</main>
+        <main className="relative flex-1 p-4 sm:p-8">{children}</main>
       </div>
     </div>
   );

@@ -13,8 +13,8 @@ export default function DashboardLayout({
 
   if (loading) {
     return (
-      <div className="flex min-h-screen bg-gray-50">
-        <div className="hidden w-64 border-r border-gray-200 bg-white md:block" />
+      <div className="flex min-h-screen bg-canvas">
+        <div className="hidden w-64 border-r border-white/70 bg-white/70 backdrop-blur-xl md:block" />
         <div className="flex-1 space-y-4 p-8">
           <Skeleton className="h-8 w-48" />
           <Skeleton className="h-32 w-full" />
@@ -26,7 +26,7 @@ export default function DashboardLayout({
 
   if (denied) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+      <div className="flex min-h-screen items-center justify-center bg-canvas">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900">Access Denied</h2>
           <p className="mt-2 text-gray-600">

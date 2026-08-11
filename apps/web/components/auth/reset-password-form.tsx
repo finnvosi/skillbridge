@@ -52,8 +52,8 @@ function InnerForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <Stagger>
+    <form onSubmit={handleSubmit} className="space-y-8">
+      <Stagger className="space-y-7">
         <StaggerItem>
           <AuthField
             id="password"

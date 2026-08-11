@@ -24,9 +24,7 @@ export default function DashboardPage() {
 
         const roleRedirects: Record<string, string> = {
           student: '/dashboard/student',
-          worker: '/dashboard/worker',
           employer: '/dashboard/employer',
-          factory: '/dashboard/factory',
           admin: '/dashboard/admin',
         };
 

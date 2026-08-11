@@ -5,9 +5,9 @@ export type BadgeVariant = "primary" | "secondary" | "outline" | "neutral";
 export type BadgeSize = "sm" | "md";
 
 const variantClasses = {
-  primary: "bg-primary/10 text-primary",
-  secondary: "bg-primary-light/20 text-primary-hover",
-  outline: "border border-primary text-primary",
+  primary: "bg-primary/10 text-primary ring-1 ring-inset ring-primary/15",
+  secondary: "bg-primary-light/15 text-primary-hover ring-1 ring-inset ring-primary-light/20",
+  outline: "border border-primary/40 text-primary",
   neutral: "bg-gray-100 text-gray-700",
 };
 

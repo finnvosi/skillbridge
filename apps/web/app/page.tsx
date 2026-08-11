@@ -28,6 +28,7 @@ import { Magnetic, ScaleOnScroll, StickySwap } from "@/components/motion/primiti
 import { HeroObject } from "@/components/sections/hero-object";
 import { HeroVideo } from "@/components/sections/hero-video";
 import { CaseStudies } from "@/components/sections/case-studies";
+import { StickySteps } from "@/components/sections/sticky-steps";
 import { ScrubShowcase } from "@/components/sections/scrub-showcase";
 
 const proof = [
@@ -203,35 +204,17 @@ export default function Home() {
           <ScrollVelocityMarquee items={proof} />
         </section>
 
-        {/* ============ HOW IT WORKS ============ */}
-        <section id="how" className="border-b border-gray-200 px-4 py-20 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-7xl">
-            <FadeUp>
-              <div className="flex items-end justify-between gap-6 border-b border-gray-200 pb-6">
-                <h2 className="display text-4xl sm:text-5xl">How it works</h2>
-                <p className="label-mono-muted hidden sm:block">Four steps · No theatre</p>
-              </div>
-            </FadeUp>
-            <Stagger className="mt-12 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
-              {[
-                { n: "01", t: "Build a verified profile", d: "Students prove skills with real coursework and projects. Employers verify — so the record means something." },
-                { n: "02", t: "Post & discover", d: "Employers publish real roles. Students find work matched to what they can actually do, not a wish list." },
-                { n: "03", t: "Apply, work, get reviewed", d: "Students ship real work. Employers attest it. Every completed project becomes permanent, portable proof." },
-                { n: "04", t: "Get hired on proof", d: "No inflated resumes. Hiring decisions ride on verified experience both sides can trust." },
-              ].map((s) => (
-                <StaggerItem key={s.n} as="div">
-                  <Card className="h-full rounded-2xl border-gray-200 shadow-soft transition-shadow duration-300 hover:shadow-soft-lg">
-                    <div className="flex h-full flex-col p-6">
-                      <span className="display text-5xl bg-gradient-to-br from-primary to-primary-light bg-clip-text text-transparent">{s.n}</span>
-                      <h3 className="mt-6 font-display text-xl font-bold text-gray-900">{s.t}</h3>
-                      <p className="mt-3 text-sm leading-relaxed text-gray-600">{s.d}</p>
-                    </div>
-                  </Card>
-                </StaggerItem>
-              ))}
-            </Stagger>
-          </div>
-        </section>
+        {/* ============ HOW IT WORKS (sticky stagger-stop scroll) ============ */}
+        <StickySteps
+          eyebrow="How it works"
+          title="Four steps. No theatre."
+          steps={[
+            { n: "01", t: "Build a verified profile", d: "Students prove skills with real coursework and projects. Employers verify — so the record means something." },
+            { n: "02", t: "Post & discover", d: "Employers publish real roles. Students find work matched to what they can actually do, not a wish list." },
+            { n: "03", t: "Apply, work, get reviewed", d: "Students ship real work. Employers attest it. Every completed project becomes permanent, portable proof." },
+            { n: "04", t: "Get hired on proof", d: "No inflated resumes. Hiring decisions ride on verified experience both sides can trust." },
+          ]}
+        />
 
         {/* ============ OPPORTUNITIES (scale-on-scroll header moment) ============ */}
         <section className="border-b border-gray-200 px-4 py-20 sm:px-6 lg:px-8">

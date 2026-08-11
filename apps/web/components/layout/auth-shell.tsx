@@ -1,24 +1,26 @@
 "use client";
 
 import Link from "next/link";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion, useMotionValue, useSpring, useMotionTemplate, useReducedMotion } from "framer-motion";
 import { Stagger, StaggerItem } from "@/components/motion";
 import type { ReactNode } from "react";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
 /**
- * Split-screen auth layout — cinematic editorial.
+ * Split-screen auth layout — cinematic editorial, synced to the landing
+ * background system.
  *
- * Left panel: full-bleed autoplay loop of the brand hero clip (same asset as
- * the landing scrub-showcase, /scrub/hero.mp4) with the same readability scrim
- * + grain the landing uses, so the auth screen belongs to the same visual
- * system. Editorial headline + proof points float over it. Purple appears only
- * as the signal CTA / accents, never as a dominant background.
+ * Left panel: full-bleed autoplay loop of the brand hero clip (/scrub/hero.mp4)
+ * with the SAME layered treatment as the landing hero — a readability scrim,
+ * the .glow-purple ambient radial (purple + azure light), a cursor-following
+ * spotlight, and bg-grain — so auth belongs to the exact same visual world.
+ * Purple appears only as the signal CTA / accents, never a dominant flat fill.
  *
- * Right: elevated white card holding the form slot.
- * On mobile the video panel collapses to a compact top bar so the form owns
- * the screen. prefers-reduced-motion swaps the video for the poster frame.
+ * Right: elevated white card holding the form slot. On mobile the video panel
+ * collapses to a compact top bar so the form owns the screen.
+ * prefers-reduced-motion swaps the video for the poster frame and drops the
+ * cursor spotlight.
  */
 export function AuthShell({
   title,
@@ -33,12 +35,28 @@ export function AuthShell({
 }) {
   const reduce = useReducedMotion();
 
+  // ----- pointer spotlight (mirrors the landing hero) -----
+  const mx = useMotionValue(50);
+  const my = useMotionValue(38);
+  const sx = useSpring(mx, { stiffness: 80, damping: 22 });
+  const sy = useSpring(my, { stiffness: 80, damping: 22 });
+  const spotlight = useMotionTemplate`radial-gradient(620px circle at ${sx}% ${sy}%, rgba(60,9,108,0.14), transparent 68%)`;
+
+  const onPointer = (e: React.PointerEvent<HTMLElement>) => {
+    if (reduce) return;
+    const r = e.currentTarget.getBoundingClientRect();
+    mx.set(((e.clientX - r.left) / r.width) * 100);
+    my.set(((e.clientY - r.top) / r.height) * 100);
+  };
+
   return (
     <div className="flex min-h-screen bg-[#0d0d0d] text-gray-900">
       {/* ===== Cinematic brand panel — desktop only ===== */}
-      <aside className="relative hidden w-1/2 overflow-hidden bg-[#0d0d0d] lg:flex">
+      <aside
+        className="relative hidden w-1/2 overflow-hidden bg-[#0d0d0d] lg:flex"
+        onPointerMove={onPointer}
+      >
         {reduce ? (
-          // Reduced-motion: static poster instead of looping video
           <div
             className="absolute inset-0 bg-cover bg-center"
             style={{ backgroundImage: "url(/scrub/object-01.png)" }}
@@ -57,8 +75,16 @@ export function AuthShell({
           />
         )}
 
-        {/* Readability scrim + grain (matches landing treatment) */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/65 via-black/35 to-black/70" />
+        {/* Same layered treatment as the landing hero */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/30 to-black/65" />
+        <div className="glow-purple absolute inset-0 mix-blend-screen opacity-70" />
+        {!reduce && (
+          <motion.div
+            aria-hidden
+            className="pointer-events-none absolute inset-0"
+            style={{ background: spotlight }}
+          />
+        )}
         <div className="bg-grain absolute inset-0 opacity-30" />
 
         {/* Floating editorial content */}

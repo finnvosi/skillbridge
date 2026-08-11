@@ -32,7 +32,9 @@ const columns = [
 
 export function Footer() {
   return (
-    <footer className="border-t border-gray-200 bg-white">
+    <footer className="relative mt-auto border-t border-gray-200 bg-white/70">
+      <div className="bg-grain absolute inset-0 -z-10 opacity-60" />
+      <div className="glow-purple absolute inset-x-0 top-0 -z-10 h-40 opacity-50" />
       <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-12 md:grid-cols-12">
           {/* Brand block — spans 5 cols */}

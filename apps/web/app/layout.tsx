@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { CursorGlow } from "@/components/layout/cursor-glow";
 
 export const metadata: Metadata = {
   title: "SkillBridge — Bridge Your Skills to Real Opportunities",
@@ -14,7 +15,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="h-full scroll-smooth">
-      <body className="min-h-full flex flex-col h-full bg-background text-foreground font-sans antialiased">
+      <body className="relative min-h-full flex flex-col h-full bg-white text-foreground font-sans antialiased">
+        {/* Three-layer ambient background: white base + cursor aura + frosted veil */}
+        <CursorGlow />
         {children}
       </body>
     </html>

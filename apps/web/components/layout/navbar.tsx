@@ -1,11 +1,29 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ScrollProgress } from "@/components/motion/scroll-progress";
 
 export function Navbar() {
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-gray-200 glass">
+    <header
+      className={`sticky top-0 z-40 w-full border-b backdrop-blur-xl transition-all duration-300 ${
+        scrolled
+          ? "border-gray-200/70 bg-white/70 shadow-[0_6px_24px_-12px_rgba(60,9,108,0.18)]"
+          : "border-transparent bg-white/40"
+      }`}
+    >
       <ScrollProgress />
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link href="/" className="flex items-center gap-2.5">
@@ -46,7 +64,7 @@ export function Navbar() {
           >
             Sign in
           </Link>
-          <Button variant="primary" size="sm" asChild>
+          <Button variant="primary" size="sm" asChild className="shadow-soft">
             <Link href="/auth/register">Get started</Link>
           </Button>
         </nav>

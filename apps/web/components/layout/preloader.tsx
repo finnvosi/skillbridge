@@ -15,27 +15,59 @@ import {
  *
  * A charcoal baseline (the composing stick) draws across first; then each
  * letter of SKILLBRIDGE drops into place one-by-one with a subtle letterpress
- * seat (a barely-there overshoot). A quiet purple underline registers under
- * the word, it holds, then the whole frame gently fades into the hero.
+ * seat (a barely-there overshoot). It holds, then the whole frame gently fades
+ * into the hero.
  *
- * Calm and editorial — no rings, blades, spinners, %, or zoom. Driven by a
- * master `progress` 0→1 over ~2.4s. Reduced-motion shows the set word briefly,
- * then unmounts. The component removes itself via onComplete so it never
- * blocks or replays.
+ * Calm and editorial — no purple underline, no rings, blades, spinners, %, or
+ * zoom. Driven by a master `progress` 0→1.
+ *
+ * Duration is DEVICE-ADAPTIVE: a capable device gets the full, slow (~3.4s)
+ * luxe timing; weaker devices (few cores, low memory, data-saver / slow
+ * connection) get a proportionally shorter timeline so the first open never
+ * drops frames. Reduced-motion shows the set word briefly, then unmounts.
+ * The overlay is pointer-events-none so it never blocks the app behind it.
  */
 
 const WORD = "SKILLBRIDGE";
 const LETTERS = WORD.split(""); // 11 glyphs
 
-const DUR = 2.4; // seconds, total animation (calm)
+// Timeline as fractions of the master progress (0→1). The *real* wall-clock
+// length of each phase scales with the device-adaptive `duration` below, so
+// the relative rhythm stays identical across devices.
 const P = {
-  baseline: [0.02, 0.3], // charcoal rule draws
-  letterStart: 0.28, // first glyph drops
-  letterStagger: 0.045, // per-glyph delay
-  letterWin: 0.14, // per-glyph settle window
-  purple: [0.8, 0.95], // purple registration underline draws
-  exit: [0.92, 1], // gentle crossfade into hero
+  baseline: [0.02, 0.34], // charcoal rule draws (slower)
+  letterStart: 0.24, // first glyph drops
+  letterStagger: 0.052, // per-glyph delay (slower, more deliberate)
+  letterWin: 0.18, // per-glyph settle window
+  exit: [0.9, 1], // gentle crossfade into hero
 };
+
+const DUR_CAPABLE = 3.4; // seconds — full luxe timing on a capable device
+const DUR_FLOOR = 1.6; // never shorter than this (word must still read)
+
+/**
+ * Pick a duration that won't lag on first open.
+ * Heuristics: CPU cores, device memory, and network/data-saver hints.
+ * Each weak signal scales the duration down; the result is clamped to
+ * [DUR_FLOOR, DUR_CAPABLE].
+ */
+function computeDuration(): number {
+  let dur = DUR_CAPABLE;
+  if (typeof navigator === "undefined") return dur;
+
+  const cores = navigator.hardwareConcurrency || 4;
+  const mem = (navigator as Navigator & { deviceMemory?: number }).deviceMemory ?? 4;
+  const conn = (navigator as Navigator & { connection?: { effectiveType?: string; saveData?: boolean } })
+    .connection;
+  const saveData = conn?.saveData === true;
+  const slowConn = /(^|-)(slow-2g|2g|3g)$/.test(conn?.effectiveType ?? "");
+
+  if (cores <= 4) dur *= 0.75; // budget / older phones
+  if (mem <= 4) dur *= 0.82; // memory-constrained
+  if (saveData || slowConn) dur *= 0.62; // metered / slow network
+
+  return Math.max(DUR_FLOOR, Math.min(dur, DUR_CAPABLE));
+}
 
 function seg(p: number, from: number, to: number, out: [number, number] = [0, 1]) {
   const t = Math.min(1, Math.max(0, (p - from) / (to - from)));
@@ -79,8 +111,9 @@ function Glyph({
 export function Preloader({ onComplete }: { onComplete: () => void }) {
   const reduce = useReducedMotion();
   const [gone, setGone] = useState(false);
+  // Compute the device-adaptive duration exactly once (lazy init runs on mount).
+  const [duration] = useState(computeDuration);
   const progress = useMotionValue(reduce ? 1 : 0);
-
   // ---- master timeline ----
   useEffect(() => {
     if (reduce) {
@@ -91,7 +124,7 @@ export function Preloader({ onComplete }: { onComplete: () => void }) {
       return () => clearTimeout(t);
     }
     const controls = animate(progress, 1, {
-      duration: DUR,
+      duration,
       ease: [0.22, 1, 0.36, 1],
       onComplete: () => {
         setGone(true);
@@ -99,20 +132,13 @@ export function Preloader({ onComplete }: { onComplete: () => void }) {
       },
     });
     return () => controls.stop();
-  }, [reduce, progress, onComplete]);
+  }, [reduce, progress, onComplete, duration]);
 
   const p = progress;
 
   // charcoal baseline draws from center
   const baselineScaleX = useTransform(p, (v) => (reduce ? 1 : seg(v, P.baseline[0], P.baseline[1])));
   const baselineOpacity = useTransform(p, (v) => (reduce ? 1 : seg(v, P.baseline[0], P.baseline[0] + 0.05)));
-
-  // purple registration underline draws under the word
-  const purpleScaleX = useTransform(p, (v) => (reduce ? 1 : seg(v, P.purple[0], P.purple[1])));
-  const purpleOpacity = useTransform(
-    p,
-    (v) => (reduce ? 1 : seg(v, P.purple[0], P.purple[0] + 0.05)) * (reduce ? 1 : 1 - seg(v, P.exit[0], P.exit[1])),
-  );
 
   // gentle crossfade into the hero
   const overlayOpacity = useTransform(p, (v) => (reduce ? 1 : 1 - seg(v, P.exit[0], P.exit[1])));
@@ -121,7 +147,7 @@ export function Preloader({ onComplete }: { onComplete: () => void }) {
 
   return (
     <motion.div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-[#F3F3F1]"
+      className="pointer-events-none fixed inset-0 z-[100] flex items-center justify-center bg-[#F3F3F1]"
       style={{ opacity: overlayOpacity }}
       aria-hidden
     >
@@ -147,17 +173,6 @@ export function Preloader({ onComplete }: { onComplete: () => void }) {
             transformOrigin: "center",
             scaleX: baselineScaleX,
             opacity: baselineOpacity,
-          }}
-        />
-
-        {/* quiet purple registration underline */}
-        <motion.div
-          className="absolute -bottom-1 left-0 h-[2px] w-full bg-[#3C096C]"
-          style={{
-            transformBox: "border-box",
-            transformOrigin: "left",
-            scaleX: purpleScaleX,
-            opacity: purpleOpacity,
           }}
         />
       </div>

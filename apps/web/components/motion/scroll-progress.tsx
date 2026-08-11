@@ -1,13 +1,14 @@
 "use client";
 
 import { motion, useScroll, useSpring } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 /**
  * Fixed top scroll-progress bar. Tracks total document scroll progress
  * (useScroll without a target = viewport scroll) and renders a thin
  * spring-eased purple fill. Reduced-motion: still reflects progress (no anim).
  */
-export function ScrollProgress() {
+export function ScrollProgress({ className }: { className?: string }) {
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, {
     stiffness: 120,
@@ -17,7 +18,10 @@ export function ScrollProgress() {
   return (
     <motion.div
       style={{ scaleX }}
-      className="absolute left-0 top-0 h-[2px] w-full origin-left bg-gradient-to-r from-primary-light via-primary to-accent"
+      className={cn(
+        "absolute left-0 top-0 h-[2px] w-full origin-left bg-gradient-to-r from-primary-light via-primary to-accent",
+        className,
+      )}
     />
   );
 }

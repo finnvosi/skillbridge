@@ -95,7 +95,7 @@ export default function Home() {
           <div className="glow-purple absolute inset-0 -z-10" />
           <div className="bg-grain absolute inset-0 -z-10" />
 
-          <div className="mx-auto max-w-7xl px-4 pt-16 sm:px-6 lg:px-8 lg:pt-24">
+          <div className="mx-auto max-w-7xl px-4 pt-20 sm:px-6 lg:px-8 lg:pt-28">
             <FadeUp>
               <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1">
                 <span className="relative flex h-1.5 w-1.5">

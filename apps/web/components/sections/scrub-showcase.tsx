@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef } from "react";
+import Image from "next/image";
 import { motion, useScroll, useTransform, useSpring } from "framer-motion";
 import { FadeUp } from "@/components/motion";
 
@@ -100,6 +101,17 @@ export function ScrubShowcase() {
                   {FRAMES - 1}
                 </motion.span>
                 <span>SCRUB ▸ scroll</span>
+              </div>
+              {/* Real AI-generated object plate (alethia-style photographic layer) */}
+              <div className="relative mb-6 h-48 w-full overflow-hidden rounded-2xl border border-gray-200 shadow-soft">
+                <Image
+                  src="/scrub/object-01.png"
+                  alt="SkillBridge proof object"
+                  fill
+                  unoptimized
+                  className="object-cover"
+                  sizes="(max-width:1024px) 100vw, 40vw"
+                />
               </div>
               <motion.div
                 style={{

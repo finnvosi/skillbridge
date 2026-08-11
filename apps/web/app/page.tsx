@@ -301,6 +301,16 @@ export default function Home() {
                   <Link href="/auth/register">Create student profile</Link>
                 </Button>
               </Magnetic>
+              <div className="relative mt-8 h-56 w-full overflow-hidden rounded-2xl border border-gray-200 shadow-soft">
+                <Image
+                  src="/scrub/object-student.png"
+                  alt="A student turning work into proof"
+                  fill
+                  unoptimized
+                  className="object-cover"
+                  sizes="(max-width:1024px) 100vw, 40vw"
+                />
+              </div>
             </FadeUp>
           </div>
           <div id="employers" className="px-4 py-16 sm:px-6 lg:px-8">
@@ -327,6 +337,16 @@ export default function Home() {
               <Button asChild variant="outline" className="mt-8">
                 <Link href="/auth/register">Post a role</Link>
               </Button>
+              <div className="relative mt-8 h-56 w-full overflow-hidden rounded-2xl border border-gray-200 shadow-soft">
+                <Image
+                  src="/scrub/object-employer.jpg"
+                  alt="Employers reviewing verified candidates"
+                  fill
+                  unoptimized
+                  className="object-cover"
+                  sizes="(max-width:1024px) 100vw, 40vw"
+                />
+              </div>
             </FadeUp>
           </div>
         </section>

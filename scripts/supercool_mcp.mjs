@@ -5,7 +5,10 @@ import { readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 
-const TOKEN_PATH = join(homedir(), ".hermes/mcp-tokens/supercool.json");
+const TOKEN_PATH = join(
+  homedir(),
+  ".hermes/profiles/personal-daily-life/mcp-tokens/supercool.json"
+);
 const ENDPOINT = "https://mcp.supercool.com/mcp";
 
 const token = JSON.parse(readFileSync(TOKEN_PATH, "utf8")).access_token;
@@ -57,6 +60,18 @@ if (cmd === "list") {
   const list = tools?.result?.tools || [];
   console.log(`TOOLS (${list.length}):`);
   for (const t of list) console.log(`  ${t.name} — ${t.description?.slice(0, 70) || ""}`);
+} else if (cmd === "schema") {
+  const toolName = process.argv[3];
+  await rpc("initialize", {
+    protocolVersion: "2024-11-05",
+    capabilities: {},
+    clientInfo: { name: "hermes-script", version: "1.0" },
+  });
+  await rpc("notifications/initialized", {}, 2).catch(() => {});
+  const tools = await rpc("tools/list", {}, 3);
+  const list = tools?.result?.tools || [];
+  const t = list.find((x) => x.name === toolName);
+  console.log(JSON.stringify(t?.inputSchema || t, null, 2));
 } else if (cmd === "call") {
   const toolName = process.argv[3];
   const argStr = process.argv[4] || "{}";

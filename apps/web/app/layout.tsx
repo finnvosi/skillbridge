@@ -3,6 +3,7 @@ import { Urbanist, Poppins } from "next/font/google";
 import "./globals.css";
 import { CursorGlow } from "@/components/layout/cursor-glow";
 import { CustomCursor } from "@/components/layout/custom-cursor";
+import { PreloaderMount } from "@/components/layout/preloader-mount";
 
 // Brand type system: Urbanist for headings (display), Poppins for body.
 // Self-hosted at build time via next/font (no FOUT, works offline).
@@ -41,6 +42,7 @@ export default function RootLayout({
         <CursorGlow />
         {/* Custom agency cursor (dot + trailing ring) */}
         <CustomCursor />
+        <PreloaderMount />
         {children}
       </body>
     </html>

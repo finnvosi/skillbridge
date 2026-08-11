@@ -85,7 +85,7 @@ export function CursorGlow() {
   return (
     <div
       aria-hidden
-      className="pointer-events-none fixed inset-0 z-[-2] bg-white"
+      className="pointer-events-none fixed inset-0 -z-30 bg-white"
     >
       {/* Middle layer — cursor-following soft gradient */}
       <motion.div className="absolute inset-0" style={{ background }} />

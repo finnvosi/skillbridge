@@ -24,7 +24,7 @@ export function HeroVideo() {
   return (
     <video
       ref={ref}
-      className="absolute inset-0 -z-20 h-full w-full object-cover opacity-40"
+      className="absolute inset-0 -z-20 h-full w-full object-cover opacity-70"
       src="/scrub/hero.mp4"
       poster="/scrub/object-01.png"
       autoPlay

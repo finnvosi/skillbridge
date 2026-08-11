@@ -90,8 +90,8 @@ export default function Home() {
         <section className="relative overflow-hidden">
           {/* Hero background video — muted autoplay loop, full-bleed, behind content */}
           <HeroVideo />
-          {/* Readability veil over the video */}
-          <div className="absolute inset-0 -z-10 bg-gradient-to-b from-white/70 via-white/55 to-white/85" />
+          {/* Readability veil over the video — light so the clip shows through */}
+          <div className="absolute inset-0 -z-10 bg-gradient-to-b from-white/40 via-white/25 to-white/70" />
           <div className="glow-purple absolute inset-0 -z-10" />
           <div className="bg-grain absolute inset-0 -z-10" />
 

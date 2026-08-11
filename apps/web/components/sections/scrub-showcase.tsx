@@ -1,25 +1,74 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, useScroll, useTransform, useSpring, useReducedMotion } from "framer-motion";
-import { FadeUp } from "@/components/motion";
 
 /**
- * Alethia-inspired scroll-scrub: the real hero clip (hero.mp4) is scrubbed
- * frame-by-frame as the user scrolls through the pinned section — the video's
- * currentTime is mapped to scroll progress, so it plays forward/backward with
- * the scrollbar exactly like the alethia "object turning" effect. A HUD shows
- * FRAME n/23 (stylized frame index) and a generated still as the poster.
+ * Full-screen scroll-scrub: hero.mp4 plays behind the whole viewport as a
+ * fixed background, and its currentTime is mapped to scroll progress (alethia
+ * "object turning" mechanic). Editorial text lines float in and out at scroll
+ * checkpoints over the clip. The HUD shows the REAL frame index at the source
+ * fps (60fps -> ~900 frames), derived from the video metadata — not a fake 23.
  *
  * Falls back to a normal autoplay loop when prefers-reduced-motion is set.
  */
-const FRAMES = 24;
+const STEPS = [
+  { t: "Captured", d: "Real coursework and projects, imported once." },
+  { t: "Attested", d: "Employers and lecturers verify each layer." },
+  { t: "Stacked", d: "Layers compose into one portable record." },
+  { t: "Shown", d: "Hiring happens on the object, not the résumé." },
+];
+
+/** One editorial line that fades in, holds, then fades out across its slice. */
+function FloatingStep({
+  step,
+  index,
+  progress,
+}: {
+  step: { t: string; d: string };
+  index: number;
+  progress: ReturnType<typeof useSpring>;
+}) {
+  const n = STEPS.length;
+  const a = index / n;
+  const b = (index + 1) / n;
+  const c = (index + 0.5) / n;
+  const opacity = useTransform(
+    progress,
+    [a - 0.06, a, c, b, b + 0.06],
+    [0, 1, 1, 1, 0],
+  );
+  const y = useTransform(progress, [a, c, b], [40, 0, -40]);
+  return (
+    <motion.div
+      style={{ opacity, y }}
+      className="absolute bottom-0 left-0 max-w-xl"
+    >
+      <div className="flex items-start gap-4">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-base font-bold text-primary-contrast">
+          {index + 1}
+        </span>
+        <div>
+          <p className="font-display text-2xl font-bold text-white sm:text-3xl">
+            {step.t}
+          </p>
+          <p className="mt-1 text-base text-white/80 sm:text-lg">{step.d}</p>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
 
 export function ScrubShowcase() {
   const ref = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const durationRef = useRef(0);
+  const fpsRef = useRef(60);
+  const totalFramesRef = useRef(0);
   const reduce = useReducedMotion();
+  const [frame, setFrame] = useState(0);
+  const [totalFrames, setTotalFrames] = useState(0);
+  const [fps, setFps] = useState(60);
 
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -27,36 +76,41 @@ export function ScrubShowcase() {
   });
   const sy = useSpring(scrollYProgress, { stiffness: 170, damping: 30 });
 
-  // Discrete "frame" quantization (frame-stepping HUD feel)
-  const frame = useSpring(useTransform(sy, [0, 1], [0, FRAMES - 1]), {
-    stiffness: 260,
-    damping: 30,
-  });
-
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
 
     const onMeta = () => {
       durationRef.current = v.duration || 0;
+      // Derive real fps from metadata rate string (tolerant if absent)
+      const rateStr =
+        // @ts-expect-error non-standard but present in some builds
+        (v.videoTracks?.[0]?.frameRate as string | undefined) ?? "";
+      const m = /(\d+)\/(\d+)/.exec(rateStr);
+      const rate = m ? Number(m[1]) / Number(m[2]) : 60;
+      fpsRef.current = rate || 60;
+      const total = Math.round((durationRef.current || 0) * fpsRef.current);
+      totalFramesRef.current = total || 0;
+      setTotalFrames(total || 0);
+      setFps(fpsRef.current);
       if (!reduce) v.currentTime = 0;
     };
     v.addEventListener("loadedmetadata", onMeta);
     onMeta();
 
     if (reduce) {
-      // Reduced motion: just loop the clip instead of scrubbing
       v.loop = true;
       v.play().catch(() => {});
       return () => v.removeEventListener("loadedmetadata", onMeta);
     }
 
-    // Scrub: drive currentTime from the spring-smoothed scroll progress.
     const unsub = sy.on("change", (p) => {
       const d = durationRef.current;
-      if (d && v.readyState >= 1) {
+      const vd = videoRef.current;
+      if (d && vd && vd.readyState >= 1) {
         const t = Math.min(d - 0.001, Math.max(0, p * d));
-        if (Math.abs(v.currentTime - t) > 0.008) v.currentTime = t;
+        if (Math.abs(vd.currentTime - t) > 0.008) vd.currentTime = t;
+        setFrame(Math.round(p * (totalFramesRef.current || 0)));
       }
     });
     return () => {
@@ -65,79 +119,61 @@ export function ScrubShowcase() {
     };
   }, [sy, reduce]);
 
+  const headlineY = useTransform(sy, [0, 1], [60, -60]);
+  const headlineOpacity = useTransform(sy, [0, 0.12, 0.9, 1], [1, 1, 1, 0]);
+
   return (
     <section
       ref={ref}
-      className="relative h-[300vh] border-b border-gray-200 bg-white"
+      className="relative h-[400vh] bg-black"
       aria-label="How proof is built"
     >
-      <div className="sticky top-0 flex h-screen items-center overflow-hidden">
-        <div className="glow-purple absolute inset-0 -z-10 opacity-70" />
-        <div className="bg-grain absolute inset-0 -z-10" />
+      <div className="sticky top-0 h-screen w-full overflow-hidden">
+        {/* Full-bleed video background — scrubbed by scroll */}
+        <video
+          ref={videoRef}
+          src="/scrub/hero-60.mp4"
+          muted
+          playsInline
+          preload="auto"
+          poster="/scrub/object-01.png"
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+        {/* Readability scrim so floating text stays legible on any frame */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/25 to-black/55" />
+        <div className="bg-grain absolute inset-0 opacity-30" />
 
-        <div className="mx-auto grid w-full max-w-7xl grid-cols-1 items-center gap-10 px-4 sm:px-6 lg:grid-cols-2 lg:px-8">
-          {/* Copy column — steps that activate as you scroll */}
-          <div className="order-2 lg:order-1">
-            <p className="label-mono">The mechanic</p>
-            <h2 className="display mt-3 text-4xl leading-tight sm:text-5xl">
+        {/* Floating editorial content */}
+        <div className="relative z-10 mx-auto flex h-full max-w-7xl flex-col justify-between px-4 py-20 sm:px-6 lg:px-8">
+          <motion.div style={{ y: headlineY, opacity: headlineOpacity }}>
+            <p className="label-mono text-white/70">The mechanic</p>
+            <h2 className="display mt-3 max-w-3xl text-4xl leading-tight text-white sm:text-6xl">
               Proof isn&apos;t a PDF.
               <br />
               It&apos;s an object.
             </h2>
-            <p className="mt-5 max-w-md text-lg leading-relaxed text-gray-600">
-              Scroll, and the record turns. Every verified project is a layer —
-              stacked, attested, and portable. That&apos;s the difference
-              between claiming work and showing it.
-            </p>
+          </motion.div>
 
-            <ol className="mt-8 space-y-4">
-              {[
-                { t: "Captured", d: "Real coursework and projects, imported once." },
-                { t: "Attested", d: "Employers and lecturers verify each layer." },
-                { t: "Stacked", d: "Layers compose into one portable record." },
-                { t: "Shown", d: "Hiring happens on the object, not the résumé." },
-              ].map((s, i) => (
-                <FadeUp key={s.t} delay={i * 0.05}>
-                  <li className="flex items-start gap-4 border-t border-gray-100 pt-4">
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-contrast">
-                      {i + 1}
-                    </span>
-                    <div>
-                      <p className="font-display text-base font-bold text-gray-900">
-                        {s.t}
-                      </p>
-                      <p className="text-sm text-gray-600">{s.d}</p>
-                    </div>
-                  </li>
-                </FadeUp>
-              ))}
-            </ol>
+          {/* Steps that float in/out as you scroll */}
+          <div className="relative min-h-[40vh]">
+            {STEPS.map((s, i) => (
+              <FloatingStep key={s.t} step={s} index={i} progress={sy} />
+            ))}
           </div>
+        </div>
 
-          {/* Video scrub column — real clip driven by scroll */}
-          <div className="order-1 flex justify-center lg:order-2">
-            <div className="[perspective:1100px] w-full max-w-[520px]">
-              {/* Frame HUD — reads like a video scrubber */}
-              <div className="mb-4 flex items-center justify-between font-mono text-xs text-gray-400">
-                <span>
-                  FRAME <motion.span className="text-primary">{frame}</motion.span>/
-                  {FRAMES - 1}
-                </span>
-                <span>SCRUB ▸ scroll</span>
-              </div>
-              <div className="relative h-[420px] w-full overflow-hidden rounded-2xl border border-gray-200 bg-gray-100 shadow-soft-lg">
-                <video
-                  ref={videoRef}
-                  src="/scrub/hero.mp4"
-                  muted
-                  playsInline
-                  preload="auto"
-                  poster="/scrub/object-01.png"
-                  className="absolute inset-0 h-full w-full object-cover"
-                />
-              </div>
-            </div>
-          </div>
+        {/* Frame HUD — real frame index at source fps */}
+        <div className="absolute bottom-4 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2 font-mono text-xs text-white/70">
+          <span>
+            FRAME <span className="text-primary">{frame}</span>
+            {totalFrames > 0 && (
+              <span className="text-white/50">/{totalFrames}</span>
+            )}
+          </span>
+          <span className="text-white/40">·</span>
+          <span>
+            {fps}fps · SCRUB ▸ scroll
+          </span>
         </div>
       </div>
     </section>

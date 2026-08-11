@@ -212,7 +212,7 @@ export function AuthShell({
                   />
                   {/* Layer 4 — translucent inner surface (~10% — the holder reads
                       as glass now, the textured field behind refracts through) */}
-                  <div className="relative rounded-[26px] bg-white/10 p-9 sm:p-11">
+                  <div className="relative rounded-[26px] bg-white/10 p-10 sm:p-14">
                     {children}
                   </div>
                 </div>

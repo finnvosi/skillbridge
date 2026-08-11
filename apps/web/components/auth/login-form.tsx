@@ -53,7 +53,7 @@ export function LoginForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-7">
       <Stagger>
         <StaggerItem>
           <AuthField

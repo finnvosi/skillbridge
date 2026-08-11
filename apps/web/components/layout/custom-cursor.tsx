@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   motion,
   useMotionValue,
@@ -12,12 +12,11 @@ import {
  * Custom agency cursor:
  *  - a tiny precise dot that tracks the pointer 1:1
  *  - a larger ring that trails with spring lag
- *  - the ring expands + the dot hides when hovering interactive elements
+ *  - on hover over interactive elements the ring MAGNETICALLY eases toward the
+ *    element's center and expands (the "pull" toward CTAs), while the dot hides
  *  - mix-blend-difference so it reads on both light and dark sections
  *
  * Disabled on touch devices and when prefers-reduced-motion is set.
- * Adds `has-custom-cursor` to <html> so the native cursor is hidden only
- * while the custom one is active.
  */
 export function CustomCursor() {
   const reduce = useReducedMotion();
@@ -25,11 +24,13 @@ export function CustomCursor() {
   const [hovering, setHovering] = useState(false);
   const [visible, setVisible] = useState(false);
 
-  // Dot = exact pointer; ring = spring-lagged
+  // Dot = exact pointer; ring = spring-lagged toward a target we steer
   const x = useMotionValue(-100);
   const y = useMotionValue(-100);
-  const ringX = useSpring(x, { stiffness: 350, damping: 28, mass: 0.4 });
-  const ringY = useSpring(y, { stiffness: 350, damping: 28, mass: 0.4 });
+  const targetX = useMotionValue(-100);
+  const targetY = useMotionValue(-100);
+  const ringX = useSpring(targetX, { stiffness: 260, damping: 26, mass: 0.5 });
+  const ringY = useSpring(targetY, { stiffness: 260, damping: 26, mass: 0.5 });
 
   useEffect(() => {
     if (reduce) return;
@@ -37,20 +38,40 @@ export function CustomCursor() {
     setEnabled(true);
     document.documentElement.classList.add("has-custom-cursor");
 
+    const hoveringRef = { current: false };
+
     const move = (e: PointerEvent) => {
       x.set(e.clientX);
       y.set(e.clientY);
+      // While not hovering, the ring target follows the pointer
+      if (!hoveringRef.current) {
+        targetX.set(e.clientX);
+        targetY.set(e.clientY);
+      }
       if (!visible) setVisible(true);
     };
     const over = (e: Event) => {
       const t = e.target as HTMLElement | null;
-      if (t?.closest("a, button, input, textarea, select, [data-cursor='hover']"))
-        setHovering(true);
+      const el = t?.closest(
+        "a, button, input, textarea, select, [data-cursor='hover'], [data-cursor-magnetic]",
+      ) as HTMLElement | null;
+      if (!el) return;
+      setHovering(true);
+      hoveringRef.current = true;
+      const r = el.getBoundingClientRect();
+      // Magnetic pull: ring eases to the element's center
+      targetX.set(r.left + r.width / 2);
+      targetY.set(r.top + r.height / 2);
     };
     const out = (e: Event) => {
       const t = e.target as HTMLElement | null;
-      if (t?.closest("a, button, input, textarea, select, [data-cursor='hover']"))
+      if (t?.closest("a, button, input, textarea, select, [data-cursor='hover'], [data-cursor-magnetic]")) {
         setHovering(false);
+        hoveringRef.current = false;
+        // Snap target back to the live pointer position
+        targetX.set(x.get());
+        targetY.set(y.get());
+      }
     };
     const leave = () => setVisible(false);
 
@@ -66,13 +87,13 @@ export function CustomCursor() {
       document.removeEventListener("pointerleave", leave);
       document.documentElement.classList.remove("has-custom-cursor");
     };
-  }, [reduce, x, y, visible]);
+  }, [reduce, x, y, targetX, targetY, visible]);
 
   if (!enabled) return null;
 
   return (
     <>
-      {/* Trailing ring */}
+      {/* Trailing ring — magnetically pulled toward hovered CTAs */}
       <motion.div
         aria-hidden
         className="pointer-events-none fixed left-0 top-0 z-[100] mix-blend-difference"
@@ -81,15 +102,15 @@ export function CustomCursor() {
         <motion.div
           className="rounded-full border border-white"
           animate={{
-            width: hovering ? 56 : 34,
-            height: hovering ? 56 : 34,
+            width: hovering ? 64 : 34,
+            height: hovering ? 64 : 34,
             opacity: visible ? 1 : 0,
           }}
           transition={{ type: "spring", stiffness: 300, damping: 24 }}
         />
       </motion.div>
 
-      {/* Precise dot */}
+      {/* Precise dot — only when not hovering */}
       <motion.div
         aria-hidden
         className="pointer-events-none fixed left-0 top-0 z-[100] mix-blend-difference"

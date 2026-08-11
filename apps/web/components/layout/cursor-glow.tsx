@@ -13,10 +13,12 @@ import {
  * Three-layer ambient background:
  *  - bottom: solid pure white (the page background)
  *  - middle: a soft radial gradient that follows the cursor (the "aura")
- *  - top: a 20% frosted glass veil so the aura reads as light through glass
+ *  - top: a frosted glass veil (translucent white + blur + fine grain) so the
+ *    aura reads as light seen through glass
  *
  * The aura is a CSS radial-gradient whose center is driven by spring-smoothed
- * pointer coordinates. Respects prefers-reduced-motion and skips touch devices.
+ * pointer coordinates, and is strong enough to be clearly visible. Respects
+ * prefers-reduced-motion and skips touch devices.
  */
 export function CursorGlow() {
   const reduce = useReducedMotion();
@@ -34,11 +36,13 @@ export function CursorGlow() {
     const px = Number(vx);
     const py = Number(vy);
     return [
-      `radial-gradient(40% 44% at ${px}% ${py}%, rgba(123,44,191,0.18), transparent 70%)`,
-      `radial-gradient(30% 30% at ${Math.min(100, px + 18)}% ${Math.min(
+      // Primary purple aura — strong + large so it's clearly visible
+      `radial-gradient(42% 46% at ${px}% ${py}%, rgba(123,44,191,0.34), transparent 72%)`,
+      // Accent azure halo offset from the cursor
+      `radial-gradient(30% 30% at ${Math.min(100, px + 20)}% ${Math.min(
         100,
-        py + 12,
-      )}%, rgba(56,189,248,0.10), transparent 70%)`,
+        py + 14,
+      )}%, rgba(56,189,248,0.20), transparent 72%)`,
     ].join(",");
   });
 
@@ -46,13 +50,11 @@ export function CursorGlow() {
   const phase = useRef(0);
 
   useEffect(() => {
-    // Only enable on devices with a fine pointer (skip touch)
     if (window.matchMedia("(pointer: fine)").matches) setEnabled(true);
 
     const onMove = (e: PointerEvent) => {
       x.set((e.clientX / window.innerWidth) * 100);
       y.set((e.clientY / window.innerHeight) * 100);
-      // User is active — stop the idle drift
       if (driftRaf.current) {
         cancelAnimationFrame(driftRaf.current);
         driftRaf.current = null;
@@ -87,13 +89,16 @@ export function CursorGlow() {
     >
       {/* Middle layer — cursor-following soft gradient */}
       <motion.div className="absolute inset-0" style={{ background }} />
-      {/* Top layer — 20% frosted glass veil */}
+      {/* Top layer — frosted glass veil: translucent white + blur + fine grain
+          so it reads as a glass sheet the aura glows through */}
       <div
-        className="absolute inset-0"
+        className="bg-grain absolute inset-0"
         style={{
-          background: "rgba(255,255,255,0.80)",
-          backdropFilter: "blur(2px) saturate(120%)",
-          WebkitBackdropFilter: "blur(2px) saturate(120%)",
+          background:
+            "linear-gradient(180deg, rgba(255,255,255,0.55), rgba(255,255,255,0.42))",
+          backdropFilter: "blur(8px) saturate(125%)",
+          WebkitBackdropFilter: "blur(8px) saturate(125%)",
+          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.6)",
         }}
       />
     </div>

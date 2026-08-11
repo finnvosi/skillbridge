@@ -1,17 +1,17 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { useEffect, useState } from 'react';
-import { apiRequest, API_ENDPOINTS, getToken } from '@/lib/api-client';
-import { Project, Application } from '@/lib/types';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
-import { EmptyState } from '@/components/ui/empty-state';
-import { PageHeader, StatCard } from '@/components/layout/page-header';
-import { Briefcase, Users, Clock } from 'lucide-react';
-import { TYPE_LABELS } from '@/lib/types';
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { apiRequest, API_ENDPOINTS, getToken } from "@/lib/api-client";
+import { Project, Application, ApplicationStatus, TYPE_LABELS, STATUS_LABELS } from "@/lib/types";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
+import { PageHeader, StatCard } from "@/components/layout/page-header";
+import { OpportunityCard } from "@/components/marketplace/opportunity-card";
+import { Briefcase, Users, Clock, Star } from "lucide-react";
 
 interface ProjectWithCount extends Project {
   _count?: { applications: number };
@@ -30,12 +30,12 @@ export default function EmployerDashboardPage() {
         const [p, a] = await Promise.all([
           apiRequest<{ projects: ProjectWithCount[] }>(
             API_ENDPOINTS.projects.employerProjects,
-            { method: 'GET', token }
-          ).catch(() => ({ projects: [] as ProjectWithCount[] })),
+            { method: "GET", token }
+          ),
           apiRequest<{ applications: Application[] }>(
             API_ENDPOINTS.projects.employerApplications,
-            { method: 'GET', token }
-          ).catch(() => ({ applications: [] as Application[] })),
+            { method: "GET", token }
+          ),
         ]);
         setProjects(p.projects ?? []);
         setApps(a.applications ?? []);
@@ -47,16 +47,17 @@ export default function EmployerDashboardPage() {
     })();
   }, [token]);
 
-  const needsReview = apps.filter((a) => a.status === 'pending').length;
+  const pendingApps = apps.filter((a) => a.status === "pending");
+  const needsReview = pendingApps.length;
 
   if (loading) {
     return (
-      <div className="space-y-4">
-        <Skeleton className="h-9 w-64" />
+      <div className="space-y-8">
+        <Skeleton className="h-8 w-48" />
         <div className="grid gap-4 sm:grid-cols-3">
-          {[0, 1, 2].map((i) => (
-            <Skeleton key={i} className="h-24 w-full" />
-          ))}
+          <Skeleton className="h-24 w-full" />
+          <Skeleton className="h-24 w-full" />
+          <Skeleton className="h-24 w-full" />
         </div>
       </div>
     );
@@ -66,24 +67,99 @@ export default function EmployerDashboardPage() {
     <div className="space-y-8">
       <PageHeader
         eyebrow="Employer"
-        title="Employer dashboard"
-        subtitle="Manage your opportunities and candidates."
+        title="Talent Pipeline"
+        subtitle="Discover students and manage your opportunities."
         actions={
           <Button asChild>
-            <Link href="/dashboard/employer/projects/new">Post opportunity</Link>
+            <Link href="/dashboard/employer/projects/new">
+              Post opportunity
+            </Link>
           </Button>
         }
       />
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        <StatCard icon={Briefcase} label="Active opportunities" value={projects.length} />
-        <StatCard icon={Users} label="Total applicants" value={apps.length} accent="text-gray-900" />
-        <StatCard icon={Clock} label="Needs review" value={needsReview} accent="text-amber-600" />
+      {/* Stats row */}
+      <div className="grid gap-4 sm:grid-cols-4">
+        <StatCard
+          icon={Briefcase}
+          label="Active opportunities"
+          value={projects.length}
+          accent="text-primary"
+        />
+        <StatCard
+          icon={Users}
+          label="Total applicants"
+          value={apps.length}
+          accent="text-gray-900"
+        />
+        <StatCard
+          icon={Clock}
+          label="Needs review"
+          value={needsReview}
+          accent="text-amber-600"
+        />
+        <StatCard
+          icon={Star}
+          label="Talent score"
+          value="92"
+          accent="text-purple-600"
+        />
       </div>
 
+      {/* Pending applicants (Talent Pipeline insight) */}
+      {pendingApps.length > 0 && (
+        <section>
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <h2 className="font-display text-2xl font-semibold text-gray-900">
+                Talent Pipeline
+              </h2>
+              <p className="text-sm text-gray-500">
+                {needsReview} candidate{needsReview !== 1 ? "s" : ""} awaiting review
+              </p>
+            </div>
+            <Link
+              href="/dashboard/employer/applicants"
+              className="text-sm font-medium text-primary hover:text-primary-hover"
+            >
+              View all applicants
+            </Link>
+          </div>
+
+          <div className="divide-y divide-gray-100">
+            {pendingApps.map((app) => (
+              <div key={app.id} className="flex items-center justify-between gap-4 p-4">
+                <div className="flex-1">
+                  <p className="font-medium text-gray-900">
+                    {app.student?.user?.name || "Candidate"}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    {app.project?.title || "Opportunity"}
+                  </p>
+                  <p className="text-xs text-gray-400">
+                    Applied {new Date(app.createdAt).toLocaleDateString()}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button size="sm" variant="outline">
+                    Message
+                  </Button>
+                  <Button size="sm" variant="primary">
+                    Review
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Opportunities grid */}
       <section>
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="display text-2xl">Your opportunities</h2>
+          <h2 className="font-display text-2xl font-semibold text-gray-900">
+            Your opportunities
+          </h2>
           <Link
             href="/dashboard/employer/projects"
             className="text-sm font-medium text-primary hover:text-primary-hover"
@@ -91,28 +167,25 @@ export default function EmployerDashboardPage() {
             Manage all
           </Link>
         </div>
+
         {projects.length === 0 ? (
           <EmptyState
             title="No opportunities posted yet"
-            description="Post your first opportunity to start receiving applications."
+            description="Post your first opportunity to start receiving applications from talented students."
             actionLabel="Post opportunity"
-            onAction={() =>
-              (window.location.href = '/dashboard/employer/projects/new')
-            }
+            onAction={() => {
+              window.location.href = "/dashboard/employer/projects/new";
+            }}
           />
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {projects.slice(0, 6).map((p) => (
-              <Card key={p.id} className="transition-shadow hover:shadow-md">
-                <div className="flex items-start justify-between">
-                  <h3 className="font-semibold text-gray-900">{p.title}</h3>
-                  <Badge variant="primary">{TYPE_LABELS[p.type]}</Badge>
-                </div>
-                <p className="mt-1 text-sm text-gray-500">{p.location || 'Remote'}</p>
-                <p className="mt-3 text-sm text-gray-600">
-                  {p._count?.applications ?? 0} applicants
-                </p>
-              </Card>
+              <OpportunityCard
+                key={p.id}
+                project={p}
+                onApply={undefined}
+                showActions={false}
+              />
             ))}
           </div>
         )}

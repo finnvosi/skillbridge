@@ -1,21 +1,23 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { apiRequest, API_ENDPOINTS, getToken } from '@/lib/api-client';
-import { Application, ApplicationStatus, STATUS_LABELS } from '@/lib/types';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
-import { EmptyState } from '@/components/ui/empty-state';
-import { StatusBadge } from '@/components/ui/status-badge';
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { apiRequest, API_ENDPOINTS, getToken } from "@/lib/api-client";
+import { Application, ApplicationStatus, STATUS_LABELS } from "@/lib/types";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
+import { StatusBadge } from "@/components/ui/status-badge";
+
+const statusFilter: ApplicationStatus[] = ["pending", "accepted", "rejected", "withdrawn"];
 
 export default function ApplicationsPage() {
   const router = useRouter();
   const [apps, setApps] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeStatus, setActiveStatus] = useState<ApplicationStatus | "all">("all");
   const token = getToken();
 
   useEffect(() => {
@@ -24,7 +26,7 @@ export default function ApplicationsPage() {
       try {
         const data = await apiRequest<{ applications: Application[] }>(
           API_ENDPOINTS.projects.myApplications,
-          { method: 'GET', token }
+          { method: "GET", token }
         );
         setApps(data.applications ?? []);
       } catch {
@@ -35,58 +37,82 @@ export default function ApplicationsPage() {
     })();
   }, [token]);
 
-  const statusVariant = (s: string) =>
-    s === 'accepted'
-      ? 'primary'
-      : s === 'rejected'
-        ? 'neutral'
-        : 'secondary';
+  const filtered = apps.filter((a) =>
+    activeStatus === "all" || a.status === activeStatus
+  );
+
+  const countByStatus = statusFilter.reduce(
+    (acc, s) => {
+      acc[s] = apps.filter((a) => a.status === s).length;
+      return acc;
+    },
+    {} as Record<ApplicationStatus, number>
+  );
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-64 w-full" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="font-display text-3xl font-extrabold text-gray-900">
-          My applications
+          My Applications
         </h1>
         <p className="mt-1 text-gray-600">Track the status of every application.</p>
       </div>
 
-      {loading ? (
-        <div className="space-y-3">
-          {[0, 1, 2].map((i) => (
-            <Skeleton key={i} className="h-20 w-full" />
-          ))}
-        </div>
-      ) : apps.length === 0 ? (
+      {/* Status tabs */}
+      <div className="flex flex-wrap gap-2">
+        <Button
+          variant={activeStatus === "all" ? "primary" : "secondary"}
+          size="sm"
+          onClick={() => setActiveStatus("all")}
+        >
+          All ({apps.length})
+        </Button>
+        {statusFilter.map((s) => (
+          <Button
+            key={s}
+            variant={activeStatus === s ? "primary" : "secondary"}
+            size="sm"
+            onClick={() => setActiveStatus(s)}
+          >
+            {STATUS_LABELS[s]} ({countByStatus[s]})
+          </Button>
+        ))}
+      </div>
+
+      {filtered.length === 0 ? (
         <EmptyState
-          title="Your applications will appear here"
-          description="When you apply to an opportunity, its status shows up here."
-          actionLabel="Browse opportunities"
-          onAction={() => router.push('/dashboard/student/discover')}
+          title="No applications yet"
+          description="When you apply to opportunities, they'll show up here."
+          actionLabel="Find opportunities"
+          onAction={() => router.push("/dashboard/student/discover")}
         />
       ) : (
-        <Card className="p-0">
-          <ul className="divide-y divide-gray-100">
-            {apps.map((a) => (
-              <li key={a.id} className="flex items-center justify-between gap-4 p-4">
-                <div className="min-w-0">
-                  <p className="truncate font-medium text-gray-900">
-                    {a.project?.title || 'Opportunity'}
+        <div className="space-y-3">
+          {filtered.map((app) => (
+            <Card key={app.id} className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-gray-900">
+                    {app.project?.title || "Opportunity"}
                   </p>
-                  <p className="truncate text-sm text-gray-500">
-                    {a.project?.employer?.companyName ||
-                      a.project?.employer?.user?.name ||
-                      'Company'}
-                  </p>
-                  <p className="mt-1 text-xs text-gray-400">
-                    Applied {new Date(a.createdAt).toLocaleDateString()}
+                  <p className="text-sm text-gray-500">
+                    Applied {new Date(app.createdAt).toLocaleDateString()}
                   </p>
                 </div>
-                <StatusBadge status={a.status as ApplicationStatus} />
-              </li>
-            ))}
-          </ul>
-        </Card>
+                <StatusBadge status={app.status} />
+              </div>
+            </Card>
+          ))}
+        </div>
       )}
     </div>
   );

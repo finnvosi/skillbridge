@@ -26,7 +26,7 @@ import {
 } from "@/components/motion";
 import { Magnetic, ScaleOnScroll, StickySwap } from "@/components/motion/primitives2";
 import { HeroObject } from "@/components/sections/hero-object";
-import { HeroVideo } from "@/components/sections/hero-video";
+import { Hero } from "@/components/sections/hero";
 import { CaseStudies } from "@/components/sections/case-studies";
 import { StickySteps } from "@/components/sections/sticky-steps";
 import { ScrubShowcase } from "@/components/sections/scrub-showcase";
@@ -40,13 +40,6 @@ const proof = [
   "Battambang Ventures",
   "Cardamom Group",
   "Siem Reap Digital",
-];
-
-const stats = [
-  { value: 2400, suffix: "+", label: "Verified students" },
-  { value: 310, suffix: "", label: "Partner employers" },
-  { value: 1900, suffix: "", label: "Completed projects" },
-  { value: 94, suffix: "%", label: "Hire-through rate" },
 ];
 
 const opportunities = [
@@ -87,81 +80,8 @@ export default function Home() {
       <Navbar />
 
       <main className="flex-1">
-        {/* ============ HERO — editorial, huge type, 3D centerpiece ============ */}
-        <section className="relative overflow-hidden">
-          {/* Hero background video — muted autoplay loop, full-bleed, behind content */}
-          <HeroVideo />
-          {/* Readability veil over the video — light so the clip shows through */}
-          <div className="absolute inset-0 -z-10 bg-gradient-to-b from-white/40 via-white/25 to-white/70" />
-          <div className="glow-purple absolute inset-0 -z-10" />
-          <div className="bg-grain absolute inset-0 -z-10" />
-
-          <div className="mx-auto max-w-7xl px-4 pt-20 sm:px-6 lg:px-8 lg:pt-28">
-            <FadeUp>
-              <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1">
-                <span className="relative flex h-1.5 w-1.5">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-60" />
-                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-primary" />
-                </span>
-                <span className="label-mono">Cambodia&apos;s verified talent network</span>
-              </div>
-            </FadeUp>
-
-            {/* Oversized magazine headline */}
-            <h1 className="display mt-8 max-w-5xl text-[clamp(3rem,11vw,8.5rem)] leading-[0.9]">
-              <WordReveal text="Stop sending" delay={0.1} />
-              <br />
-              <WordReveal text="résumés." delay={0.28} />
-              <br />
-              <span className="bg-gradient-to-r from-primary to-primary-light bg-clip-text text-transparent">
-                <WordReveal text="Show the" delay={0.46} />
-              </span>{" "}
-              <span className="bg-gradient-to-r from-primary to-primary-light bg-clip-text text-transparent">
-                <WordReveal text="proof." delay={0.62} />
-              </span>
-            </h1>
-
-            <FadeUp delay={0.8}>
-              <p className="mt-8 max-w-xl text-lg leading-relaxed text-gray-600">
-                SkillBridge turns real student work into verified, portable proof
-                — and helps Cambodian employers hire on what&apos;s been done,
-                not what&apos;s been claimed.
-              </p>
-            </FadeUp>
-
-            <FadeUp delay={0.95}>
-              <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center">
-                <Magnetic>
-                  <Button asChild variant="primary" size="lg" className="shadow-soft">
-                    <Link href="/auth/register">Get started free</Link>
-                  </Button>
-                </Magnetic>
-                <Button asChild variant="outline" size="lg">
-                  <Link href="/#how">See how it works</Link>
-                </Button>
-              </div>
-            </FadeUp>
-          </div>
-
-          {/* Centerpiece object — anchored, parallax + pointer tilt */}
-          <div className="mt-12 lg:mt-16">
-            <HeroObject />
-          </div>
-
-          {/* Stat strip under hero */}
-          <div className="mx-auto mt-8 grid max-w-5xl grid-cols-2 gap-px border-y border-gray-200 bg-gray-200 sm:grid-cols-4">
-            {stats.map((s) => (
-              <div key={s.label} className="bg-white px-6 py-6 text-center">
-                <div className="display text-3xl text-primary sm:text-4xl">
-                  <CountUp value={s.value} suffix={s.suffix} />
-                </div>
-                <div className="mt-1 text-xs uppercase tracking-wide text-gray-500">
-                  {s.label}
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
+        {/* ============ HERO — engaging: pointer spotlight, floating proof cards, scroll parallax ============ */}
+        <Hero />
 
         {/* ============ STICKY SCROLLYTELLING — the shift ============ */}
         <StickySwap

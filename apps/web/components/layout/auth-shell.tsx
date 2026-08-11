@@ -148,12 +148,12 @@ export function AuthShell({
       {/* ===== Form side — textured light field so the glass card has
           something to refract (flat white makes frosted glass invisible) ===== */}
       <main
-        className="relative flex w-full flex-col items-center justify-center overflow-hidden bg-[#F3F3F1] px-4 py-14 sm:px-6 lg:w-1/2 lg:px-12"
+        className="relative flex w-full flex-col items-center justify-center overflow-hidden bg-[#F3F3F1] px-5 py-20 sm:px-8 lg:w-1/2 lg:px-16"
         onPointerMove={onPointerRight}
       >
         {/* ambient purple radial + grain behind the card */}
-        <div className="glow-purple pointer-events-none absolute inset-0 opacity-50" />
-        <div className="bg-grain pointer-events-none absolute inset-0 opacity-40" />
+        <div className="glow-purple pointer-events-none absolute inset-0 opacity-60" />
+        <div className="bg-grain-strong pointer-events-none absolute inset-0 opacity-100" />
         {/* cursor-following purple spotlight the glass refracts */}
         {!reduce && (
           <motion.div
@@ -164,49 +164,55 @@ export function AuthShell({
         )}
 
         <motion.div
-          className="relative z-10 w-full max-w-md"
+          className="relative z-10 w-full max-w-lg"
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: EASE, delay: 0.05 }}
         >
           {/* mobile wordmark */}
-          <Link href="/" className="mb-8 flex items-center gap-2 lg:hidden">
+          <Link href="/" className="mb-10 flex items-center gap-2 lg:hidden">
             <span className="font-display text-xl font-extrabold text-gray-900">SkillBridge</span>
           </Link>
 
-          <Stagger>
+          <Stagger className="space-y-3">
             <StaggerItem>
-              <h1 className="display text-3xl text-gray-900">{title}</h1>
+              <h1 className="display text-4xl leading-tight text-gray-900">{title}</h1>
             </StaggerItem>
             <StaggerItem>
-              <p className="mt-2 text-gray-600">{subtitle}</p>
+              <p className="text-base text-gray-600">{subtitle}</p>
             </StaggerItem>
 
             <StaggerItem>
               {/* Multi-layer frosted glass card holder — matches the landing
                   glass language (.glass / nav pill). The colored aura behind
                   gives the blur something to refract so it reads as real glass. */}
-              <div className="relative mt-8">
+              <div className="relative mt-10">
                 {/* Layer 0 — soft purple/azure aura the glass blurs through */}
                 <div
                   aria-hidden
-                  className="glow-purple pointer-events-none absolute -inset-6 -z-10 opacity-60 blur-2xl"
+                  className="glow-purple pointer-events-none absolute -inset-6 -z-10 opacity-70 blur-2xl"
                 />
                 {/* Layer 1 — outer frosted glass shell */}
-                <div className="relative overflow-hidden rounded-3xl border border-white/60 bg-white/55 p-[1.5px] shadow-soft-lg backdrop-blur-xl backdrop-saturate-150">
+                <div className="relative overflow-hidden rounded-[28px] border border-white/70 bg-white/55 p-[1.5px] shadow-soft-lg backdrop-blur-2xl backdrop-saturate-150">
                   {/* Layer 2 — top sheen (light catching the glass edge) */}
                   <div
                     aria-hidden
-                    className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/80 to-transparent"
+                    className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/85 to-transparent"
                   />
                   {/* Layer 3 — inner highlight ring */}
                   <div
                     aria-hidden
-                    className="pointer-events-none absolute inset-0 rounded-3xl shadow-[inset_0_1px_0_rgba(255,255,255,0.6)]"
+                    className="pointer-events-none absolute inset-0 rounded-[28px] shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]"
+                  />
+                  {/* Layer 3b — visible grain ON the glass so it reads as real
+                      frosted glass, not a flat tint */}
+                  <div
+                    aria-hidden
+                    className="bg-grain-strong pointer-events-none absolute inset-0 rounded-[28px] opacity-100 mix-blend-overlay"
                   />
                   {/* Layer 4 — translucent inner surface (~10% — the holder reads
                       as glass now, the textured field behind refracts through) */}
-                  <div className="rounded-[21px] bg-white/10 p-8 sm:p-10">
+                  <div className="relative rounded-[26px] bg-white/10 p-9 sm:p-11">
                     {children}
                   </div>
                 </div>
@@ -214,7 +220,7 @@ export function AuthShell({
             </StaggerItem>
 
             <StaggerItem>
-              <p className="mt-6 text-center text-sm text-gray-500">
+              <p className="mt-7 text-center text-sm text-gray-500">
                 By continuing you agree to our{" "}
                 <Link href="/#" className="font-medium text-gray-700 underline">
                   Terms

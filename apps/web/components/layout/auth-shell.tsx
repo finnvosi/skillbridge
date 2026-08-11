@@ -151,8 +151,32 @@ export function AuthShell({
             </StaggerItem>
 
             <StaggerItem>
-              <div className="mt-8 rounded-2xl border border-gray-200 bg-white p-8 shadow-soft sm:p-10">
-                {children}
+              {/* Multi-layer frosted glass card holder — matches the landing
+                  glass language (.glass / nav pill). The colored aura behind
+                  gives the blur something to refract so it reads as real glass. */}
+              <div className="relative mt-8">
+                {/* Layer 0 — soft purple/azure aura the glass blurs through */}
+                <div
+                  aria-hidden
+                  className="glow-purple pointer-events-none absolute -inset-6 -z-10 opacity-60 blur-2xl"
+                />
+                {/* Layer 1 — outer frosted glass shell */}
+                <div className="relative overflow-hidden rounded-3xl border border-white/60 bg-white/55 p-[1.5px] shadow-soft-lg backdrop-blur-xl backdrop-saturate-150">
+                  {/* Layer 2 — top sheen (light catching the glass edge) */}
+                  <div
+                    aria-hidden
+                    className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/80 to-transparent"
+                  />
+                  {/* Layer 3 — inner highlight ring */}
+                  <div
+                    aria-hidden
+                    className="pointer-events-none absolute inset-0 rounded-3xl shadow-[inset_0_1px_0_rgba(255,255,255,0.6)]"
+                  />
+                  {/* Layer 4 — translucent inner surface holding the form */}
+                  <div className="rounded-[21px] bg-white/70 p-8 sm:p-10">
+                    {children}
+                  </div>
+                </div>
               </div>
             </StaggerItem>
 

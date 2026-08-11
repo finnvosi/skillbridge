@@ -71,7 +71,7 @@ export function AuthField({
           required={required}
           aria-invalid={!!error}
           className={cn(
-            "h-12 rounded-xl border-gray-200 bg-white/70 px-3.5 text-[15px] text-gray-900",
+            "h-14 rounded-xl border-gray-200 bg-white/70 px-3.5 text-[15px] text-gray-900",
             "transition-colors placeholder:text-gray-400",
             "focus-visible:border-primary/40 focus-visible:ring-2 focus-visible:ring-primary/15",
             isPw && "pr-11",

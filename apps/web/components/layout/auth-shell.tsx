@@ -50,7 +50,7 @@ export function AuthShell({
   };
 
   return (
-    <div className="flex min-h-screen bg-[#0d0d0d] text-gray-900">
+    <div className="flex min-h-screen bg-white text-gray-900">
       {/* ===== Cinematic brand panel — desktop only ===== */}
       <aside
         className="relative hidden w-1/2 overflow-hidden bg-[#0d0d0d] lg:flex"
@@ -139,19 +139,19 @@ export function AuthShell({
         >
           {/* mobile wordmark */}
           <Link href="/" className="mb-8 flex items-center gap-2 lg:hidden">
-            <span className="font-display text-xl font-extrabold text-white">SkillBridge</span>
+            <span className="font-display text-xl font-extrabold text-gray-900">SkillBridge</span>
           </Link>
 
           <Stagger>
             <StaggerItem>
-              <h1 className="display text-3xl text-white">{title}</h1>
+              <h1 className="display text-3xl text-gray-900">{title}</h1>
             </StaggerItem>
             <StaggerItem>
-              <p className="mt-2 text-gray-400">{subtitle}</p>
+              <p className="mt-2 text-gray-600">{subtitle}</p>
             </StaggerItem>
 
             <StaggerItem>
-              <div className="mt-8 rounded-2xl border border-white/10 bg-white/95 p-8 shadow-soft backdrop-blur-sm sm:p-10">
+              <div className="mt-8 rounded-2xl border border-gray-200 bg-white p-8 shadow-soft sm:p-10">
                 {children}
               </div>
             </StaggerItem>
@@ -159,11 +159,11 @@ export function AuthShell({
             <StaggerItem>
               <p className="mt-6 text-center text-sm text-gray-500">
                 By continuing you agree to our{" "}
-                <Link href="/#" className="font-medium text-gray-300 underline">
+                <Link href="/#" className="font-medium text-gray-700 underline">
                   Terms
                 </Link>{" "}
                 &{" "}
-                <Link href="/#" className="font-medium text-gray-300 underline">
+                <Link href="/#" className="font-medium text-gray-700 underline">
                   Privacy
                 </Link>
                 .

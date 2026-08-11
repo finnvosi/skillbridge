@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import Link from "next/link";
 import Image from "next/image";
@@ -25,21 +25,29 @@ interface NavItem {
   href: string;
   roles: string[];
   icon: React.ComponentType<{ className?: string }>;
+  section: "main" | "student" | "employer" | "admin";
 }
 
 const navItems: NavItem[] = [
-  { label: "Dashboard", href: "/dashboard", roles: ["student", "employer", "admin"], icon: LayoutDashboard },
-  { label: "Discover", href: "/dashboard/student", roles: ["student"], icon: Compass },
-  { label: "My Applications", href: "/dashboard/student/applications", roles: ["student"], icon: ClipboardList },
-  { label: "Profile", href: "/dashboard/student/profile", roles: ["student"], icon: User },
-  { label: "Opportunities", href: "/dashboard/employer", roles: ["employer"], icon: Briefcase },
-  { label: "Applicants", href: "/dashboard/employer/applicants", roles: ["employer"], icon: Users },
-  { label: "Company", href: "/dashboard/employer/company", roles: ["employer"], icon: Building2 },
-  { label: "Overview", href: "/dashboard/admin", roles: ["admin"], icon: ShieldCheck },
-  { label: "Users", href: "/dashboard/admin/users", roles: ["admin"], icon: Users },
-  { label: "Opportunities", href: "/dashboard/admin/opportunities", roles: ["admin"], icon: ListChecks },
-  { label: "Applications", href: "/dashboard/admin/applications", roles: ["admin"], icon: FileCheck2 },
+  { label: "Dashboard", href: "/dashboard", roles: ["student", "employer", "admin"], icon: LayoutDashboard, section: "main" },
+  { label: "Discover", href: "/dashboard/student/discover", roles: ["student"], icon: Compass, section: "student" },
+  { label: "My Applications", href: "/dashboard/student/applications", roles: ["student"], icon: ClipboardList, section: "student" },
+  { label: "Profile", href: "/dashboard/student/profile", roles: ["student"], icon: User, section: "student" },
+  { label: "Opportunities", href: "/dashboard/employer", roles: ["employer"], icon: Briefcase, section: "employer" },
+  { label: "Applicants", href: "/dashboard/employer/applicants", roles: ["employer"], icon: Users, section: "employer" },
+  { label: "Company", href: "/dashboard/employer/company", roles: ["employer"], icon: Building2, section: "employer" },
+  { label: "Overview", href: "/dashboard/admin", roles: ["admin"], icon: ShieldCheck, section: "admin" },
+  { label: "Users", href: "/dashboard/admin/users", roles: ["admin"], icon: Users, section: "admin" },
+  { label: "Opportunities", href: "/dashboard/admin/opportunities", roles: ["admin"], icon: ListChecks, section: "admin" },
+  { label: "Applications", href: "/dashboard/admin/applications", roles: ["admin"], icon: FileCheck2, section: "admin" },
 ];
+
+const sectionLabels: Record<NavItem["section"], string> = {
+  main: "",
+  student: "Student",
+  employer: "Employer",
+  admin: "Admin",
+};
 
 export function DashboardShell({
   user,
@@ -52,6 +60,20 @@ export function DashboardShell({
   const router = useRouter();
 
   const items = navItems.filter((i) => !user || i.roles.includes(user.role));
+
+  // Group items by section for visual separation
+  const groups: { section: string; items: typeof items }[] = [];
+  let currentSection = "";
+  for (const item of items) {
+    if (item.section !== "main" && item.section !== currentSection) {
+      currentSection = item.section;
+      groups.push({ section: sectionLabels[item.section], items: [] });
+    }
+    const group = groups.at(-1) || { section: "", items: [] };
+    if (!group) continue;
+    const idx = groups.indexOf(group);
+    groups[idx].items.push(item);
+  }
 
   const logout = () => {
     clearToken();
@@ -80,37 +102,53 @@ export function DashboardShell({
             </span>
           </Link>
         </div>
+
         <nav className="relative flex-1 space-y-1 px-3 py-4">
-          {items.map((item) => {
+          {items.length === 0 && (
+            <p className="text-sm text-gray-500">No items</p>
+          )}
+          {items.map((item, idx) => {
             const Icon = item.icon;
             const active = isActive(item.href);
+
+            // Show section header above first item of each group
+            const isFirstInSection = idx === 0 || items[idx - 1]?.section !== item.section;
+
             return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  "group flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all duration-200",
-                  active
-                    ? "bg-primary/10 text-primary shadow-soft"
-                    : "text-gray-600 hover:bg-white hover:text-gray-900 hover:shadow-soft"
+              <div key={item.href}>
+                {isFirstInSection && item.section !== "main" && (
+                  <p className="text-xs font-semibold uppercase text-gray-400 px-3 pt-3 pb-1">
+                    {item.section === "student" ? "Student" : item.section === "employer" ? "Employer" : "Admin"}
+                  </p>
                 )}
-              >
-                <Icon
+                <Link
+                  href={item.href}
                   className={cn(
-                    "h-4 w-4 transition-colors",
-                    active ? "text-primary" : "text-gray-400 group-hover:text-primary-light"
+                    "group flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all duration-200",
+                    active
+                      ? "bg-primary/10 text-primary shadow-soft"
+                      : "text-gray-600 hover:bg-white hover:text-gray-900 hover:shadow-soft"
                   )}
-                />
-                {item.label}
-              </Link>
+                >
+                  <Icon
+                    className={cn(
+                      "h-4 w-4 transition-colors",
+                      active ? "text-primary" : "text-gray-400 group-hover:text-primary-light"
+                    )}
+                  />
+                  {item.label}
+                </Link>
+              </div>
             );
           })}
         </nav>
+
         <div className="relative border-t border-white/70 p-4">
           {user && (
-            <p className="mb-2 truncate text-sm font-medium text-gray-900">
-              {user.name}
-            </p>
+            <div className="mb-3">
+              <p className="truncate text-sm font-medium text-gray-900">{user.name}</p>
+              <p className="text-xs text-gray-500">{user.role}</p>
+            </div>
           )}
           <button
             onClick={logout}

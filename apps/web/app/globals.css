@@ -52,12 +52,12 @@
   --color-muted: var(--color-gray-100);
 
   /* Typography families.
-     NOTE: Urbanist (display) + Jost (body) are the brand fonts per spec.
-     They are loaded at runtime via a <link> in production (Vercel has network).
-     For offline-safe local builds we fall back to a tight system stack here;
-     swap these two lines for the woff2 @font-face once fonts are self-hosted. */
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --font-display: "Helvetica Neue", Helvetica, Arial, ui-sans-serif, system-ui, sans-serif;
+     Brand spec: Urbanist (display/headings) + Poppins (body).
+     Loaded self-hosted via next/font/google in app/layout.tsx, which injects
+     --font-display (Urbanist) and --font-sans (Poppins) as CSS variables on
+     <html>. The stacks below are fallback chains only — they rarely render. */
+  --font-sans: "Poppins", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-display: "Urbanist", "Helvetica Neue", Helvetica, Arial, ui-sans-serif, system-ui, sans-serif;
 
   /* Border radius (controlled, consistent) */
   --radius-sm: 0.375rem;   /* 6px */

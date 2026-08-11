@@ -204,8 +204,9 @@ export function AuthShell({
                     aria-hidden
                     className="pointer-events-none absolute inset-0 rounded-3xl shadow-[inset_0_1px_0_rgba(255,255,255,0.6)]"
                   />
-                  {/* Layer 4 — translucent inner surface holding the form */}
-                  <div className="rounded-[21px] bg-white/70 p-8 sm:p-10">
+                  {/* Layer 4 — translucent inner surface (~10% — the holder reads
+                      as glass now, the textured field behind refracts through) */}
+                  <div className="rounded-[21px] bg-white/10 p-8 sm:p-10">
                     {children}
                   </div>
                 </div>

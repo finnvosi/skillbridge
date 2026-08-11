@@ -52,7 +52,7 @@ export function Footer() {
     window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
 
   return (
-    <footer className="relative mt-auto overflow-hidden bg-white">
+    <footer className="relative mt-auto bg-white">
       {/* Ambient glow + grain */}
       <div className="glow-purple absolute inset-x-0 top-0 -z-10 h-48 opacity-60" />
       <div className="bg-grain absolute inset-0 -z-10 opacity-50" />

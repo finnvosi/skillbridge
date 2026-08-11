@@ -122,23 +122,36 @@ export function ScrubShowcase() {
   const headlineY = useTransform(sy, [0, 1], [60, -60]);
   const headlineOpacity = useTransform(sy, [0, 0.12, 0.9, 1], [1, 1, 1, 0]);
 
+  // Video tile grows from corner-sized to fullscreen as you enter the section;
+  // the shared layoutId drives the position/size morph, borderRadius eases
+  // the corners from rounded tile to hard fullscreen.
+  const videoRadius = useTransform(sy, [0, 0.12], [16, 0]);
+
   return (
     <section
       ref={ref}
+      id="scrub-section"
       className="relative h-[400vh] bg-black"
       aria-label="How proof is built"
     >
       <div className="sticky top-0 h-screen w-full overflow-hidden">
-        {/* Full-bleed video background — scrubbed by scroll */}
-        <video
-          ref={videoRef}
-          src="/scrub/hero-60.mp4"
-          muted
-          playsInline
-          preload="auto"
-          poster="/scrub/object-01.png"
-          className="absolute inset-0 h-full w-full object-cover"
-        />
+        {/* Video morphs from the hero corner tile (shared layoutId) to
+            fullscreen, then scrubs by scroll */}
+        <motion.div
+          layoutId="hero-scrub-video"
+          style={{ borderRadius: videoRadius }}
+          className="absolute left-1/2 top-1/2 z-0 h-screen w-screen -translate-x-1/2 -translate-y-1/2 overflow-hidden"
+        >
+          <video
+            ref={videoRef}
+            src="/scrub/hero-60.mp4"
+            muted
+            playsInline
+            preload="auto"
+            poster="/scrub/object-01.png"
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        </motion.div>
         {/* Readability scrim so floating text stays legible on any frame */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/25 to-black/55" />
         <div className="bg-grain absolute inset-0 opacity-30" />

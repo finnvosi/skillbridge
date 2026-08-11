@@ -26,6 +26,7 @@ import {
 } from "@/components/motion";
 import { Magnetic, ScaleOnScroll, StickySwap } from "@/components/motion/primitives2";
 import { HeroObject } from "@/components/sections/hero-object";
+import { HeroVideo } from "@/components/sections/hero-video";
 import { CaseStudies } from "@/components/sections/case-studies";
 import { ScrubShowcase } from "@/components/sections/scrub-showcase";
 
@@ -87,6 +88,10 @@ export default function Home() {
       <main className="flex-1">
         {/* ============ HERO — editorial, huge type, 3D centerpiece ============ */}
         <section className="relative overflow-hidden">
+          {/* Hero background video — muted autoplay loop, full-bleed, behind content */}
+          <HeroVideo />
+          {/* Readability veil over the video */}
+          <div className="absolute inset-0 -z-10 bg-gradient-to-b from-white/70 via-white/55 to-white/85" />
           <div className="glow-purple absolute inset-0 -z-10" />
           <div className="bg-grain absolute inset-0 -z-10" />
 

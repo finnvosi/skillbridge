@@ -17,10 +17,12 @@ const EASE = [0.16, 1, 0.3, 1] as const;
  * spotlight, and bg-grain — so auth belongs to the exact same visual world.
  * Purple appears only as the signal CTA / accents, never a dominant flat fill.
  *
- * Right: elevated white card holding the form slot. On mobile the video panel
- * collapses to a compact top bar so the form owns the screen.
- * prefers-reduced-motion swaps the video for the poster frame and drops the
- * cursor spotlight.
+ * Right: textured light field (titanium #F3F3F1 + .glow-purple + grain + a
+ * cursor-following spotlight) so the frosted glass card has real color/texture
+ * to refract — flat white would make the glass invisible. The form sits in a
+ * multi-layer frosted glass holder. On mobile the video panel collapses to a
+ * compact top bar so the form owns the screen. prefers-reduced-motion swaps the
+ * video for the poster frame and drops both cursor spotlights.
  */
 export function AuthShell({
   title,
@@ -35,7 +37,7 @@ export function AuthShell({
 }) {
   const reduce = useReducedMotion();
 
-  // ----- pointer spotlight (mirrors the landing hero) -----
+  // ----- left panel spotlight (mirrors the landing hero) -----
   const mx = useMotionValue(50);
   const my = useMotionValue(38);
   const sx = useSpring(mx, { stiffness: 80, damping: 22 });
@@ -47,6 +49,20 @@ export function AuthShell({
     const r = e.currentTarget.getBoundingClientRect();
     mx.set(((e.clientX - r.left) / r.width) * 100);
     my.set(((e.clientY - r.top) / r.height) * 100);
+  };
+
+  // ----- right side spotlight: gives the frosted card something to refract -----
+  const rx = useMotionValue(50);
+  const ry = useMotionValue(50);
+  const rsx = useSpring(rx, { stiffness: 80, damping: 22 });
+  const rsy = useSpring(ry, { stiffness: 80, damping: 22 });
+  const rightSpotlight = useMotionTemplate`radial-gradient(540px circle at ${rsx}% ${rsy}%, rgba(123,44,191,0.20), transparent 70%)`;
+
+  const onPointerRight = (e: React.PointerEvent<HTMLElement>) => {
+    if (reduce) return;
+    const r = e.currentTarget.getBoundingClientRect();
+    rx.set(((e.clientX - r.left) / r.width) * 100);
+    ry.set(((e.clientY - r.top) / r.height) * 100);
   };
 
   return (
@@ -129,10 +145,26 @@ export function AuthShell({
         </div>
       </aside>
 
-      {/* ===== Form side ===== */}
-      <main className="flex w-full flex-col items-center justify-center px-4 py-14 sm:px-6 lg:w-1/2 lg:px-12">
+      {/* ===== Form side — textured light field so the glass card has
+          something to refract (flat white makes frosted glass invisible) ===== */}
+      <main
+        className="relative flex w-full flex-col items-center justify-center overflow-hidden bg-[#F3F3F1] px-4 py-14 sm:px-6 lg:w-1/2 lg:px-12"
+        onPointerMove={onPointerRight}
+      >
+        {/* ambient purple radial + grain behind the card */}
+        <div className="glow-purple pointer-events-none absolute inset-0 opacity-50" />
+        <div className="bg-grain pointer-events-none absolute inset-0 opacity-40" />
+        {/* cursor-following purple spotlight the glass refracts */}
+        {!reduce && (
+          <motion.div
+            aria-hidden
+            className="pointer-events-none absolute inset-0"
+            style={{ background: rightSpotlight }}
+          />
+        )}
+
         <motion.div
-          className="w-full max-w-md"
+          className="relative z-10 w-full max-w-md"
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: EASE, delay: 0.05 }}

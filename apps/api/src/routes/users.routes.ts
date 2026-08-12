@@ -201,4 +201,38 @@ router.get(
   })
 );
 
+
+// Change user role (admin only)
+router.put(
+  '/:id/role',
+  authenticate,
+  asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (req.user!.role !== 'admin') {
+      return res.status(403).json({ error: 'Admin access required' });
+    }
+    const { role } = req.body as { role: 'student' | 'employer' | 'admin' };
+    
+    if (!['student', 'employer', 'admin'].includes(role)) {
+      return res.status(400).json({ error: 'Invalid role' });
+    }
+    
+    // If changing from student, remove student profile
+    if (role !== 'student') {
+      await prisma.student.deleteMany({ where: { userId: req.params.id } });
+    }
+    // If changing from employer, remove employer profile
+    if (role !== 'employer') {
+      await prisma.employer.deleteMany({ where: { userId: req.params.id } });
+    }
+    
+    const user = await prisma.user.update({
+      where: { id: req.params.id },
+      data: { role },
+    });
+    
+    res.json({ message: 'Role updated', user });
+  })
+);
+
+
 export default router;

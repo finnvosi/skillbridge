@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { apiRequest, API_ENDPOINTS, getToken } from "@/lib/api-client";
+import { apiRequest, getToken } from "@/lib/api-client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -114,7 +114,7 @@ export default function AdminReportsPage() {
         <Card className="p-6 text-center">
           <Shield className="h-8 w-8 text-gray-400 mx-auto mb-2" />
           <p className="text-gray-600">
-            No {filter === "all" ? "" : filter + " "}reports found.
+            No {filter === "all" ? "reports" : filter + " reports"}found.
           </p>
         </Card>
       ) : (
@@ -138,7 +138,7 @@ export default function AdminReportsPage() {
                     <p className="text-sm text-gray-600 mb-2">{report.description}</p>
                   )}
                   <p className="text-xs text-gray-400">
-                    Reported "{report.targetName}" on{" "}
+                    Reported {report.targetName} on{" "}
                     {new Date(report.createdAt).toLocaleDateString()}
                   </p>
                 </div>

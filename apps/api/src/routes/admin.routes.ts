@@ -22,6 +22,67 @@ router.get(
   })
 );
 
+// List pending verifications (students without university, unverified employers)
+router.get(
+  '/verifications',
+  asyncHandler(async (req: AuthRequest, res: Response) => {
+    const studentsNeedingVerify = await prisma.student.findMany({
+      where: { university: null },
+      include: { user: { select: { name: true, email: true } } },
+      take: 50,
+    });
+
+    const employersNeedingVerify = await prisma.employer.findMany({
+      where: { verified: false },
+      include: { user: { select: { name: true, email: true } } },
+      take: 50,
+    });
+
+    res.json({
+      students: studentsNeedingVerify.map(s => ({
+        id: s.id,
+        type: 'student' as const,
+        name: s.user.name,
+        email: s.user.email,
+        major: s.major,
+        createdAt: s.createdAt,
+      })),
+      employers: employersNeedingVerify.map(e => ({
+        id: e.id,
+        type: 'employer' as const,
+        name: e.companyName || e.user.name,
+        email: e.user.email,
+        industry: e.industry,
+        verified: e.verified,
+        createdAt: e.createdAt,
+        userId: e.userId,
+      })),
+    });
+  })
+);
+
+// Verify a student or employer
+router.put(
+  '/verifications/:type/:id',
+  asyncHandler(async (req: AuthRequest, res: Response) => {
+    const { type, id } = req.params;
+    
+    if (type === 'student') {
+      await prisma.student.update({
+        where: { id },
+        data: { university: 'Verified Student' },
+      });
+    } else if (type === 'employer') {
+      await prisma.employer.update({
+        where: { id },
+        data: { verified: true, verifiedAt: new Date() },
+      });
+    }
+
+    res.json({ message: `${type} verified successfully` });
+  })
+);
+
 // List opportunities (with applicant counts)
 router.get(
   '/opportunities',

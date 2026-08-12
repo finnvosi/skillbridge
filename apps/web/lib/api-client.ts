@@ -38,6 +38,8 @@ export const API_ENDPOINTS = {
   },
   admin: {
     overview: '/admin/overview',
+    verifications: '/admin/verifications',
+    verifyUser: (type: string, id: string) => `/admin/verifications/${type}/${id}`,
     users: '/users',
     opportunities: '/admin/opportunities',
     applications: '/admin/applications',

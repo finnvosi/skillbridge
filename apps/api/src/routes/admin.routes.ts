@@ -178,4 +178,14 @@ router.put(
   })
 );
 
+// List user reports
+router.get(
+  '/reports',
+  asyncHandler(async (_req: AuthRequest, res: Response) => {
+    // Mock data - in production this would query a Report model
+    const reports: any[] = [];
+    res.json({ reports });
+  })
+);
+
 export default router;

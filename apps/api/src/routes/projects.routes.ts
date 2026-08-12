@@ -352,4 +352,51 @@ router.put(
   })
 );
 
+
+// Generate contract for accepted application
+router.post(
+  '/applications/:applicationId/contract',
+  asyncHandler(async (req: AuthRequest, res: Response) => {
+    const { applicationId } = req.params;
+    
+    // Find the application
+    const application = await prisma.application.findUnique({
+      where: { id: applicationId },
+      include: {
+        project: true,
+        student: { include: { user: true } },
+        employer: { include: { user: true } }
+      }
+    });
+    
+    if (!application) return res.status(404).json({ error: 'Application not found' });
+    if (application.status !== 'accepted') {
+      return res.status(400).json({ error: 'Only accepted applications can generate contracts' });
+    }
+    
+    // Mock contract generation - in production this would:
+    // 1. Build contract terms from project + application
+    // 2. Send to PDF generation service (PDFShift, HelloSign, etc.)
+    // 3. Store the signed URL
+    
+    const contractData = {
+      id: `contract_${applicationId}`,
+      projectId: application.projectId,
+      student: application.student.user.name,
+      employer: application.employer.user.name,
+      salary: application.proposedBudget || application.project.budget,
+      project: application.project.title,
+      status: 'pending_signatures',
+      contractUrl: `https://example.com/contracts/contract_${applicationId}.pdf`,
+      createdAt: new Date().toISOString()
+    };
+    
+    res.status(201).json({ 
+      message: 'Contract generated successfully',
+      contract: contractData,
+      signUrl: `https://example.com/sign/${applicationId}`
+    });
+  })
+);
+
 export default router;

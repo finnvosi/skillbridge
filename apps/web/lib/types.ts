@@ -30,6 +30,11 @@ export interface Project {
   } | null;
 }
 
+export interface MatchedProject extends Project {
+  matchScore: number;
+  skillMatches: string[];
+}
+
 export interface Application {
   id: string;
   projectId: string;

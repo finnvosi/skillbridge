@@ -1,19 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { Project } from "@/lib/types";
+import { Project, MatchedProject } from "@/lib/types";
 import { TYPE_LABELS } from "@/lib/types";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 interface OpportunityCardProps {
-  project: Project;
+  project: Project | MatchedProject;
   onApply?: (id: string) => void;
   showActions?: boolean;
 }
 
 export function OpportunityCard({ project, onApply, showActions = true }: OpportunityCardProps) {
+  const isMatch = 'matchScore' in project;
+
   return (
     <Card className="flex flex-col transition-all duration-300 hover:shadow-soft-lg">
       <div className="flex items-start justify-between gap-3">
@@ -25,7 +27,12 @@ export function OpportunityCard({ project, onApply, showActions = true }: Opport
             {project.employer?.companyName || project.employer?.user?.name || "Company"}
           </p>
         </div>
-        <Badge variant="primary">{TYPE_LABELS[project.type]}</Badge>
+        {isMatch && (
+          <Badge variant="primary" size="sm">
+            {project.matchScore}% Match
+          </Badge>
+        )}
+        {!isMatch && <Badge variant="primary">{TYPE_LABELS[project.type]}</Badge>}
       </div>
 
       <p className="mt-3 line-clamp-2 flex-1 text-sm text-gray-600">
@@ -35,12 +42,12 @@ export function OpportunityCard({ project, onApply, showActions = true }: Opport
       {project.skillsRequired && project.skillsRequired.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-1.5">
           {project.skillsRequired.slice(0, 3).map((skill) => (
-            <Badge key={skill} variant="secondary" size="sm">
+            <Badge key={skill} variant="neutral" size="sm">
               {skill}
             </Badge>
           ))}
           {project.skillsRequired.length > 3 && (
-            <Badge variant="secondary" size="sm">
+            <Badge variant="neutral" size="sm">
               +{project.skillsRequired.length - 3}
             </Badge>
           )}
@@ -62,12 +69,7 @@ export function OpportunityCard({ project, onApply, showActions = true }: Opport
             </Link>
           </Button>
           {onApply && (
-            <Button
-              size="sm"
-              variant="primary"
-              className="flex-1"
-              onClick={() => onApply(project.id)}
-            >
+            <Button size="sm" variant="primary" className="flex-1" onClick={() => onApply(project.id)}>
               Apply
             </Button>
           )}

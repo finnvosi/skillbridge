@@ -91,6 +91,58 @@ router.get(
   })
 );
 
+// Get AI-matched projects for student (simple heuristic scorer)
+router.get(
+  '/student/match',
+  authenticate,
+  asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (req.user!.role !== 'student') {
+      return res.status(403).json({ error: 'Only students can get matches' });
+    }
+
+    const student = await prisma.student.findUnique({ where: { userId: req.user!.id } });
+    if (!student) return res.status(404).json({ error: 'Student profile not found' });
+
+    const projects = await prisma.project.findMany({
+      where: { status: 'open' },
+      include: { employer: { include: { user: { select: { name: true, email: true } } } } },
+    });
+
+    const studentSkills = student.skills.map(s => s.toLowerCase());
+
+    // Simple heuristic match scorer
+    const scored = projects.map(p => {
+      const projectSkills = p.skillsRequired.map(s => s.toLowerCase());
+      
+      // Skill overlap (40% weight)
+      const skillMatches = studentSkills.filter(s => projectSkills.includes(s));
+      const skillScore = (skillMatches.length / Math.max(projectSkills.length, 1)) * 40;
+      
+      // Budget fit (20% weight) - higher budget = better fit
+      const budgetScore = p.budget ? Math.min((p.budget / 1000) * 20, 20) : 0;
+      
+      // Type relevance (20% weight) - assume student prefers internship/parttime for now
+      const typeBonus = p.type === 'internship' || p.type === 'part_time' ? 10 : 0;
+      
+      // Location match (20% weight)
+      const locationScore = p.remote ? 20 : (p.location ? 10 : 0);
+
+      const totalScore = Math.round(skillScore + budgetScore + typeBonus + locationScore);
+
+      return {
+        ...p,
+        matchScore: totalScore,
+        skillMatches,
+      };
+    });
+
+    // Sort by match score descending
+    scored.sort((a, b) => b.matchScore - a.matchScore);
+
+    res.json({ projects: scored });
+  })
+);
+
 // Get the current employer's own projects
 // NOTE: declared before '/:id' so 'employer' is not captured as :id
 router.get(

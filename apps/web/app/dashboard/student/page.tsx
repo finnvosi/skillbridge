@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { apiRequest, API_ENDPOINTS, getToken } from "@/lib/api-client";
-import { Project, Application } from "@/lib/types";
+import { Project, Application, MatchedProject } from "@/lib/types";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -27,7 +27,7 @@ interface DashboardData {
     totalApplications: number;
     skillsCount: number;
   };
-  matchedProjects: Project[];
+  matchedProjects: MatchedProject[];
   applications: Application[];
 }
 
@@ -46,12 +46,12 @@ export default function StudentDashboardPage() {
       if (!token) return;
 
       try {
-        const [profileRes, projectsRes, appsRes] = await Promise.all([
+        const [profileRes, matchRes, appsRes] = await Promise.all([
           apiRequest<{ user: { name: string; profile: DashboardData["profile"] } }>(
             API_ENDPOINTS.users.profile,
             { method: "GET", token }
           ),
-          apiRequest<{ projects: Project[] }>(API_ENDPOINTS.projects.list, {
+          apiRequest<{ projects: MatchedProject[] }>(API_ENDPOINTS.projects.match, {
             method: "GET",
             token,
           }),
@@ -64,21 +64,14 @@ export default function StudentDashboardPage() {
         const profile = profileRes.user.profile || {};
         const skills = profile.skills || [];
 
-        // Calculate matched opportunities (simplified: projects matching any skill)
-        const matched = projectsRes.projects?.filter((p) =>
-          skills.some((s) =>
-            (p.skillsRequired || []).map((x) => x.toLowerCase()).includes(s.toLowerCase())
-          )
-        ) || [];
-
         setData({
           profile,
           stats: {
-            matchedOpportunities: matched.length,
+            matchedOpportunities: matchRes.projects?.length || 0,
             totalApplications: appsRes.applications?.length || 0,
             skillsCount: skills.length,
           },
-          matchedProjects: matched,
+          matchedProjects: matchRes.projects || [],
           applications: appsRes.applications || [],
         });
       } catch {
@@ -117,7 +110,7 @@ export default function StudentDashboardPage() {
               r={55}
               strokeWidth="2"
               strokeDasharray="345"
-              strokeDashoffset="345 * (1 - profileCompletion / 100)"
+              strokeDashoffset={`345 * (1 - ${profileCompletion} / 100)`}
               strokeLinecap="round"
               stroke="#3C096C"
             />
@@ -169,13 +162,13 @@ export default function StudentDashboardPage() {
         />
       </div>
 
-      {/* Matched opportunities */}
+      {/* Matched opportunities with scores */}
       {data.matchedProjects.length > 0 ? (
         <div>
           <h2 className="font-display text-2xl font-semibold text-gray-900">
-            Matched for you
+            Recommended for you
           </h2>
-          <p className="mt-1 text-gray-500">Based on your skills</p>
+          <p className="mt-1 text-gray-500">Matched by your skills, budget & location</p>
 
           <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {data.matchedProjects.map((p) => (
@@ -186,11 +179,9 @@ export default function StudentDashboardPage() {
       ) : (
         <EmptyState
           title="No matched opportunities yet"
-          description="Complete your profile to get matched with opportunities."
+          description="Complete your profile with skills to get AI-powered matches."
           actionLabel="Complete profile"
-          onAction={() =>
-            (window.location.href = "/dashboard/student/profile")
-          }
+          onAction={() => (window.location.href = "/dashboard/student/profile")}
         />
       )}
 
@@ -216,7 +207,7 @@ export default function StudentDashboardPage() {
               Discover
             </h3>
             <p className="mt-1 text-sm text-gray-500">
-              Browse all opportunities and find what matches you.
+              Browse all opportunities and refine your matches.
             </p>
             <Button asChild variant="outline" className="mt-4 w-full">
               <Link href="/dashboard/student/discover">Browse</Link>

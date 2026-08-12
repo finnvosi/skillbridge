@@ -363,9 +363,8 @@ router.post(
     const application = await prisma.application.findUnique({
       where: { id: applicationId },
       include: {
-        project: true,
-        student: { include: { user: true } },
-        employer: { include: { user: true } }
+        project: { include: { employer: { include: { user: true } } } },
+        student: { include: { user: true } }
       }
     });
     
@@ -383,7 +382,7 @@ router.post(
       id: `contract_${applicationId}`,
       projectId: application.projectId,
       student: application.student.user.name,
-      employer: application.employer.user.name,
+      employer: application.project.employer.user.name,
       salary: application.proposedBudget || application.project.budget,
       project: application.project.title,
       status: 'pending_signatures',

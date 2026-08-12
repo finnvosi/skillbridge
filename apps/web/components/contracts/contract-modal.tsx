@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PageHeader } from "@/components/layout/page-header";
-import { FileDown, Download, CheckCircle } from "lucide-react";
+import { Download, CheckCircle } from "lucide-react";
 
 interface Contract {
   id: string;
@@ -46,8 +46,8 @@ export default function ContractModal({ applicationId }: Props) {
           { method: "POST", token }
         );
         setContract(data.contract);
-      } catch (e: any) {
-        setError(e.message || "Failed to generate contract");
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Failed to generate contract");
       } finally {
         setLoading(false);
       }

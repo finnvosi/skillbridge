@@ -19,6 +19,7 @@
     "pnpm": "^9.0.0",
     "turbo": "^2.0.0"
   },
+  "packageManager": "pnpm@11.21.0",
   "engines": {
     "node": ">=18",
     "pnpm": ">=9"

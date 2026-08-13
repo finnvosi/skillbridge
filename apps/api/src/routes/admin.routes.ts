@@ -39,7 +39,7 @@ router.get(
     });
 
     res.json({
-      students: studentsNeedingVerify.map(s => ({
+      students: studentsNeedingVerify.map((s: any) => ({
         id: s.id,
         type: 'student' as const,
         name: s.user.name,
@@ -47,7 +47,7 @@ router.get(
         major: s.major,
         createdAt: s.createdAt,
       })),
-      employers: employersNeedingVerify.map(e => ({
+      employers: employersNeedingVerify.map((e: any) => ({
         id: e.id,
         type: 'employer' as const,
         name: e.companyName || e.user.name,

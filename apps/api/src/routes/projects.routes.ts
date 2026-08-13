@@ -108,14 +108,14 @@ router.get(
       include: { employer: { include: { user: { select: { name: true, email: true } } } } },
     });
 
-    const studentSkills = student.skills.map(s => s.toLowerCase());
+    const studentSkills = student.skills.map((s: string) => s.toLowerCase());
 
     // Simple heuristic match scorer
-    const scored = projects.map(p => {
-      const projectSkills = p.skillsRequired.map(s => s.toLowerCase());
+    const scored = projects.map((p: any) => {
+      const projectSkills = p.skillsRequired.map((s: string) => s.toLowerCase());
       
       // Skill overlap (40% weight)
-      const skillMatches = studentSkills.filter(s => projectSkills.includes(s));
+      const skillMatches = studentSkills.filter((s: string) => projectSkills.includes(s));
       const skillScore = (skillMatches.length / Math.max(projectSkills.length, 1)) * 40;
       
       // Budget fit (20% weight) - higher budget = better fit
@@ -137,7 +137,7 @@ router.get(
     });
 
     // Sort by match score descending
-    scored.sort((a, b) => b.matchScore - a.matchScore);
+    scored.sort((a: { matchScore: number }, b: { matchScore: number }) => b.matchScore - a.matchScore);
 
     res.json({ projects: scored });
   })

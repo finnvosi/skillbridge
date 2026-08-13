@@ -12,10 +12,16 @@ import authRoutes from './routes/auth.routes';
 import usersRoutes from './routes/users.routes';
 import projectsRoutes from './routes/projects.routes';
 import certificatesRoutes from './routes/certificates.routes';
+import adminRoutes from './routes/admin.routes';
 import * as path from 'path';
 
 // Initialize Express app
 const app = express();
+
+// Trust the proxy hop (Next.js dev rewrite / reverse proxy) so rate-limit can
+// read X-Forwarded-For instead of throwing ERR_ERL_UNEXPECTED_X_FORWARDED_FOR.
+// `1` = trust the single proxy immediately in front of us.
+app.set('trust proxy', 1);
 
 // Middleware
 app.use(helmet());
@@ -52,6 +58,7 @@ app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/users', usersRoutes);
 app.use('/api/v1/projects', projectsRoutes);
 app.use('/api/v1/certificates', certificatesRoutes);
+app.use('/api/v1/admin', adminRoutes);
 
 // Serve uploaded files statically
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));

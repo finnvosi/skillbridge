@@ -1,20 +1,30 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Urbanist, Poppins } from "next/font/google";
 import "./globals.css";
+import { CursorGlow } from "@/components/layout/cursor-glow";
+import { CustomCursor } from "@/components/layout/custom-cursor";
+import { PreloaderMount } from "@/components/layout/preloader-mount";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+// Brand type system: Urbanist for headings (display), Poppins for body.
+// Self-hosted at build time via next/font (no FOUT, works offline).
+const urbanist = Urbanist({
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800", "900"],
+  variable: "--font-display",
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const poppins = Poppins({
   subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-sans",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "SkillBridge - Verified Talent Ecosystem",
-  description: "Connect students, workers, employers, and factories through verified work experience.",
+  title: "SkillBridge — Bridge Your Skills to Real Opportunities",
+  description:
+    "Connect students with employers through meaningful projects, jobs, and career opportunities.",
 };
 
 export default function RootLayout({
@@ -25,9 +35,16 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`h-full scroll-smooth ${urbanist.variable} ${poppins.variable}`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="relative min-h-full flex flex-col h-full bg-white text-foreground font-sans antialiased">
+        {/* Three-layer ambient background: white base + cursor aura + frosted veil */}
+        <CursorGlow />
+        {/* Custom agency cursor (dot + trailing ring) */}
+        <CustomCursor />
+        <PreloaderMount />
+        {children}
+      </body>
     </html>
   );
 }

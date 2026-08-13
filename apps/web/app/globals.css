@@ -1,26 +1,207 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* Soft, layered elevation shadows as real Tailwind utilities so both
+   @apply and className="shadow-soft" work (Apple/Linear feel). */
+@utility shadow-soft {
+  box-shadow:
+    0 1px 2px rgba(17, 17, 17, 0.04),
+    0 8px 24px -8px rgba(17, 17, 17, 0.10),
+    0 2px 6px -2px rgba(60, 9, 108, 0.06);
+}
+@utility shadow-soft-lg {
+  box-shadow:
+    0 2px 4px rgba(17, 17, 17, 0.05),
+    0 18px 40px -12px rgba(17, 17, 17, 0.14),
+    0 6px 16px -6px rgba(60, 9, 108, 0.08);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* ===== SkillBridge brand color system (light-mode first) ===== */
+  /* Primary brand: deep purple. Used for accents, logos, key CTAs. */
+  --color-primary: #3C096C;
+  --color-primary-hover: #5A189A;
+  --color-primary-light: #7B2CBF;
+  --color-primary-contrast: #ffffff;
+
+  /* Supporting purples */
+  --color-purple-100: #E9D8FD;
+
+  /* AI / technology accent */
+  --color-accent: #38BDF8;
+  --color-accent-hover: #0EA5E9;
+
+  /* Neutral surface stack — light-mode-first, agency editorial.
+     Titanium field (#F3F3F1) for page canvases, soft white cards with
+     hairline borders so frosted/glass and cards read as one system. */
+  --color-white: #ffffff;
+  --color-light: #F9FAFB;
+  --color-gray-100: #F3F4F6;
+  --color-gray-200: #E5E7EB;
+  --color-gray-300: #D1D5DB;
+  --color-gray-400: #9CA3AF;
+  --color-gray-500: #6B7280;
+  --color-gray-600: #4B5563;
+  --color-gray-700: #374151;
+  --color-gray-800: #1F2937;
+  --color-charcoal: #2D2D2D;
+  --color-near-black: #111111;
+
+  /* Titanium canvas + surface system (matches landing/auth worlds) */
+  --color-titanium: #F3F3F1;
+  --color-surface: #FFFFFF;
+  --color-surface-border: #ECECEA;
+
+  /* Semantic aliases */
+  --color-background: var(--color-white);
+  --color-foreground: var(--color-gray-800);
+  --color-card: var(--color-surface);
+  --color-card-border: var(--color-surface-border);
+  --color-muted: var(--color-titanium);
+  /* Dashboard canvas uses the titanium field so it belongs to the same
+     world as the landing hero + auth form side. */
+  --color-canvas: var(--color-titanium);
+
+  /* Typography families.
+     Brand spec: Urbanist (display/headings) + Poppins (body).
+     Loaded self-hosted via next/font/google in app/layout.tsx, which injects
+     --font-display (Urbanist) and --font-sans (Poppins) as CSS variables on
+     <html>. The stacks below are fallback chains only — they rarely render. */
+  --font-sans: "Poppins", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-display: "Urbanist", "Helvetica Neue", Helvetica, Arial, ui-sans-serif, system-ui, sans-serif;
+
+  /* Border radius (controlled, consistent) */
+  --radius-sm: 0.375rem;   /* 6px */
+  --radius-md: 0.5rem;     /* 8px */
+  --radius-lg: 0.75rem;    /* 12px */
+  --radius-xl: 1rem;       /* 16px */
 }
 
+/* Dark mode — still light-mode-first, but support it. */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --color-background: var(--color-gray-900);
+    --color-foreground: var(--color-gray-200);
+    --color-card: #1F2937;
+    --color-card-border: var(--color-gray-700);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Reduced motion gating (spec section 19/21) */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@layer base {
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  /* Headings use the display font for tight hierarchy + confident headlines */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+  /* Subtle editorial body text */
+  p {
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50;
+  }
+  .btn-primary {
+    @apply bg-primary text-primary-contrast hover:bg-primary-hover focus-visible:ring-primary;
+  }
+  .btn-outline {
+    @apply border border-primary text-primary hover:bg-primary/10 focus-visible:ring-primary;
+  }
+  .btn-ghost {
+    @apply text-gray-600 hover:bg-gray-100 hover:text-gray-900 focus-visible:ring-gray-500;
+  }
+  .card {
+    @apply rounded-2xl bg-card shadow-soft ring-1 ring-card-border;
+  }
+
+  /* ===== Editorial / Swiss-Brutalist primitives ===== */
+  /* Monospace micro-label — used for kicker/eyebrow tags and metadata. */
+  .label-mono {
+    @apply font-mono text-xs font-medium uppercase tracking-[0.18em] text-primary;
+  }
+  .label-mono-muted {
+    @apply font-mono text-xs font-medium uppercase tracking-[0.18em] text-gray-500;
+  }
+  /* Hairline rule used to divide editorial sections (subtle by default). */
+  .rule {
+    @apply border-t border-gray-200;
+  }
+  .rule-strong {
+    @apply border-t border-gray-900;
+  }
+  /* Oversized display headline with tight tracking + ink color. */
+  .display {
+    @apply font-display font-extrabold tracking-[-0.03em] text-gray-900;
+    text-wrap: balance;
+  }
+  /* Red alert accent for "verified / priority" pops. */
+  .accent-red {
+    @apply text-[#FF0000];
+  }
+}
+
+/* Subtle grain overlay — very fine noise, premium editorial texture.
+   Inline SVG fractal noise, no network request. */
+.bg-grain {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+}
+
+/* Stronger grain — visible tooth on glass surfaces (the baked-0.035 grain is
+   near-invisible once stacked under blur). Used on the auth card holder. */
+.bg-grain-strong {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)' opacity='0.18'/%3E%3C/svg%3E");
+}
+
+/* Soft, layered elevation shadow (Apple/Linear feel) — not a hard offset. */
+.shadow-soft {
+  box-shadow:
+    0 1px 2px rgba(17, 17, 17, 0.04),
+    0 8px 24px -8px rgba(17, 17, 17, 0.10),
+    0 2px 6px -2px rgba(60, 9, 108, 0.06);
+}
+.shadow-soft-lg {
+  box-shadow:
+    0 2px 4px rgba(17, 17, 17, 0.05),
+    0 18px 40px -12px rgba(17, 17, 17, 0.14),
+    0 6px 16px -6px rgba(60, 9, 108, 0.08);
+}
+
+/* Purple light effect — ambient glow, used behind hero/CTA. */
+.glow-purple {
+  background:
+    radial-gradient(60% 55% at 50% 0%, rgba(123, 44, 191, 0.16), transparent 70%),
+    radial-gradient(40% 40% at 85% 20%, rgba(56, 189, 248, 0.10), transparent 70%);
+}
+
+/* Glass surface (nav, floating chrome). */
+.glass {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+}
+
+/* Custom cursor: hide the native cursor only when the JS cursor is active
+   (fine pointer + JS enabled). Touch devices keep the native behavior. */
+html.has-custom-cursor,
+html.has-custom-cursor * {
+  cursor: none !important;
 }

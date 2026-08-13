@@ -1,106 +1,138 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { apiRequest, ApiError, AuthResponse, API_ENDPOINTS, storeToken } from '@/lib/api-client';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
+import { apiRequest, ApiError, AuthResponse, API_ENDPOINTS, storeToken } from "@/lib/api-client";
+import { Button } from "@/components/ui/button";
+import { AuthField } from "@/components/auth/auth-field";
+import { Stagger, StaggerItem } from "@/components/motion";
+
+const EASE = [0.16, 1, 0.3, 1] as const;
 
 export function LoginForm() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
+  function validate() {
+    if (!email || !/\S+@\S+\.\S+/.test(email)) return "Enter a valid email.";
+    if (!password) return "Password is required.";
+    return null;
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
+    const v = validate();
+    if (v) {
+      setError(v);
+      return;
+    }
     setLoading(true);
-
     try {
       const data = await apiRequest<AuthResponse>(API_ENDPOINTS.auth.login, {
-        method: 'POST',
+        method: "POST",
         body: { email, password },
       });
-
       storeToken(data.token, data.refreshToken);
 
       const roleRedirects: Record<string, string> = {
-        student: '/dashboard/student',
-        worker: '/dashboard/worker',
-        employer: '/dashboard/employer',
-        factory: '/dashboard/factory',
-        admin: '/dashboard/admin',
+        student: "/dashboard/student",
+        employer: "/dashboard/employer",
+        admin: "/dashboard/admin",
       };
-
-      router.push(roleRedirects[data.user.role] || '/dashboard');
+      router.push(roleRedirects[data.user.role] || "/dashboard");
     } catch (err) {
-      setError(
-        err instanceof ApiError
-          ? err.message
-          : 'An error occurred. Please try again.'
-      );
+      setError(err instanceof ApiError ? err.message : "An error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="w-full max-w-md mx-auto">
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-            Email
-          </label>
-          <input
+    <form onSubmit={handleSubmit} className="space-y-10">
+      <Stagger className="space-y-9">
+        <StaggerItem>
+          <AuthField
             id="email"
+            label="Email"
             type="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={setEmail}
+            placeholder="you@skillbridge.co"
+            autoComplete="email"
             required
-            className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-            placeholder="you@example.com"
+            error={error}
           />
-        </div>
+        </StaggerItem>
 
-        <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-            Password
-          </label>
-          <input
+        <StaggerItem>
+          <AuthField
             id="password"
+            label="Password"
             type="password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            onChange={setPassword}
             placeholder="••••••••"
+            autoComplete="current-password"
+            required
+            error={error}
           />
-        </div>
+        </StaggerItem>
 
-        {error && (
-          <div className="p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-700">
-            {error}
+        <StaggerItem>
+          <div className="flex items-center justify-end">
+            <a
+              href="/auth/forgot-password"
+              className="text-sm font-medium text-gray-600 transition-colors hover:text-gray-900"
+            >
+              Forgot password?
+            </a>
           </div>
-        )}
+        </StaggerItem>
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed font-medium"
-        >
-          {loading ? 'Signing in...' : 'Sign In'}
-        </button>
-      </form>
+        <StaggerItem>
+          <Button
+            type="submit"
+            disabled={loading}
+            variant="primary"
+            size="lg"
+            className="relative isolate overflow-hidden w-full transition-transform active:scale-[0.985]"
+          >
+            {loading && (
+              <motion.span
+                className="absolute inset-0 -z-10"
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: 1 }}
+                transition={{ duration: 0.8, ease: EASE }}
+              />
+            )}
+            <motion.span
+              key={loading ? "loading" : "idle"}
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, ease: EASE }}
+            >
+              {loading ? "Signing in…" : "Sign In"}
+            </motion.span>
+          </Button>
+        </StaggerItem>
 
-      <div className="mt-4 text-center text-sm text-gray-600">
-        Don&apos;t have an account?{' '}
-        <a
-          href="/auth/register"
-          className="text-blue-600 hover:text-blue-700 font-medium"
-        >
-          Sign up
-        </a>
-      </div>
-    </div>
+        <StaggerItem>
+          <div className="text-center text-sm text-gray-600">
+            Don&apos;t have an account?{" "}
+            <a
+              href="/auth/register"
+              className="inline font-medium text-gray-900 underline transition-colors hover:text-primary"
+            >
+              Sign up
+            </a>
+          </div>
+        </StaggerItem>
+      </Stagger>
+    </form>
   );
 }

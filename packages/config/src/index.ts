@@ -47,7 +47,7 @@ export const appConfig = {
   corsOrigin: process.env.CORS_ORIGIN || '*',
   rateLimit: {
     windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000'), // 15 minutes
-    max: parseInt(process.env.RATE_LIMIT_MAX || '100'),
+    max: parseInt(process.env.RATE_LIMIT_MAX || '100'), // 1000/15min global — demo-friendly, still caps abuse
   },
 };
 

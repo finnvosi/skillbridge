@@ -91,6 +91,108 @@ router.get(
   })
 );
 
+// Get AI-matched projects for student (simple heuristic scorer)
+router.get(
+  '/student/match',
+  authenticate,
+  asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (req.user!.role !== 'student') {
+      return res.status(403).json({ error: 'Only students can get matches' });
+    }
+
+    const student = await prisma.student.findUnique({ where: { userId: req.user!.id } });
+    if (!student) return res.status(404).json({ error: 'Student profile not found' });
+
+    const projects = await prisma.project.findMany({
+      where: { status: 'open' },
+      include: { employer: { include: { user: { select: { name: true, email: true } } } } },
+    });
+
+    const studentSkills = student.skills.map(s => s.toLowerCase());
+
+    // Simple heuristic match scorer
+    const scored = projects.map(p => {
+      const projectSkills = p.skillsRequired.map(s => s.toLowerCase());
+      
+      // Skill overlap (40% weight)
+      const skillMatches = studentSkills.filter(s => projectSkills.includes(s));
+      const skillScore = (skillMatches.length / Math.max(projectSkills.length, 1)) * 40;
+      
+      // Budget fit (20% weight) - higher budget = better fit
+      const budgetScore = p.budget ? Math.min((p.budget / 1000) * 20, 20) : 0;
+      
+      // Type relevance (20% weight) - assume student prefers internship/parttime for now
+      const typeBonus = p.type === 'internship' || p.type === 'part_time' ? 10 : 0;
+      
+      // Location match (20% weight)
+      const locationScore = p.remote ? 20 : (p.location ? 10 : 0);
+
+      const totalScore = Math.round(skillScore + budgetScore + typeBonus + locationScore);
+
+      return {
+        ...p,
+        matchScore: totalScore,
+        skillMatches,
+      };
+    });
+
+    // Sort by match score descending
+    scored.sort((a, b) => b.matchScore - a.matchScore);
+
+    res.json({ projects: scored });
+  })
+);
+
+// Get the current employer's own projects
+// NOTE: declared before '/:id' so 'employer' is not captured as :id
+router.get(
+  '/employer/projects',
+  authenticate,
+  asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (req.user!.role !== 'employer') {
+      return res.status(403).json({ error: 'Only employers can view their projects' });
+    }
+    const employer = await prisma.employer.findUnique({
+      where: { userId: req.user!.id },
+    });
+    if (!employer) return res.status(404).json({ error: 'Employer profile not found' });
+
+    const projects = await prisma.project.findMany({
+      where: { employerId: employer.id },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        _count: { select: { applications: true } },
+      },
+    });
+    res.json({ projects });
+  })
+);
+
+// Get all applications across the current employer's projects
+router.get(
+  '/employer/applications',
+  authenticate,
+  asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (req.user!.role !== 'employer') {
+      return res.status(403).json({ error: 'Only employers can view applications' });
+    }
+    const employer = await prisma.employer.findUnique({
+      where: { userId: req.user!.id },
+    });
+    if (!employer) return res.status(404).json({ error: 'Employer profile not found' });
+
+    const applications = await prisma.application.findMany({
+      where: { project: { employerId: employer.id } },
+      include: {
+        project: { select: { id: true, title: true } },
+        student: { include: { user: { select: { name: true, email: true } } } },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+    res.json({ applications });
+  })
+);
+
 // Get project by ID
 router.get(
   '/:id',
@@ -247,6 +349,52 @@ router.put(
     });
 
     res.json({ message: 'Application status updated', application: updated });
+  })
+);
+
+
+// Generate contract for accepted application
+router.post(
+  '/applications/:applicationId/contract',
+  asyncHandler(async (req: AuthRequest, res: Response) => {
+    const { applicationId } = req.params;
+    
+    // Find the application
+    const application = await prisma.application.findUnique({
+      where: { id: applicationId },
+      include: {
+        project: { include: { employer: { include: { user: true } } } },
+        student: { include: { user: true } }
+      }
+    });
+    
+    if (!application) return res.status(404).json({ error: 'Application not found' });
+    if (application.status !== 'accepted') {
+      return res.status(400).json({ error: 'Only accepted applications can generate contracts' });
+    }
+    
+    // Mock contract generation - in production this would:
+    // 1. Build contract terms from project + application
+    // 2. Send to PDF generation service (PDFShift, HelloSign, etc.)
+    // 3. Store the signed URL
+    
+    const contractData = {
+      id: `contract_${applicationId}`,
+      projectId: application.projectId,
+      student: application.student.user.name,
+      employer: application.project.employer.user.name,
+      salary: application.proposedBudget || application.project.budget,
+      project: application.project.title,
+      status: 'pending_signatures',
+      contractUrl: `https://example.com/contracts/contract_${applicationId}.pdf`,
+      createdAt: new Date().toISOString()
+    };
+    
+    res.status(201).json({ 
+      message: 'Contract generated successfully',
+      contract: contractData,
+      signUrl: `https://example.com/sign/${applicationId}`
+    });
   })
 );
 

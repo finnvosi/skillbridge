@@ -1,58 +1,195 @@
-import Link from 'next/link';
+"use client";
 
-export const metadata = {
-  title: 'Employer Dashboard - SkillBridge',
-};
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { apiRequest, API_ENDPOINTS, getToken } from "@/lib/api-client";
+import { Project, Application, ApplicationStatus, TYPE_LABELS, STATUS_LABELS } from "@/lib/types";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
+import { PageHeader, StatCard } from "@/components/layout/page-header";
+import { OpportunityCard } from "@/components/marketplace/opportunity-card";
+import { Briefcase, Users, Clock, Star } from "lucide-react";
 
-export default function EmployerDashboard() {
+interface ProjectWithCount extends Project {
+  _count?: { applications: number };
+}
+
+export default function EmployerDashboardPage() {
+  const [loading, setLoading] = useState(true);
+  const [projects, setProjects] = useState<ProjectWithCount[]>([]);
+  const [apps, setApps] = useState<Application[]>([]);
+  const token = getToken();
+
+  useEffect(() => {
+    if (!token) return;
+    (async () => {
+      try {
+        const [p, a] = await Promise.all([
+          apiRequest<{ projects: ProjectWithCount[] }>(
+            API_ENDPOINTS.projects.employerProjects,
+            { method: "GET", token }
+          ),
+          apiRequest<{ applications: Application[] }>(
+            API_ENDPOINTS.projects.employerApplications,
+            { method: "GET", token }
+          ),
+        ]);
+        setProjects(p.projects ?? []);
+        setApps(a.applications ?? []);
+      } catch {
+        // empty
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [token]);
+
+  const pendingApps = apps.filter((a) => a.status === "pending");
+  const needsReview = pendingApps.length;
+
+  if (loading) {
+    return (
+      <div className="space-y-8">
+        <Skeleton className="h-8 w-48" />
+        <div className="grid gap-4 sm:grid-cols-3">
+          <Skeleton className="h-24 w-full" />
+          <Skeleton className="h-24 w-full" />
+          <Skeleton className="h-24 w-full" />
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-900">SkillBridge</h1>
-          <Link href="/api/auth/logout" className="text-gray-600 hover:text-gray-900">
-            Logout
+    <div className="space-y-8">
+      <PageHeader
+        eyebrow="Employer"
+        title="Talent Pipeline"
+        subtitle="Discover students and manage your opportunities."
+        actions={
+          <Button asChild>
+            <Link href="/dashboard/employer/projects/new">
+              Post opportunity
+            </Link>
+          </Button>
+        }
+      />
+
+      {/* Stats row */}
+      <div className="grid gap-4 sm:grid-cols-4">
+        <StatCard
+          icon={Briefcase}
+          label="Active opportunities"
+          value={projects.length}
+          accent="text-primary"
+        />
+        <StatCard
+          icon={Users}
+          label="Total applicants"
+          value={apps.length}
+          accent="text-gray-900"
+        />
+        <StatCard
+          icon={Clock}
+          label="Needs review"
+          value={needsReview}
+          accent="text-amber-600"
+        />
+        <StatCard
+          icon={Star}
+          label="Talent score"
+          value="92"
+          accent="text-purple-600"
+        />
+      </div>
+
+      {/* Pending applicants (Talent Pipeline insight) */}
+      {pendingApps.length > 0 && (
+        <section>
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <h2 className="font-display text-2xl font-semibold text-gray-900">
+                Talent Pipeline
+              </h2>
+              <p className="text-sm text-gray-500">
+                {needsReview} candidate{needsReview !== 1 ? "s" : ""} awaiting review
+              </p>
+            </div>
+            <Link
+              href="/dashboard/employer/applicants"
+              className="text-sm font-medium text-primary hover:text-primary-hover"
+            >
+              View all applicants
+            </Link>
+          </div>
+
+          <div className="divide-y divide-gray-100">
+            {pendingApps.map((app) => (
+              <div key={app.id} className="flex items-center justify-between gap-4 p-4">
+                <div className="flex-1">
+                  <p className="font-medium text-gray-900">
+                    {app.student?.user?.name || "Candidate"}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    {app.project?.title || "Opportunity"}
+                  </p>
+                  <p className="text-xs text-gray-400">
+                    Applied {new Date(app.createdAt).toLocaleDateString()}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button size="sm" variant="outline">
+                    Message
+                  </Button>
+                  <Button size="sm" variant="primary">
+                    Review
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Opportunities grid */}
+      <section>
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="font-display text-2xl font-semibold text-gray-900">
+            Your opportunities
+          </h2>
+          <Link
+            href="/dashboard/employer/projects"
+            className="text-sm font-medium text-primary hover:text-primary-hover"
+          >
+            Manage all
           </Link>
         </div>
-      </nav>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <h2 className="text-3xl font-bold text-gray-900 mb-8">Employer Dashboard</h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Company Profile</h3>
-            <p className="text-gray-600">Manage your company information</p>
-            <button className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-              Manage
-            </button>
+        {projects.length === 0 ? (
+          <EmptyState
+            title="No opportunities posted yet"
+            description="Post your first opportunity to start receiving applications from talented students."
+            actionLabel="Post opportunity"
+            onAction={() => {
+              window.location.href = "/dashboard/employer/projects/new";
+            }}
+          />
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {projects.slice(0, 6).map((p) => (
+              <OpportunityCard
+                key={p.id}
+                project={p}
+                onApply={undefined}
+                showActions={false}
+              />
+            ))}
           </div>
-
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Post Opportunity</h3>
-            <p className="text-gray-600">Post projects, internships, or jobs</p>
-            <button className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-              Post
-            </button>
-          </div>
-
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Candidate Search</h3>
-            <p className="text-gray-600">Find and filter talented candidates</p>
-            <button className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-              Search
-            </button>
-          </div>
-
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Applications</h3>
-            <p className="text-gray-600">Review and manage applications</p>
-            <button className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-              View
-            </button>
-          </div>
-        </div>
-      </main>
+        )}
+      </section>
     </div>
   );
 }

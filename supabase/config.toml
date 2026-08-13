@@ -1,0 +1,9 @@
+# For full configuration documentation see:
+# https://supabase.com/docs/guides/cli/config
+
+# Use a cloud-hosted project for dev work (we already have a project).
+[remote]
+project_id = "hkbacfvanogrnqlegbae"
+
+[build]
+# No local Postgres needed; we push schema to the remote project directly.

@@ -1,141 +1,186 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { apiRequest, ApiError, AuthResponse, API_ENDPOINTS, storeToken } from '@/lib/api-client';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
+import { apiRequest, ApiError, AuthResponse, API_ENDPOINTS, storeToken } from "@/lib/api-client";
+import { Button } from "@/components/ui/button";
+import { AuthField } from "@/components/auth/auth-field";
+import { Stagger, StaggerItem } from "@/components/motion";
+import { cn } from "@/lib/utils";
+
+const EASE = [0.16, 1, 0.3, 1] as const;
 
 export function RegisterForm() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
-  const [role, setRole] = useState<'student' | 'employer'>('student');
-  const [error, setError] = useState('');
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [role, setRole] = useState<"student" | "employer">("student");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
+  function validate() {
+    if (!name.trim()) return "Name is required.";
+    if (!email || !/\S+@\S+\.\S+/.test(email)) return "Enter a valid email.";
+    if (password.length < 8) return "Password must be at least 8 characters.";
+    if (!/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/[0-9]/.test(password))
+      return "Add an uppercase letter, a number, and a symbol.";
+    return null;
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
+    const v = validate();
+    if (v) {
+      setError(v);
+      return;
+    }
     setLoading(true);
-
     try {
       const data = await apiRequest<AuthResponse>(API_ENDPOINTS.auth.register, {
-        method: 'POST',
+        method: "POST",
         body: { email, password, name, role },
       });
-
       storeToken(data.token, data.refreshToken);
 
       const roleRedirects: Record<string, string> = {
-        student: '/dashboard/student',
-        worker: '/dashboard/worker',
-        employer: '/dashboard/employer',
-        factory: '/dashboard/factory',
-        admin: '/dashboard/admin',
+        student: "/dashboard/student",
+        employer: "/dashboard/employer",
+        admin: "/dashboard/admin",
       };
-
-      router.push(roleRedirects[data.user.role] || '/dashboard');
+      router.push(roleRedirects[data.user.role] || "/dashboard");
     } catch (err) {
-      setError(
-        err instanceof ApiError
-          ? err.message
-          : 'An error occurred. Please try again.'
-      );
+      setError(err instanceof ApiError ? err.message : "An error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="w-full max-w-md mx-auto">
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-            Full Name
-          </label>
-          <input
+    <form onSubmit={handleSubmit} className="space-y-9">
+      <Stagger className="space-y-8">
+        <StaggerItem>
+          <AuthField
             id="name"
+            label="Full Name"
             type="text"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={setName}
+            placeholder="Sopanha Vosi"
+            autoComplete="name"
             required
-            className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-            placeholder="John Doe"
+            error={error}
           />
-        </div>
+        </StaggerItem>
 
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-            Email
-          </label>
-          <input
+        <StaggerItem>
+          <AuthField
             id="email"
+            label="Email"
             type="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={setEmail}
+            placeholder="you@skillbridge.co"
+            autoComplete="email"
             required
-            className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-            placeholder="you@example.com"
+            error={error}
           />
-        </div>
+        </StaggerItem>
 
-        <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-            Password
-          </label>
-          <input
+        <StaggerItem>
+          <AuthField
             id="password"
+            label="Password"
             type="password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            onChange={setPassword}
             placeholder="••••••••"
+            autoComplete="new-password"
+            required
+            showStrength
+            error={error}
           />
-          <p className="mt-1 text-xs text-gray-500">
-            Min 8 characters, 1 uppercase, 1 number, 1 special character
-          </p>
-        </div>
+        </StaggerItem>
 
-        <div>
-          <label htmlFor="role" className="block text-sm font-medium text-gray-700">
-            I am a...
-          </label>
-          <select
-            id="role"
-            value={role}
-            onChange={(e) => setRole(e.target.value as 'student' | 'employer')}
-            className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-          >
-            <option value="student">Student</option>
-            <option value="employer">Employer</option>
-          </select>
-        </div>
+        <StaggerItem>
+          <fieldset className="flex gap-3" role="radiogroup">
+            <legend className="mb-1.5 block text-sm font-medium text-gray-700">
+              I am a…
+            </legend>
+            {(["student", "employer"] as const).map((r) => {
+              const active = role === r;
+              return (
+                <label
+                  key={r}
+                  className={cn(
+                    "flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-medium transition-all",
+                    active
+                      ? "border-primary/40 bg-primary/5 text-primary"
+                      : "border-gray-200 text-gray-600 hover:border-gray-300"
+                  )}
+                >
+                  <input
+                    type="radio"
+                    name="role"
+                    value={r}
+                    checked={active}
+                    onChange={() => setRole(r)}
+                    className="sr-only"
+                  />
+                  {r === "student" ? "Student" : "Employer"}
+                </label>
+              );
+            })}
+          </fieldset>
+        </StaggerItem>
 
-        {error && (
-          <div className="p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-700">
-            {error}
+        <StaggerItem>
+          <div className="pt-1 text-xs text-gray-500">
+            Min 8 chars · 1 uppercase · 1 number · 1 symbol
           </div>
-        )}
+        </StaggerItem>
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed font-medium"
-        >
-          {loading ? 'Creating account...' : 'Sign Up'}
-        </button>
-      </form>
+        <StaggerItem>
+          <Button
+            type="submit"
+            disabled={loading}
+            variant="primary"
+            size="lg"
+            className="relative isolate overflow-hidden w-full transition-transform active:scale-[0.985]"
+          >
+            {loading && (
+              <motion.span
+                className="absolute inset-0 -z-10"
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: 1 }}
+                transition={{ duration: 0.8, ease: EASE }}
+              />
+            )}
+            <motion.span
+              key={loading ? "loading" : "idle"}
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, ease: EASE }}
+            >
+              {loading ? "Creating account…" : "Sign Up"}
+            </motion.span>
+          </Button>
+        </StaggerItem>
 
-      <div className="mt-4 text-center text-sm text-gray-600">
-        Already have an account?{' '}
-        <a
-          href="/auth/login"
-          className="text-blue-600 hover:text-blue-700 font-medium"
-        >
-          Sign in
-        </a>
-      </div>
-    </div>
+        <StaggerItem>
+          <div className="text-center text-sm text-gray-600">
+            Already have an account?{" "}
+            <a
+              href="/auth/login"
+              className="inline font-medium text-gray-900 underline transition-colors hover:text-primary"
+            >
+              Sign in
+            </a>
+          </div>
+        </StaggerItem>
+      </Stagger>
+    </form>
   );
 }

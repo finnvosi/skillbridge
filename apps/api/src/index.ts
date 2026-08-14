@@ -27,10 +27,18 @@ app.set('trust proxy', 1);
 
 // Middleware
 app.use(helmet());
-app.use(cors({
-  origin: appConfig.corsOrigin,
-  credentials: true,
-}));
+// CORS: echo the caller's origin. The web portal calls the API with
+// credentials:'include', and the browser forbids `Access-Control-Allow-Origin: *`
+// in that case — so we reflect the actual request origin for browser requests
+// and fall back to the configured origin for origin-less (server) calls.
+app.use(
+  cors({
+    origin: (origin, cb) => {
+      cb(null, origin || appConfig.corsOrigin);
+    },
+    credentials: true,
+  })
+);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 

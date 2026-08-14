@@ -7,10 +7,12 @@ import { apiRequest, API_ENDPOINTS, getToken, ApiError } from '@/lib/api-client'
 import { Project, TYPE_LABELS, STATUS_LABELS, ApplicationStatus } from '@/lib/types';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/ui/empty-state';
+import { Magnetic } from '@/components/motion/primitives2';
 
 export default function ProjectDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -199,12 +201,11 @@ export default function ProjectDetailPage() {
               <label className="block text-sm font-medium text-gray-700">
                 Proposed budget (optional)
               </label>
-              <input
+              <Input
                 type="number"
                 value={proposedBudget}
                 onChange={(e) => setProposedBudget(e.target.value)}
                 placeholder="e.g. 500"
-                className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/30"
               />
             </div>
             {error && (
@@ -212,9 +213,11 @@ export default function ProjectDetailPage() {
                 {error}
               </div>
             )}
-            <Button onClick={submit} disabled={applying} className="w-full">
-              {applying ? 'Submitting...' : 'Submit application'}
-            </Button>
+            <Magnetic>
+              <Button onClick={submit} disabled={applying} className="w-full">
+                {applying ? 'Submitting...' : 'Submit application'}
+              </Button>
+            </Magnetic>
           </div>
         )}
       </Card>

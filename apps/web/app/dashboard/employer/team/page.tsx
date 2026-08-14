@@ -10,7 +10,6 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PageHeader } from "@/components/layout/page-header";
 import { FadeUp, Stagger, StaggerItem } from "@/components/motion";
-import { Magnetic } from "@/components/motion/primitives2";
 import { cn } from "@/lib/utils";
 import { Users2, UserPlus, Mail, Trash2, Crown, ShieldCheck, Briefcase, UserCog } from "lucide-react";
 
@@ -275,11 +274,9 @@ export default function TeamPage() {
                   })}
                 </div>
               </div>
-              <Magnetic>
-                <Button onClick={invite} disabled={busy || !name.trim() || !email.trim()}>
-                  <UserPlus className="h-4 w-4" /> {busy ? "Inviting…" : "Send invite"}
-                </Button>
-              </Magnetic>
+              <Button onClick={invite} disabled={busy || !name.trim() || !email.trim()}>
+                <UserPlus className="h-4 w-4" /> {busy ? "Inviting…" : "Send invite"}
+              </Button>
               {saved && <span className="ml-3 text-sm font-medium text-green-600">Invited.</span>}
             </div>
           </Card>

@@ -14,7 +14,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FadeUp } from "@/components/motion";
-import { Magnetic } from "@/components/motion/primitives2";
 import {
   Search,
   GraduationCap,
@@ -133,11 +132,9 @@ export default function TalentSearchPage() {
                 placeholder="Add a skill filter (e.g. React)"
               />
             </div>
-            <Magnetic>
-              <Button type="button" onClick={runSearch} className="w-full sm:w-auto">
-                Search
-              </Button>
-            </Magnetic>
+            <Button type="button" onClick={runSearch} className="w-full sm:w-auto">
+              Search
+            </Button>
             <Button
               type="button"
               variant="ghost"

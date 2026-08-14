@@ -16,7 +16,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { FadeUp } from "@/components/motion";
-import { Magnetic } from "@/components/motion/primitives2";
 import { Check, Plus, X } from "lucide-react";
 
 const TYPE_HINTS: Record<ProjectType, string> = {
@@ -242,16 +241,14 @@ export default function CreateProjectPage() {
                   }
                   placeholder="Add a skill..."
                 />
-                <Magnetic>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={addSkill}
-                    className="shrink-0"
-                  >
-                    <Plus className="h-4 w-4" /> Add
-                  </Button>
-                </Magnetic>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={addSkill}
+                  className="shrink-0"
+                >
+                  <Plus className="h-4 w-4" /> Add
+                </Button>
               </div>
               <div className="mt-3 flex flex-wrap gap-2">
                 {skills.map((s) => (
@@ -329,21 +326,17 @@ export default function CreateProjectPage() {
         </Button>
 
         {step < STEPS.length - 1 ? (
-          <Magnetic>
-            <Button
-              type="button"
-              onClick={next}
-              disabled={step === 0 ? !basicsValid : !detailsValid}
-            >
-              Continue
-            </Button>
-          </Magnetic>
+          <Button
+            type="button"
+            onClick={next}
+            disabled={step === 0 ? !basicsValid : !detailsValid}
+          >
+            Continue
+          </Button>
         ) : (
-          <Magnetic>
-            <Button type="button" onClick={submit} disabled={submitting}>
-              {submitting ? "Publishing..." : "Publish opportunity"}
-            </Button>
-          </Magnetic>
+          <Button type="button" onClick={submit} disabled={submitting}>
+            {submitting ? "Publishing..." : "Publish opportunity"}
+          </Button>
         )}
       </div>
     </div>

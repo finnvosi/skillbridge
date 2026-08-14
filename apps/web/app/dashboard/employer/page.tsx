@@ -16,7 +16,6 @@ import {
 } from "@/components/layout/page-header";
 import { OpportunityCard } from "@/components/marketplace/opportunity-card";
 import { CountUp, FadeUp, Stagger, StaggerItem, Tilt } from "@/components/motion";
-import { Magnetic } from "@/components/motion/primitives2";
 import {
   Briefcase,
   Users,
@@ -155,15 +154,13 @@ function HeroPanel({
           </div>
         </div>
         <div className="shrink-0 sm:text-right">
-          <Magnetic>
-            <Button
-              size="lg"
-              className="w-full bg-white text-primary hover:bg-white/90 sm:w-auto"
-              onClick={onPostOpportunity}
-            >
-              Post opportunity
-            </Button>
-          </Magnetic>
+        <Button
+          size="lg"
+          className="w-full bg-white text-primary hover:bg-white/90 sm:w-auto"
+          onClick={onPostOpportunity}
+        >
+          Post opportunity
+        </Button>
         </div>
       </div>
     </Card>
@@ -415,18 +412,14 @@ export default function EmployerDashboardPage() {
                               </Badge>
                             </div>
                             <div className="flex w-full gap-2 p-4 pt-0">
-                              <Magnetic className="flex-1">
-                                <Button size="sm" variant="outline" className="w-full">
-                                  <MessageCircle className="h-3.5 w-3.5" />
-                                  Message
-                                </Button>
-                              </Magnetic>
-                              <Magnetic className="flex-1">
-                                <Button size="sm" className="w-full">
-                                  <CheckCircle2 className="h-3.5 w-3.5" />
-                                  Review
-                                </Button>
-                              </Magnetic>
+                              <Button size="sm" variant="outline" className="w-full">
+                                <MessageCircle className="h-3.5 w-3.5" />
+                                Message
+                              </Button>
+                              <Button size="sm" className="w-full">
+                                <CheckCircle2 className="h-3.5 w-3.5" />
+                                Review
+                              </Button>
                             </div>
                           </Card>
                         </Tilt>

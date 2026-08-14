@@ -7,7 +7,6 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tilt } from "@/components/motion";
-import { Magnetic } from "@/components/motion/primitives2";
 
 interface OpportunityCardProps {
   project: Project | MatchedProject;
@@ -78,16 +77,14 @@ export function OpportunityCard({
               </Link>
             </Button>
             {onApply && (
-              <Magnetic className="flex-1">
-                <Button
-                  size="sm"
-                  variant="primary"
-                  className="w-full"
-                  onClick={() => onApply(project.id)}
-                >
-                  Apply
-                </Button>
-              </Magnetic>
+              <Button
+                size="sm"
+                variant="primary"
+                className="w-full"
+                onClick={() => onApply(project.id)}
+              >
+                Apply
+              </Button>
             )}
           </div>
         )}

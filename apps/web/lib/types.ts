@@ -35,6 +35,20 @@ export interface MatchedProject extends Project {
   skillMatches: string[];
 }
 
+export interface Student {
+  id: string;
+  name: string;
+  email: string;
+  avatar?: string | null;
+  university?: string | null;
+  major?: string | null;
+  graduationYear?: number | null;
+  skills: string[];
+  certCount: number;
+  verifiedCertCount: number;
+  applicationCount: number;
+}
+
 export interface Application {
   id: string;
   projectId: string;

@@ -54,6 +54,9 @@ export const API_ENDPOINTS = {
   certificates: {
     list: '/certificates',
   },
+  students: {
+    search: '/students',
+  },
   analytics: {
     employer: '/analytics/employer/analytics',
   },

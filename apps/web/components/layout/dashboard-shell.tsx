@@ -15,6 +15,8 @@ import {
   ListChecks,
   FileCheck2,
   LogOut,
+  Search,
+  UserPlus,
 } from "lucide-react";
 import { clearToken } from "@/lib/api-client";
 import { cn } from "@/lib/utils";
@@ -34,7 +36,9 @@ const navItems: NavItem[] = [
   { label: "My Applications", href: "/dashboard/student/applications", roles: ["student"], icon: ClipboardList, section: "student" },
   { label: "Profile", href: "/dashboard/student/profile", roles: ["student"], icon: User, section: "student" },
   { label: "Opportunities", href: "/dashboard/employer", roles: ["employer"], icon: Briefcase, section: "employer" },
+  { label: "Talent Search", href: "/dashboard/employer/talent", roles: ["employer"], icon: Search, section: "employer" },
   { label: "Applicants", href: "/dashboard/employer/applicants", roles: ["employer"], icon: Users, section: "employer" },
+  { label: "Team", href: "/dashboard/employer/team", roles: ["employer"], icon: UserPlus, section: "employer" },
   { label: "Company", href: "/dashboard/employer/company", roles: ["employer"], icon: Building2, section: "employer" },
   { label: "Overview", href: "/dashboard/admin", roles: ["admin"], icon: ShieldCheck, section: "admin" },
   { label: "Users", href: "/dashboard/admin/users", roles: ["admin"], icon: Users, section: "admin" },

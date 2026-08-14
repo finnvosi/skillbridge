@@ -38,6 +38,8 @@ export default function TeamPage() {
   const [loading, setLoading] = useState(true);
   const [members, setMembers] = useState<TeamMember[]>([]);
   const [busy, setBusy] = useState(false);
+  const [removingId, setRemovingId] = useState<string | null>(null);
+  const [confirmId, setConfirmId] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [saved, setSaved] = useState(false);
 
@@ -90,11 +92,16 @@ export default function TeamPage() {
 
   const remove = async (id: string) => {
     if (!token) return;
+    setRemovingId(id);
+    setError("");
     try {
       await apiRequest(API_ENDPOINTS.projects.teamRemove(id), { method: "DELETE", token });
       setMembers((m) => m.filter((x) => x.id !== id));
-    } catch {
-      // ignore
+      setConfirmId(null);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Failed to remove teammate");
+    } finally {
+      setRemovingId(null);
     }
   };
 
@@ -175,13 +182,33 @@ export default function TeamPage() {
                       <Badge variant="outline" size="sm">
                         <RoleIcon className="h-3 w-3" /> {r.label}
                       </Badge>
-                      <button
-                        onClick={() => remove(m.id)}
-                        className="rounded-lg p-2 text-gray-400 transition hover:bg-red-50 hover:text-[#FF0000]"
-                        aria-label={`Remove ${m.name}`}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
+                      {confirmId === m.id ? (
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs font-medium text-gray-500">Remove?</span>
+                          <button
+                            onClick={() => remove(m.id)}
+                            disabled={removingId === m.id}
+                            className="rounded-lg bg-[#FF0000] px-2.5 py-1 text-xs font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
+                          >
+                            {removingId === m.id ? "…" : "Yes"}
+                          </button>
+                          <button
+                            onClick={() => setConfirmId(null)}
+                            disabled={removingId === m.id}
+                            className="rounded-lg border border-gray-200 px-2.5 py-1 text-xs font-medium text-gray-600 transition hover:bg-gray-100"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => setConfirmId(m.id)}
+                          className="rounded-lg p-2 text-gray-400 transition hover:bg-red-50 hover:text-[#FF0000]"
+                          aria-label={`Remove ${m.name}`}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      )}
                     </div>
                   </div>
                 );

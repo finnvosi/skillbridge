@@ -31,6 +31,7 @@ export const API_ENDPOINTS = {
     list: '/projects',
     detail: (id: string) => `/projects/${id}`,
     apply: (id: string) => `/projects/${id}/apply`,
+    create: '/projects',
     myApplications: '/projects/student/applications',
     match: '/projects/student/match',
     employerProjects: '/projects/employer/projects',

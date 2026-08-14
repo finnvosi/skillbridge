@@ -16,11 +16,24 @@ import {
   FileCheck2,
   LogOut,
   Menu,
+  ArrowUpRight,
+  ChevronRight,
 } from "lucide-react";
+import {
+  motion,
+  AnimatePresence,
+  useMotionValue,
+  useSpring,
+  useMotionTemplate,
+  useReducedMotion,
+} from "framer-motion";
 import { clearToken } from "@/lib/api-client";
 import { cn } from "@/lib/utils";
 import type { ApiUser } from "@/lib/api-client";
-import { useState } from "react";
+import { useState, useRef } from "react";
+import { ScrollProgress } from "@/components/motion/scroll-progress";
+import { Button } from "@/components/ui/button";
+import { Magnetic } from "@/components/motion/primitives2";
 
 interface NavItem {
   label: string;
@@ -133,6 +146,8 @@ export function DashboardShell({
   const pathname = usePathname();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const reduce = useReducedMotion();
+  const navListRef = useRef<HTMLUListElement>(null);
 
   const items = navItems.filter(
     (i) => !user || i.roles.includes(user.role)
@@ -146,116 +161,125 @@ export function DashboardShell({
     router.push("/auth/login");
   };
 
+  /* hover-following pill indicator under nav links (spring-driven, not React state) */
+  const hoverX = useMotionValue(0);
+  const hoverW = useMotionValue(0);
+  const px = useSpring(hoverX, { stiffness: 280, damping: 26 });
+  const pw = useSpring(hoverW, { stiffness: 280, damping: 26 });
+  const pillTransform = useMotionTemplate`translateX(${px}px) width(${pw}px)`;
+
   return (
     <div className="flex min-h-screen flex-col bg-canvas">
-      {/* ===== Top header bar — always-visible, scrollable row ===== */}
-      <header className="relative z-30 flex h-16 shrink-0 items-center gap-3 border-b border-card-border bg-white/60 px-3 backdrop-blur-xl md:px-4">
-        {/* subtle corner-lit glow */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute bottom-0 left-1/2 -translate-x-1/2 h-3 w-40 rounded-full opacity-50"
-          style={{
-            background:
-              "radial-gradient(ellipse, rgba(60,9,108,0.22) 0%, rgba(60,9,108,0) 70%)",
-          }}
-        />
-        {/* background grain */}
-        <div className="bg-grain-strong absolute inset-0 -z-10 opacity-[0.2]" />
+      {/* ===== Floating editorial pill nav (fixed, not sticky) ===== */}
+      <header className="fixed inset-x-0 top-4 z-40 pointer-events-none">
+        <div className="flex justify-center px-3">
+          <div className="pointer-events-auto flex items-center gap-2 rounded-full border border-card-border bg-white/70 px-2 pl-1.5 shadow-soft backdrop-blur-xl">
+            {/* scroll progress (first child, rounded-full) */}
+            <ScrollProgress className="rounded-full" />
+            {/* purple logo tile */}
+            <Link
+              href="/"
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary"
+            >
+              <Image
+                src="/skillbridge-logo.svg"
+                alt="SkillBridge"
+                width={18}
+                height={18}
+                className="invert"
+              />
+            </Link>
 
-        {/* mobile menu button */}
-        <button
-          aria-label="Toggle navigation"
-          onClick={() => setMobileOpen(!mobileOpen)}
-          className="md:hidden"
-        >
-          <Menu className="h-5 w-5 text-gray-600" />
-        </button>
+            {/* nav links (center) */}
+            <nav className="flex-1 overflow-x-auto">
+              <ul
+                ref={navListRef}
+                className="relative flex items-center gap-1 whitespace-nowrap py-1.5 pl-2 pr-1 text-sm"
+              >
+                {/* hover-following pill indicator */}
+                {!reduce && (
+                  <motion.li
+                    aria-hidden
+                    className="pointer-events-none absolute top-0 left-0 h-full rounded-full bg-primary/10"
+                    style={{ transform: pillTransform }}
+                  />
+                )}
+                {items.map((item) => {
+                  const Icon = item.icon;
+                  const active = isActive(item.href);
+                  return (
+                    <li key={item.href}>
+                      <Link
+                        href={item.href}
+                        onMouseEnter={(e) => {
+                          if (reduce || !navListRef.current) return;
+                          const r = navListRef.current.getBoundingClientRect();
+                          const c = (
+                            e.currentTarget as HTMLElement
+                          ).getBoundingClientRect();
+                          hoverX.set(c.left - r.left + 6);
+                          hoverW.set(c.width);
+                        }}
+                        onMouseLeave={() => {
+                          if (reduce) return;
+                          hoverX.set(0);
+                          hoverW.set(0);
+                        }}
+                        onClick={() => setMobileOpen(false)}
+                        className={cn(
+                          "relative z-[2] flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-colors",
+                          active
+                            ? "text-primary"
+                            : "text-gray-600 hover:text-gray-900"
+                        )}
+                      >
+                        <Icon
+                          className={cn(
+                            "h-4 w-4",
+                            active ? "text-primary" : "text-gray-500"
+                          )}
+                        />
+                        {item.label}
+                        {active && (
+                          <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 h-0.5 w-4 rounded-full bg-primary" />
+                        )}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </nav>
 
-        {/* logo (left) */}
-        <Link
-          href="/"
-          className="flex items-center gap-2 font-display text-lg font-extrabold text-primary"
-        >
-          <Image
-            src="/skillbridge-logo.svg"
-            alt="SkillBridge"
-            width={24}
-            height={24}
-            className="h-6 w-auto"
-          />
-          <span className="hidden sm:inline">SkillBridge</span>
-        </Link>
-
-        {/* nav links (center) — scrollable on mobile, row on desktop */}
-        <nav className="flex-1 overflow-x-auto">
-          <div
-            className={cn(
-              "flex items-center gap-1.5 whitespace-nowrap",
-              mobileOpen ? "md:static" : "md:gap-1"
-            )}
-          >
-            {items.length === 0 && (
-              <p className="px-3 text-sm text-gray-500">No items</p>
-            )}
-            {items.map((item, idx) => {
-              const Icon = item.icon;
-              const firstInSection =
-                idx === 0 || items[idx - 1]?.section !== item.section;
-              const active = isActive(item.href);
-              return (
-                <div key={item.href}>
-                  {firstInSection && item.section !== "student" && (
-                    <span className="mx-2 hidden text-xs font-semibold uppercase text-gray-400 md:inline-block">
-                      {SECTION_LABEL[item.section]}
-                    </span>
-                  )}
-                  <Link
-                    href={item.href}
-                    onClick={() => setMobileOpen(false)}
-                    className={cn(
-                      "group flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium transition-all duration-200",
-                      active
-                        ? "bg-primary/10 text-primary shadow-soft"
-                        : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                    )}
-                  >
-                    <Icon
-                      className={cn(
-                        "h-4 w-4 transition-colors",
-                        active ? "text-primary" : "text-gray-400 group-hover:text-primary"
-                      )}
-                    />
-                    {item.label}
-                  </Link>
+            {/* user + CTA (right) */}
+            <div className="flex items-center gap-1.5 pl-1.5 pr-1">
+              {user && (
+                <div className="hidden flex-col items-end sm:flex">
+                  <p className="font-display text-sm font-bold text-gray-900">
+                    {user.name}
+                  </p>
+                  <p className="text-xs text-gray-500">{user.role}</p>
                 </div>
-              );
-            })}
-          </div>
-        </nav>
-
-        {/* user + logout (right) */}
-        <div className="flex items-center gap-3">
-          {user && (
-            <div className="hidden flex-col items-end sm:flex">
-              <p className="font-display text-sm font-bold text-gray-900">
-                {user.name}
-              </p>
-              <p className="text-xs text-gray-500">{user.role}</p>
+              )}
+              <Magnetic>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={logout}
+                  className="group rounded-full text-gray-600 hover:text-primary"
+                  title="Log out"
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span className="hidden sm:ml-1 sm:inline">Log out</span>
+                  <ArrowUpRight className="ml-1 h-3 w-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 opacity-0 group-hover:opacity-100" />
+                </Button>
+              </Magnetic>
             </div>
-          )}
-          <button
-            onClick={logout}
-            className="flex items-center justify-center rounded-xl p-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
-            title="Log out"
-          >
-            <LogOut className="h-4 w-4" />
-            <span className="hidden sm:ml-1 sm:inline">Log out</span>
-          </button>
+          </div>
         </div>
       </header>
 
-      {/* page content */}
-      <main className="relative flex-1 p-4 sm:p-8">
+      {/* page content — offset for fixed pill nav */}
+      <main className="relative flex-1 pt-20 lg:pt-24 p-4 sm:p-8">
         {/* corner-lit field on wide screens */}
         <div
           aria-hidden

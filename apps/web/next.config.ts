@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Emit a standalone, traced server bundle so Vercel reliably collects the
+  // serverless functions for this monorepo (root dir apps/web) build.
+  output: "standalone",
   // React Compiler is auto-enabled by Next 16 when present; it currently
   // crashes prerendering internal routes (_global-error/_not-found) with a
   // `useContext null` error on this Node/React combo. Disable until fixed.

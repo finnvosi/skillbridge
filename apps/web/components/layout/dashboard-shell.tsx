@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import {
   motion,
+  MotionConfig,
   AnimatePresence,
   useMotionValue,
   useSpring,
@@ -161,8 +162,11 @@ export function DashboardShell({
   const pw = useSpring(hoverW, { stiffness: 280, damping: 26 });
 
   return (
-    <div className="flex min-h-screen flex-col bg-canvas">
-      {/* ===== Full-width editorial header bar (fixed) ===== */}
+    <MotionConfig
+      transition={{ type: "spring", stiffness: 300, damping: 25 }}
+    >
+      <div className="flex min-h-screen flex-col bg-canvas">
+        {/* ===== Full-width editorial header bar (fixed) ===== */}
       <header className="fixed inset-x-4 top-4 z-40 pointer-events-none">
         <div className="pointer-events-auto flex items-center gap-2 rounded-2xl border border-card-border/60 bg-white/80 px-4 py-3 shadow-soft-lg backdrop-blur-xl">
           {/* scroll progress (full-width top edge) */}
@@ -191,7 +195,8 @@ export function DashboardShell({
                 {!reduce && (
                   <motion.li
                     aria-hidden
-                    className="pointer-events-none absolute top-1/2 -translate-y-1/2 h-10 rounded-xl bg-primary/10"
+                    className="pointer-events-none absolute top-1/2 -translate-y-1/2 h-10 w-1 rounded-xl bg-primary/15 shadow-inner"
+                    whileHover={{ scaleX: 1.02 }}
                     style={{ x: px, width: pw }}
                   />
                 )}
@@ -201,7 +206,11 @@ export function DashboardShell({
                   // exact match; child routes active on exact match too
                   const active = isExactActive(item.href);
                   return (
-                    <li key={item.href}>
+                    <motion.li
+                      key={item.href}
+                      whileHover={{ scale: 1.04 }}
+                      whileTap={{ scale: 0.96 }}
+                    >
                       <Link
                         href={item.href}
                         onMouseEnter={(e) => {
@@ -236,7 +245,7 @@ export function DashboardShell({
                           <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 h-0.5 w-6 rounded-full bg-primary" />
                         )}
                       </Link>
-                    </li>
+                    </motion.li>
                   );
                 })}
               </ul>
@@ -253,19 +262,21 @@ export function DashboardShell({
                 </div>
               )}
               {/* kebab menu */}
-              <button
+              <motion.button
                 type="button"
                 aria-label="Menu"
                 aria-haspopup="menu"
                 aria-expanded={menuOpen}
                 onClick={() => setMenuOpen(!menuOpen)}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.92 }}
                 className={cn(
                   "relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-900",
                   menuOpen && "bg-gray-100 text-gray-900"
                 )}
               >
                 <Menu className="h-4 w-4" />
-              </button>
+              </motion.button>
               {/* dropdown */}
               <AnimatePresence>
                 {menuOpen && (
@@ -334,6 +345,7 @@ export function DashboardShell({
         />
         {children}
       </main>
-    </div>
+      </div>
+    </MotionConfig>
   );
 }

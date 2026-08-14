@@ -13,8 +13,8 @@ export default function DashboardLayout({
 
   if (loading) {
     return (
-      <div className="flex min-h-screen bg-canvas">
-        <div className="hidden w-64 border-r border-white/70 bg-white/70 backdrop-blur-xl md:block" />
+      <div className="flex min-h-screen flex-col bg-canvas">
+        <div className="h-16 shrink-0 border-b border-card-border bg-white/60" />
         <div className="flex-1 space-y-4 p-8">
           <Skeleton className="h-8 w-48" />
           <Skeleton className="h-32 w-full" />

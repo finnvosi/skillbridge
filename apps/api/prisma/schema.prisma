@@ -94,8 +94,25 @@ model Employer {
   user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   projects       Project[]
   workExperiences WorkExperience[]
+  teamMembers   TeamMember[]
 
   @@index([verified])
+}
+
+model TeamMember {
+  id         String   @id @default(cuid())
+  employerId String
+  name       String
+  email      String
+  role       String   @default("recruiter") // recruiter | hiring_manager | admin
+  status     String   @default("invited")   // invited | active
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  employer Employer @relation(fields: [employerId], references: [id], onDelete: Cascade)
+
+  @@index([employerId])
+  @@unique([employerId, email])
 }
 
 model Factory {

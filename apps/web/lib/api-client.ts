@@ -35,6 +35,9 @@ export const API_ENDPOINTS = {
     match: '/projects/student/match',
     employerProjects: '/projects/employer/projects',
     employerApplications: '/projects/employer/applications',
+    teamList: '/projects/employer/team',
+    teamInvite: '/projects/employer/team',
+    teamRemove: (id: string) => `/projects/employer/team/${id}`,
   },
   admin: {
     overview: '/admin/overview',

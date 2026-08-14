@@ -33,6 +33,42 @@ export function PageHeader({
   );
 }
 
+PageHeader.defaultProps = { eyebrow: "", subtitle: "" };
+
+/** Section header: mono eyebrow + display title + optional action. */
+export function SectionHeader({
+  eyebrow,
+  title,
+  action,
+  className,
+}: {
+  eyebrow?: string;
+  title: string;
+  action?: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div
+      className={cn(
+        "mb-5 flex items-baseline justify-between gap-3 border-b border-card-border pb-2",
+        className
+      )}
+    >
+      <div>
+        {eyebrow && (
+          <p className="label-mono text-xs uppercase tracking-[0.18em] text-gray-500">
+            {eyebrow}
+          </p>
+        )}
+        <h2 className="display mt-1 text-2xl font-extrabold text-gray-900">
+          {title}
+        </h2>
+      </div>
+      {action && <div>{action}</div>}
+    </div>
+  );
+}
+
 /** Compact stat tile with corner-lit glow + frosted glass depth. */
 export function StatCard({
   icon: Icon,

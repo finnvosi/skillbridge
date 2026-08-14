@@ -43,7 +43,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   {
-    label: "Opportunities",
+    label: "Overview",
     href: "/dashboard/employer",
     roles: ["employer"],
     icon: Briefcase,
@@ -145,8 +145,9 @@ export function DashboardShell({
     (i) => !user || i.roles.includes(user.role)
   );
 
-  const isActive = (href: string) =>
-    pathname === href || pathname.startsWith(href + "/");
+  // a parent link (e.g. /dashboard/employer) is only "active" on its exact
+  // route — not when you're nested under a child route like /talent or /team
+  const isExactActive = (href: string) => pathname === href;
 
   const logout = () => {
     clearToken();
@@ -197,7 +198,9 @@ export function DashboardShell({
                 )}
                 {items.map((item) => {
                   const Icon = item.icon;
-                  const active = isActive(item.href);
+                  // parent routes (e.g. /dashboard/employer) only active on
+                  // exact match; child routes active on exact match too
+                  const active = isExactActive(item.href);
                   return (
                     <li key={item.href}>
                       <Link

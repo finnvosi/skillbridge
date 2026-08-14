@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { CheckCircle2, FileText } from 'lucide-react';
 
 interface ProfileShape {
   university?: string | null;
@@ -37,6 +38,9 @@ export default function StudentProfilePage() {
   const [skillInput, setSkillInput] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [certs, setCerts] = useState<
+    { id: string; title: string; description?: string | null; verified: boolean; createdAt: string }[]
+  >([]);
 
   const completion = Math.round(
     (REQUIRED_FIELDS.filter((f) => {
@@ -67,7 +71,15 @@ export default function StudentProfilePage() {
 
   useEffect(() => {
     fetchProfile();
-  }, [fetchProfile]);
+    if (token) {
+      apiRequest<{ certificates: { id: string; title: string; description?: string | null; verified: boolean; createdAt: string }[] }>(
+        API_ENDPOINTS.certificates.list,
+        { method: 'GET', token }
+      )
+        .then((d) => setCerts(d.certificates ?? []))
+        .catch(() => {});
+    }
+  }, [fetchProfile, token]);
 
   const addSkill = () => {
     const v = skillInput.trim();
@@ -235,6 +247,41 @@ export default function StudentProfilePage() {
       <Button onClick={save} disabled={saving}>
         {saving ? 'Saving...' : 'Save profile'}
       </Button>
+
+      <Card>
+        <h2 className="flex items-center gap-2 font-display text-lg font-semibold text-gray-900">
+          <FileText className="h-4 w-4 text-primary" /> Certifications
+        </h2>
+        {certs.length === 0 ? (
+          <p className="mt-2 text-sm text-gray-500">
+            No certificates yet. Upload credentials to build trust with employers.
+          </p>
+        ) : (
+          <ul className="mt-3 space-y-2">
+            {certs.map((c) => (
+              <li
+                key={c.id}
+                className="flex items-center justify-between gap-3 rounded-xl border border-gray-100 p-3"
+              >
+                <div className="min-w-0">
+                  <p className="flex items-center gap-2 font-medium text-gray-900">
+                    {c.title}
+                    {c.verified && (
+                      <CheckCircle2 className="h-3.5 w-3.5 text-green-600" />
+                    )}
+                  </p>
+                  {c.description && (
+                    <p className="truncate text-xs text-gray-500">{c.description}</p>
+                  )}
+                </div>
+                <Badge variant={c.verified ? 'primary' : 'outline'} size="sm">
+                  {c.verified ? 'Verified' : 'Pending'}
+                </Badge>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Card>
     </div>
   );
 }

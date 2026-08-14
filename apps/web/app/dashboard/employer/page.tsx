@@ -17,17 +17,30 @@ interface ProjectWithCount extends Project {
   _count?: { applications: number };
 }
 
+interface Analytics {
+  funnel: {
+    applied: number;
+    reviewing: number;
+    accepted: number;
+    rejected: number;
+    withdrawn: number;
+  };
+  acceptanceRate: number;
+  talentScore: number;
+}
+
 export default function EmployerDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [projects, setProjects] = useState<ProjectWithCount[]>([]);
   const [apps, setApps] = useState<Application[]>([]);
+  const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const token = getToken();
 
   useEffect(() => {
     if (!token) return;
     (async () => {
       try {
-        const [p, a] = await Promise.all([
+        const [p, a, an] = await Promise.all([
           apiRequest<{ projects: ProjectWithCount[] }>(
             API_ENDPOINTS.projects.employerProjects,
             { method: "GET", token }
@@ -36,9 +49,14 @@ export default function EmployerDashboardPage() {
             API_ENDPOINTS.projects.employerApplications,
             { method: "GET", token }
           ),
+          apiRequest<Analytics>(API_ENDPOINTS.analytics.employer, {
+            method: "GET",
+            token,
+          }).catch(() => null),
         ]);
         setProjects(p.projects ?? []);
         setApps(a.applications ?? []);
+        setAnalytics(an);
       } catch {
         // empty
       } finally {
@@ -101,10 +119,58 @@ export default function EmployerDashboardPage() {
         <StatCard
           icon={Star}
           label="Talent score"
-          value="92"
+          value={analytics ? `${analytics.talentScore}` : "—"}
           accent="text-purple-600"
         />
       </div>
+
+      {/* Hiring funnel */}
+      {analytics && analytics.funnel.applied > 0 && (
+        <section>
+          <h2 className="mb-3 font-display text-xl font-semibold text-gray-900">
+            Hiring funnel
+          </h2>
+          <Card className="p-5">
+            <div className="space-y-3">
+              {(
+                [
+                  { label: "Applied", value: analytics.funnel.applied, tone: "bg-primary" },
+                  { label: "In review", value: analytics.funnel.reviewing, tone: "bg-amber-400" },
+                  { label: "Accepted", value: analytics.funnel.accepted, tone: "bg-green-500" },
+                  { label: "Rejected", value: analytics.funnel.rejected, tone: "bg-red-400" },
+                ] as const
+              ).map((step) => {
+                const pct =
+                  analytics.funnel.applied > 0
+                    ? Math.round((step.value / analytics.funnel.applied) * 100)
+                    : 0;
+                return (
+                  <div key={step.label} className="flex items-center gap-3">
+                    <span className="w-24 text-sm text-gray-600">{step.label}</span>
+                    <div className="h-3 flex-1 overflow-hidden rounded-full bg-gray-100">
+                      <div
+                        className={`h-full rounded-full ${step.tone} transition-all`}
+                        style={{ width: `${Math.max(pct, step.value > 0 ? 6 : 0)}%` }}
+                      />
+                    </div>
+                    <span className="w-10 text-right text-sm font-medium text-gray-900">
+                      {step.value}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+            {analytics.funnel.accepted + analytics.funnel.rejected > 0 && (
+              <p className="mt-4 text-sm text-gray-500">
+                Acceptance rate:{" "}
+                <span className="font-medium text-gray-900">
+                  {analytics.acceptanceRate}%
+                </span>
+              </p>
+            )}
+          </Card>
+        </section>
+      )}
 
       {/* Pending applicants (Talent Pipeline insight) */}
       {pendingApps.length > 0 && (

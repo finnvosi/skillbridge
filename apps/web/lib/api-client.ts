@@ -50,6 +50,12 @@ export const API_ENDPOINTS = {
     deleteOpportunity: (id: string) => `/admin/opportunities/${id}`,
     updateApplication: (id: string) => `/admin/applications/${id}`,
   },
+  certificates: {
+    list: '/certificates',
+  },
+  analytics: {
+    employer: '/analytics/employer/analytics',
+  },
 } as const;
 
 export class ApiError extends Error {

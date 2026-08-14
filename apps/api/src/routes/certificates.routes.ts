@@ -9,12 +9,23 @@ import * as crypto from 'crypto';
 
 const router = Router();
 
-// Storage directory for certificates
-const CERT_UPLOAD_DIR = path.join(process.cwd(), 'uploads', 'certificates');
+// Storage directory for certificates.
+// Vercel serverless has a read-only cwd (/var/task); only /tmp is writable,
+// so fall back to /tmp in production. Wrapped so a missing dir can never crash
+// the function at import time.
+const CERT_UPLOAD_DIR =
+  process.env.NODE_ENV === 'production'
+    ? path.join('/tmp', 'skillbridge', 'uploads', 'certificates')
+    : path.join(process.cwd(), 'uploads', 'certificates');
 
-// Ensure upload directory exists
-if (!fs.existsSync(CERT_UPLOAD_DIR)) {
-  fs.mkdirSync(CERT_UPLOAD_DIR, { recursive: true });
+// Ensure upload directory exists (non-fatal — uploads are best-effort).
+try {
+  if (!fs.existsSync(CERT_UPLOAD_DIR)) {
+    fs.mkdirSync(CERT_UPLOAD_DIR, { recursive: true });
+  }
+} catch {
+  // Read-only filesystem (e.g. missing /tmp) — certificate file storage
+  // simply won't persist; API still serves.
 }
 
 // Upload a certificate (base64-encoded file in JSON body)

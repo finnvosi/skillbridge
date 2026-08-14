@@ -162,11 +162,10 @@ export function DashboardShell({
 
   return (
     <div className="flex min-h-screen flex-col bg-canvas">
-      {/* ===== Floating editorial pill nav (fixed, not sticky) ===== */}
-      <header className="fixed inset-x-0 top-4 z-40 pointer-events-none">
-        <div className="flex justify-center px-3">
-          <div className="pointer-events-auto flex items-center gap-1.5 rounded-full border border-card-border/60 bg-white/80 px-4 py-2.5 shadow-soft-lg backdrop-blur-xl">
-            {/* scroll progress (first child, rounded-full) */}
+      {/* ===== Full-width editorial header bar (fixed) ===== */}
+      <header className="fixed inset-x-4 top-4 z-40 pointer-events-none">
+        <div className="pointer-events-auto flex items-center gap-2 rounded-2xl border border-card-border/60 bg-white/80 px-4 py-3 shadow-soft-lg backdrop-blur-xl">
+          {/* scroll progress (full-width top edge) */}
             <ScrollProgress className="rounded-full" />
             {/* purple logo tile */}
             <Link
@@ -192,7 +191,7 @@ export function DashboardShell({
                 {!reduce && (
                   <motion.li
                     aria-hidden
-                    className="pointer-events-none absolute top-1/2 -translate-y-1/2 h-9 rounded-full bg-primary/10"
+                    className="pointer-events-none absolute top-1/2 -translate-y-1/2 h-10 rounded-xl bg-primary/10"
                     style={{ x: px, width: pw }}
                   />
                 )}
@@ -320,11 +319,10 @@ export function DashboardShell({
               </AnimatePresence>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
 
-      {/* page content — offset for fixed pill nav */}
-      <main className="relative flex-1 pt-20 lg:pt-24 p-4 sm:p-8">
+      {/* page content — offset for full-width header bar */}
+      <main className="relative flex-1 pt-24 lg:pt-28 p-4 sm:p-8">
         {/* corner-lit field on wide screens */}
         <div
           aria-hidden

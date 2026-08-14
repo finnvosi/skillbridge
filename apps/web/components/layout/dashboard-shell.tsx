@@ -21,10 +21,8 @@ import {
 } from "lucide-react";
 import {
   motion,
-  AnimatePresence,
   useMotionValue,
   useSpring,
-  useMotionTemplate,
   useReducedMotion,
 } from "framer-motion";
 import { clearToken } from "@/lib/api-client";
@@ -166,14 +164,13 @@ export function DashboardShell({
   const hoverW = useMotionValue(0);
   const px = useSpring(hoverX, { stiffness: 280, damping: 26 });
   const pw = useSpring(hoverW, { stiffness: 280, damping: 26 });
-  const pillTransform = useMotionTemplate`translateX(${px}px) width(${pw}px)`;
 
   return (
     <div className="flex min-h-screen flex-col bg-canvas">
       {/* ===== Floating editorial pill nav (fixed, not sticky) ===== */}
       <header className="fixed inset-x-0 top-4 z-40 pointer-events-none">
         <div className="flex justify-center px-3">
-          <div className="pointer-events-auto flex items-center gap-2 rounded-full border border-card-border bg-white/70 px-2 pl-1.5 shadow-soft backdrop-blur-xl">
+          <div className="pointer-events-auto flex items-center gap-1.5 rounded-full border border-card-border/60 bg-white/80 px-4 py-2.5 shadow-soft-lg backdrop-blur-xl">
             {/* scroll progress (first child, rounded-full) */}
             <ScrollProgress className="rounded-full" />
             {/* purple logo tile */}
@@ -194,14 +191,14 @@ export function DashboardShell({
             <nav className="flex-1 overflow-x-auto">
               <ul
                 ref={navListRef}
-                className="relative flex items-center gap-1 whitespace-nowrap py-1.5 pl-2 pr-1 text-sm"
+                className="relative flex items-center gap-1 px-2 py-1.5 text-sm"
               >
-                {/* hover-following pill indicator */}
+                {/* hover-following pill indicator */ }
                 {!reduce && (
                   <motion.li
                     aria-hidden
-                    className="pointer-events-none absolute top-0 left-0 h-full rounded-full bg-primary/10"
-                    style={{ transform: pillTransform }}
+                    className="pointer-events-none absolute top-1/2 -translate-y-1/2 h-9 rounded-full bg-primary/10"
+                    style={{ x: px, width: pw }}
                   />
                 )}
                 {items.map((item) => {

@@ -20,14 +20,7 @@ import {
   User as UserIcon,
   HelpCircle,
 } from "lucide-react";
-import {
-  motion,
-  MotionConfig,
-  AnimatePresence,
-  useMotionValue,
-  useSpring,
-  useReducedMotion,
-} from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { clearToken } from "@/lib/api-client";
 import { cn } from "@/lib/utils";
 import type { ApiUser } from "@/lib/api-client";
@@ -139,15 +132,14 @@ export function DashboardShell({
   const pathname = usePathname();
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
-  const reduce = useReducedMotion();
   const navListRef = useRef<HTMLUListElement>(null);
 
   const items = navItems.filter(
     (i) => !user || i.roles.includes(user.role)
   );
 
-  // a parent link (e.g. /dashboard/employer) is only "active" on its exact
-  // route — not when you're nested under a child route like /talent or /team
+  // exact-match active: parent route (/dashboard/employer) is only active on
+  // its own page — not when you're on a child route (/talent, /team, etc.)
   const isExactActive = (href: string) => pathname === href;
 
   const logout = () => {
@@ -155,182 +147,143 @@ export function DashboardShell({
     router.push("/auth/login");
   };
 
-  /* hover-following pill indicator under nav links (spring-driven, not React state) */
-  const hoverX = useMotionValue(0);
-  const hoverW = useMotionValue(0);
-  const px = useSpring(hoverX, { stiffness: 280, damping: 26 });
-  const pw = useSpring(hoverW, { stiffness: 280, damping: 26 });
-
   return (
-    <MotionConfig
-      transition={{ type: "spring", stiffness: 300, damping: 25 }}
-    >
-      <div className="flex min-h-screen flex-col bg-canvas">
-        {/* ===== Full-width editorial header bar (fixed) ===== */}
+    <div className="flex min-h-screen flex-col bg-canvas">
+      {/* ===== Full-width editorial header bar (fixed) ===== */}
       <header className="fixed inset-x-4 top-4 z-40 pointer-events-none">
         <div className="pointer-events-auto flex items-center gap-2 rounded-2xl border border-card-border/60 bg-white/80 px-4 py-3 shadow-soft-lg backdrop-blur-xl">
-          {/* scroll progress (full-width top edge) */}
-            <ScrollProgress className="rounded-full" />
-            {/* purple logo tile */}
-            <Link
-              href="/"
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary"
+          {/* scroll progress */}
+          <ScrollProgress className="rounded-full" />
+
+          {/* purple logo tile */}
+          <Link
+            href="/"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary"
+          >
+            <Image
+              src="/skillbridge-logo.svg"
+              alt="SkillBridge"
+              width={18}
+              height={18}
+              className="invert"
+            />
+          </Link>
+
+          {/* nav links (center) */}
+          <nav className="flex-1 overflow-x-auto">
+            <ul
+              ref={navListRef}
+              className="relative flex items-center gap-1 px-2 py-1.5 text-sm"
             >
-              <Image
-                src="/skillbridge-logo.svg"
-                alt="SkillBridge"
-                width={18}
-                height={18}
-                className="invert"
-              />
-            </Link>
-
-            {/* nav links (center) */}
-            <nav className="flex-1 overflow-x-auto">
-              <ul
-                ref={navListRef}
-                className="relative flex items-center gap-1 px-2 py-1.5 text-sm"
-              >
-                {/* hover-following pill indicator */}
-                {!reduce && (
-                  <motion.li
-                    aria-hidden
-                    className="pointer-events-none absolute top-1/2 -translate-y-1/2 h-10 w-1 rounded-xl bg-primary/15 shadow-inner"
-                    whileHover={{ scaleX: 1.02 }}
-                    style={{ x: px, width: pw }}
-                  />
-                )}
-                {items.map((item) => {
-                  const Icon = item.icon;
-                  // parent routes (e.g. /dashboard/employer) only active on
-                  // exact match; child routes active on exact match too
-                  const active = isExactActive(item.href);
-                  return (
-                    <motion.li
-                      key={item.href}
-                      whileHover={{ scale: 1.04 }}
-                      whileTap={{ scale: 0.96 }}
+              {items.map((item) => {
+                const Icon = item.icon;
+                const active = isExactActive(item.href);
+                return (
+                  <li key={item.href}>
+                    <Link
+                      href={item.href}
+                      className={cn(
+                        "relative z-[2] flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-all duration-200",
+                        active
+                          ? "bg-primary/12 text-primary shadow-xs"
+                          : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                      )}
                     >
-                      <Link
-                        href={item.href}
-                        onMouseEnter={(e) => {
-                          if (reduce || !navListRef.current) return;
-                          const r = navListRef.current.getBoundingClientRect();
-                          const c = (
-                            e.currentTarget as HTMLElement
-                          ).getBoundingClientRect();
-                          hoverX.set(c.left - r.left + 6);
-                          hoverW.set(c.width);
-                        }}
-                        onMouseLeave={() => {
-                          if (reduce) return;
-                          hoverX.set(0);
-                          hoverW.set(0);
-                        }}
+                      <Icon
                         className={cn(
-                          "relative z-[2] flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-all duration-200",
-                          active
-                            ? "bg-primary/12 text-primary shadow-xs"
-                            : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                          "h-4 w-4",
+                          active ? "text-primary" : "text-gray-500"
                         )}
-                      >
-                        <Icon
-                          className={cn(
-                            "h-4 w-4",
-                            active ? "text-primary" : "text-gray-500"
-                          )}
-                        />
-                        {item.label}
-                        {active && (
-                          <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 h-0.5 w-6 rounded-full bg-primary" />
-                        )}
-                      </Link>
-                    </motion.li>
-                  );
-                })}
-              </ul>
-            </nav>
+                      />
+                      {item.label}
+                      {active && (
+                        <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 h-0.5 w-6 rounded-full bg-primary" />
+                      )}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
 
-            {/* user + kebab menu + CTA (right) */}
-            <div className="relative flex items-center gap-1 pl-1.5 pr-1">
-              {user && (
-                <div className="hidden flex-col items-end sm:flex">
-                  <p className="font-display text-sm font-bold text-gray-900">
-                    {user.name}
-                  </p>
-                  <p className="text-xs text-gray-500">{user.role}</p>
-                </div>
+          {/* user + kebab menu (right) */}
+          <div className="relative flex items-center gap-1 pl-1.5 pr-1">
+            {user && (
+              <div className="hidden flex-col items-end sm:flex">
+                <p className="font-display text-sm font-bold text-gray-900">
+                  {user.name}
+                </p>
+                <p className="text-xs text-gray-500">{user.role}</p>
+              </div>
+            )}
+            {/* kebab menu */}
+            <button
+              type="button"
+              aria-label="Menu"
+              aria-haspopup="menu"
+              aria-expanded={menuOpen}
+              onClick={() => setMenuOpen(!menuOpen)}
+              className={cn(
+                "relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-900",
+                menuOpen && "bg-gray-100 text-gray-900"
               )}
-              {/* kebab menu */}
-              <motion.button
-                type="button"
-                aria-label="Menu"
-                aria-haspopup="menu"
-                aria-expanded={menuOpen}
-                onClick={() => setMenuOpen(!menuOpen)}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.92 }}
-                className={cn(
-                  "relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-900",
-                  menuOpen && "bg-gray-100 text-gray-900"
-                )}
-              >
-                <Menu className="h-4 w-4" />
-              </motion.button>
-              {/* dropdown */}
-              <AnimatePresence>
-                {menuOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -6, scale: 0.94 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: -6, scale: 0.94 }}
-                    transition={{ duration: 0.14, ease: [0.16, 1, 0.3, 1] }}
-                    className="absolute top-full right-0 z-50 mt-2 w-48 origin-top-right rounded-xl border border-card-border bg-white/80 p-1.5 shadow-soft-lg backdrop-blur-xl"
+            >
+              <Menu className="h-4 w-4" />
+            </button>
+            {/* dropdown — slide+fade (open/close only, not hover) */}
+            <AnimatePresence>
+              {menuOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: -6, scale: 0.94 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -6, scale: 0.94 }}
+                  transition={{ duration: 0.14, ease: [0.16, 1, 0.3, 1] }}
+                  className="absolute top-full right-0 z-50 mt-2 w-48 origin-top-right rounded-xl border border-card-border bg-white/80 p-1.5 shadow-soft-lg backdrop-blur-xl"
+                >
+                  <Link
+                    href={
+                      user?.role === "student"
+                        ? "/dashboard/student/profile"
+                        : "/dashboard/employer/team"
+                    }
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                   >
-                    <Link
-                      href={
-                        user?.role === "student"
-                          ? "/dashboard/student/profile"
-                          : "/dashboard/employer/team"
-                      }
-                      onClick={() => setMenuOpen(false)}
-                      className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                    >
-                      <UserIcon className="h-4 w-4" />
-                      Profile
-                    </Link>
-                    <Link
-                      href="/dashboard/employer/team"
-                      onClick={() => setMenuOpen(false)}
-                      className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                    >
-                      <Settings className="h-4 w-4" />
-                      Settings
-                    </Link>
-                    <Link
-                      href="https://skillbridge.demo"
-                      onClick={() => setMenuOpen(false)}
-                      className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                    >
-                      <HelpCircle className="h-4 w-4" />
-                      Help
-                    </Link>
-                    <button
-                      onClick={() => {
-                        setMenuOpen(false);
-                        logout();
-                      }}
-                      className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                    >
-                      <LogOut className="h-4 w-4" />
-                      Sign out
-                    </button>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+                    <UserIcon className="h-4 w-4" />
+                    Profile
+                  </Link>
+                  <Link
+                    href="/dashboard/employer/team"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                  >
+                    <Settings className="h-4 w-4" />
+                    Settings
+                  </Link>
+                  <Link
+                    href="https://skillbridge.demo"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                  >
+                    <HelpCircle className="h-4 w-4" />
+                    Help
+                  </Link>
+                  <button
+                    onClick={() => {
+                      setMenuOpen(false);
+                      logout();
+                    }}
+                    className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Sign out
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
-        </header>
+        </div>
+      </header>
 
       {/* page content — offset for full-width header bar */}
       <main className="relative flex-1 pt-24 lg:pt-28 p-4 sm:p-8">
@@ -345,7 +298,6 @@ export function DashboardShell({
         />
         {children}
       </main>
-      </div>
-    </MotionConfig>
+    </div>
   );
 }

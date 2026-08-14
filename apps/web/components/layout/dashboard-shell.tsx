@@ -10,17 +10,19 @@ import {
   Briefcase,
   Search,
   Users,
-  Building2,
   ShieldCheck,
   ListChecks,
   FileCheck2,
   LogOut,
   Menu,
-  ArrowUpRight,
-  ChevronRight,
+  BarChart3,
+  Settings,
+  User as UserIcon,
+  HelpCircle,
 } from "lucide-react";
 import {
   motion,
+  AnimatePresence,
   useMotionValue,
   useSpring,
   useReducedMotion,
@@ -30,8 +32,6 @@ import { cn } from "@/lib/utils";
 import type { ApiUser } from "@/lib/api-client";
 import { useState, useRef } from "react";
 import { ScrollProgress } from "@/components/motion/scroll-progress";
-import { Button } from "@/components/ui/button";
-import { Magnetic } from "@/components/motion/primitives2";
 
 interface NavItem {
   label: string;
@@ -58,7 +58,7 @@ const navItems: NavItem[] = [
   },
   {
     label: "Applicants",
-    href: "/dashboard/employer/applicants",
+    href: "/dashboard/employer/projects",
     roles: ["employer"],
     icon: Users,
     section: "employer",
@@ -71,10 +71,10 @@ const navItems: NavItem[] = [
     section: "employer",
   },
   {
-    label: "Company",
-    href: "/dashboard/employer/company",
+    label: "Analytics",
+    href: "/dashboard/employer/projects",
     roles: ["employer"],
-    icon: Building2,
+    icon: BarChart3,
     section: "employer",
   },
   {
@@ -128,12 +128,6 @@ const navItems: NavItem[] = [
   },
 ];
 
-const SECTION_LABEL: Record<NavItem["section"], string> = {
-  student: "Student",
-  employer: "Employer",
-  admin: "Admin",
-};
-
 export function DashboardShell({
   user,
   children,
@@ -143,7 +137,7 @@ export function DashboardShell({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const reduce = useReducedMotion();
   const navListRef = useRef<HTMLUListElement>(null);
 
@@ -193,7 +187,7 @@ export function DashboardShell({
                 ref={navListRef}
                 className="relative flex items-center gap-1 px-2 py-1.5 text-sm"
               >
-                {/* hover-following pill indicator */ }
+                {/* hover-following pill indicator */}
                 {!reduce && (
                   <motion.li
                     aria-hidden
@@ -222,7 +216,6 @@ export function DashboardShell({
                           hoverX.set(0);
                           hoverW.set(0);
                         }}
-                        onClick={() => setMobileOpen(false)}
                         className={cn(
                           "relative z-[2] flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-colors",
                           active
@@ -247,8 +240,8 @@ export function DashboardShell({
               </ul>
             </nav>
 
-            {/* user + CTA (right) */}
-            <div className="flex items-center gap-1.5 pl-1.5 pr-1">
+            {/* user + kebab menu + CTA (right) */}
+            <div className="relative flex items-center gap-1 pl-1.5 pr-1">
               {user && (
                 <div className="hidden flex-col items-end sm:flex">
                   <p className="font-display text-sm font-bold text-gray-900">
@@ -257,19 +250,71 @@ export function DashboardShell({
                   <p className="text-xs text-gray-500">{user.role}</p>
                 </div>
               )}
-              <Magnetic>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={logout}
-                  className="group rounded-full text-gray-600 hover:text-primary"
-                  title="Log out"
-                >
-                  <LogOut className="h-4 w-4" />
-                  <span className="hidden sm:ml-1 sm:inline">Log out</span>
-                  <ArrowUpRight className="ml-1 h-3 w-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 opacity-0 group-hover:opacity-100" />
-                </Button>
-              </Magnetic>
+              {/* kebab menu */}
+              <button
+                type="button"
+                aria-label="Menu"
+                aria-haspopup="menu"
+                aria-expanded={menuOpen}
+                onClick={() => setMenuOpen(!menuOpen)}
+                className={cn(
+                  "relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-900",
+                  menuOpen && "bg-gray-100 text-gray-900"
+                )}
+              >
+                <Menu className="h-4 w-4" />
+              </button>
+              {/* dropdown */}
+              <AnimatePresence>
+                {menuOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -6, scale: 0.94 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -6, scale: 0.94 }}
+                    transition={{ duration: 0.14, ease: [0.16, 1, 0.3, 1] }}
+                    className="absolute top-full right-0 z-50 mt-2 w-48 origin-top-right rounded-xl border border-card-border bg-white/80 p-1.5 shadow-soft-lg backdrop-blur-xl"
+                  >
+                    <Link
+                      href={
+                        user?.role === "student"
+                          ? "/dashboard/student/profile"
+                          : "/dashboard/employer/team"
+                      }
+                      onClick={() => setMenuOpen(false)}
+                      className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                    >
+                      <UserIcon className="h-4 w-4" />
+                      Profile
+                    </Link>
+                    <Link
+                      href="/dashboard/employer/team"
+                      onClick={() => setMenuOpen(false)}
+                      className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                    >
+                      <Settings className="h-4 w-4" />
+                      Settings
+                    </Link>
+                    <Link
+                      href="https://skillbridge.demo"
+                      onClick={() => setMenuOpen(false)}
+                      className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                    >
+                      <HelpCircle className="h-4 w-4" />
+                      Help
+                    </Link>
+                    <button
+                      onClick={() => {
+                        setMenuOpen(false);
+                        logout();
+                      }}
+                      className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      Sign out
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </div>
         </div>

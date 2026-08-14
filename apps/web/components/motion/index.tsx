@@ -7,7 +7,7 @@ import {
   useSpring,
   useVelocity,
   useReducedMotion,
-  useInView,
+  useMotionValue,
   type Variants,
 } from "framer-motion";
 import {
@@ -172,15 +172,13 @@ export function CountUp({
   suffix?: string;
   className?: string;
 }) {
-  const ref = useRef<HTMLSpanElement>(null);
-  const inView = useInView(ref, { once: true, margin: "0px 0px -20% 0px" });
   const reduce = useReducedMotion();
   const [display, setDisplay] = useState(reduce ? value : 0);
+  const [started, setStarted] = useState(false);
 
   useEffect(() => {
-    if (!inView) return;
-    if (reduce) {
-      setDisplay(value);
+    if (!started || reduce) {
+      if (reduce) setDisplay(value);
       return;
     }
     let raf = 0;
@@ -195,10 +193,15 @@ export function CountUp({
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [inView, value, reduce]);
+  }, [started, value, reduce]);
+
+  // Animate once on mount (stats are always in-viewport in the hero).
+  useEffect(() => {
+    setStarted(true);
+  }, []);
 
   return (
-    <span ref={ref} className={className}>
+    <span className={className}>
       {display}
       {suffix}
     </span>

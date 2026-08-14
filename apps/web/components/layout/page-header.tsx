@@ -33,34 +33,51 @@ export function PageHeader({
   );
 }
 
-/** Compact stat tile with an icon. */
+/** Compact stat tile with corner-lit glow + frosted glass depth. */
 export function StatCard({
   icon: Icon,
   label,
   value,
   accent = "text-primary",
+  iconBg = "bg-primary/10",
   className,
 }: {
   icon: React.ComponentType<{ className?: string }>;
   label: string;
   value: ReactNode;
   accent?: string;
+  iconBg?: string;
   className?: string;
 }) {
   return (
     <div
       className={cn(
-        "rounded-2xl border border-gray-200 bg-white p-5 shadow-soft",
+        "group relative flex items-center gap-4 overflow-hidden rounded-2xl border border-card-border bg-white/60 p-5 shadow-soft backdrop-blur-xl transition-all duration-300 hover:shadow-soft-lg",
         className
       )}
     >
-      <div className="flex items-center justify-between">
+      {/* corner-lit radial */}{" "}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -top-14 -right-14 h-32 w-32 rounded-full opacity-0 group-hover:opacity-60"
+        style={{
+          background:
+            "radial-gradient(circle, rgba(60,9,108,0.18) 0%, rgba(60,9,108,0) 70%)",
+        }}
+      />
+      <span
+        className={cn(
+          "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl",
+          iconBg,
+          accent
+        )}
+      >
+        <Icon className="h-4 w-4" />
+      </span>
+      <div className="min-w-0">
         <p className="text-sm text-gray-500">{label}</p>
-        <span className={cn("flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10", accent)}>
-          <Icon className="h-4 w-4" />
-        </span>
+        <p className={cn("display mt-0.5 text-2xl sm:text-3xl", accent)}>{value}</p>
       </div>
-      <p className={cn("display mt-3 text-3xl", accent)}>{value}</p>
     </div>
   );
 }

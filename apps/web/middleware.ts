@@ -1,5 +1,26 @@
 import { NextResponse } from 'next/server';
 
+// Build the connect-src allowlist. The web portal calls the Express API
+// (NEXT_PUBLIC_API_URL) directly from the browser, so that origin MUST be
+// allowed in CSP connect-src — otherwise every fetch (login, signup, data)
+// is silently blocked by the browser even though curl/Postman succeed.
+const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+let apiOrigin = '';
+try {
+  if (apiUrl && !apiUrl.startsWith('/')) apiOrigin = new URL(apiUrl).origin;
+} catch {
+  apiOrigin = '';
+}
+
+const connectSrc = [
+  "'self'",
+  'https://*.supabase.co',
+  'https://*.supabase.in',
+  apiOrigin,
+  'https://skillbridge-api.vercel.app',
+  'https://skillbridge-api-xi.vercel.app',
+].filter(Boolean).join(' ');
+
 // Security headers applied to every response. These are the cheap, high-impact
 // "protect" layer: they stop clickjacking, MIME sniffing, most XSS, and downgrade
 // attacks. CSP is intentionally strict but allows inline styles/scripts from the
@@ -21,7 +42,7 @@ const securityHeaders = {
     "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.supabase.co; " +
     "style-src 'self' 'unsafe-inline'; " +
     "font-src 'self' data:; " +
-    "connect-src 'self' https://*.supabase.co https://*.supabase.in; " +
+    `connect-src ${connectSrc}; ` +
     "frame-ancestors 'none'; " +
     "base-uri 'self'; " +
     "form-action 'self'",

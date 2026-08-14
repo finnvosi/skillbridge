@@ -85,13 +85,17 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
   });
 });
 
-// Start server
+// Start server — only when running as a long-lived process (local dev / container).
+// On Vercel the default export `app` is used as the serverless handler, so we must
+// NOT call app.listen there (it would try to bind a port that doesn't exist).
 const PORT = appConfig.port;
-app.listen(PORT, () => {
-  console.log(`🚀 SkillBridge API server running on port ${PORT}`);
-  console.log(`📊 Environment: ${appConfig.nodeEnv}`);
-  console.log(`🔗 Health check: http://localhost:${PORT}/health`);
-  console.log(`📖 API docs: http://localhost:${PORT}/api/v1`);
-});
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`🚀 SkillBridge API server running on port ${PORT}`);
+    console.log(`📊 Environment: ${appConfig.nodeEnv}`);
+    console.log(`🔗 Health check: http://localhost:${PORT}/health`);
+    console.log(`📖 API docs: http://localhost:${PORT}/api/v1`);
+  });
+}
 
 export default app;

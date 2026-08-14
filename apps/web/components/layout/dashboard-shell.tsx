@@ -217,10 +217,10 @@ export function DashboardShell({
                           hoverW.set(0);
                         }}
                         className={cn(
-                          "relative z-[2] flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-colors",
+                          "relative z-[2] flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-all duration-200",
                           active
-                            ? "text-primary"
-                            : "text-gray-600 hover:text-gray-900"
+                            ? "bg-primary/12 text-primary shadow-xs"
+                            : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
                         )}
                       >
                         <Icon
@@ -231,7 +231,7 @@ export function DashboardShell({
                         />
                         {item.label}
                         {active && (
-                          <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 h-0.5 w-4 rounded-full bg-primary" />
+                          <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 h-0.5 w-6 rounded-full bg-primary" />
                         )}
                       </Link>
                     </li>

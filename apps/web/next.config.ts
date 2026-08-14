@@ -12,8 +12,11 @@ const nextConfig: NextConfig = {
   //   env is unset we fall back to localhost so local builds still work, but
   //   production MUST set NEXT_PUBLIC_API_URL to the skillbridge-api URL.
   async rewrites() {
-    const apiBase =
-      process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+    // NEXT_PUBLIC_API_URL is the API origin (may or may not include /api/v1).
+    // The client appends /api/v1 itself, so the rewrite target must be the bare
+    // origin. Strip a trailing /api/v1 to avoid double-prefixing.
+    const raw = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+    const apiBase = raw.replace(/\/api\/v1\/?$/, "");
     return [
       {
         source: "/api/v1/:path*",

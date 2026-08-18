@@ -6,9 +6,7 @@ import Image from "next/image";
 import {
   AnimatePresence,
   motion,
-  useMotionValue,
   useReducedMotion,
-  useSpring,
 } from "framer-motion";
 import { gsap } from "gsap";
 import {
@@ -318,22 +316,6 @@ export function Navbar() {
     });
   }, [open, reduced]);
 
-  const pillX = useMotionValue(-100);
-  const pillW = useMotionValue(0);
-  const springX = useSpring(pillX, { stiffness: 350, damping: 30 });
-  const springW = useSpring(pillW, { stiffness: 350, damping: 30 });
-
-  const movePill = (
-    event: React.MouseEvent<HTMLAnchorElement> | React.FocusEvent<HTMLAnchorElement>,
-  ) => {
-    const nav = event.currentTarget.parentElement;
-    if (!nav) return;
-    const navBounds = nav.getBoundingClientRect();
-    const linkBounds = event.currentTarget.getBoundingClientRect();
-    pillX.set(linkBounds.left - navBounds.left);
-    pillW.set(linkBounds.width);
-  };
-
   const closeMenu = () => {
     setOpen(false);
     menuButtonRef.current?.focus();
@@ -371,38 +353,17 @@ export function Navbar() {
           </span>
         </Link>
 
-        <nav className="relative hidden items-center lg:flex" aria-label="Primary navigation">
-          <motion.span
-            style={{ x: springX, width: springW }}
-            className="pointer-events-none absolute -bottom-1 left-0 h-7 rounded-full bg-primary/10"
-          />
-          <div className="flex items-center gap-1" onMouseLeave={() => { pillX.set(-100); pillW.set(0); }}>
-            {PRIMARY_LINKS.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                onMouseEnter={movePill}
-                onFocus={movePill}
-                className={cn(
-                  "relative rounded-full px-3.5 py-1.5 font-mono text-[11px] font-medium uppercase tracking-[0.12em] transition-colors",
-                  open ? "text-white/65 hover:text-white" : "text-gray-500 hover:text-gray-900",
-                )}
-              >
-                {link.label}
-              </Link>
-            ))}
-          </div>
-          <span className={cn("mx-2 h-5 w-px", open ? "bg-white/20" : "bg-gray-200")} />
+        <div className="ml-auto flex items-center gap-2">
           <Link
             href="/auth/login"
             className={cn(
-              "rounded-full px-3 py-1.5 font-mono text-[11px] font-medium uppercase tracking-[0.12em] transition-colors",
+              "hidden rounded-full px-3 py-1.5 font-mono text-[11px] font-medium uppercase tracking-[0.12em] transition-colors md:inline-flex",
               open ? "text-white/65 hover:text-white" : "text-gray-600 hover:text-primary",
             )}
           >
             Sign in
           </Link>
-        </nav>
+        </div>
 
         <div className="flex items-center gap-2">
           <Button variant="primary" size="sm" asChild className="group hidden rounded-full md:inline-flex">

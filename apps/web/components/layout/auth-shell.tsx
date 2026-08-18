@@ -1,9 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { motion, useMotionValue, useSpring, useMotionTemplate, useReducedMotion } from "framer-motion";
+import {
+  motion,
+  useMotionValue,
+  useSpring,
+  useMotionTemplate,
+  useReducedMotion,
+} from "framer-motion";
 import { Stagger, StaggerItem } from "@/components/motion";
 import type { ReactNode } from "react";
+import { cn } from "@/lib/utils";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
@@ -66,10 +73,10 @@ export function AuthShell({
   };
 
   return (
-    <div className="flex min-h-screen bg-white text-gray-900">
+    <div className="flex min-h-dvh bg-white text-gray-900">
       {/* ===== Cinematic brand panel — desktop only ===== */}
       <aside
-        className="relative hidden w-1/2 overflow-hidden bg-[#0d0d0d] lg:flex"
+        className="relative hidden w-1/2 overflow-hidden bg-[#0d0d0d] lg:sticky lg:top-0 lg:flex lg:h-dvh lg:self-start"
         onPointerMove={onPointer}
       >
         {reduce ? (
@@ -141,14 +148,19 @@ export function AuthShell({
             </StaggerItem>
           </Stagger>
 
-          <p className="text-xs text-white/50">SkillBridge · Phnom Penh, Cambodia</p>
+          <p className="text-xs text-white/50">
+            SkillBridge · Phnom Penh, Cambodia
+          </p>
         </div>
       </aside>
 
       {/* ===== Form side — textured light field so the glass card has
           something to refract (flat white makes frosted glass invisible) ===== */}
       <main
-        className="relative flex w-full flex-col items-center justify-center overflow-hidden bg-[#F3F3F1] px-5 py-20 sm:px-8 lg:w-1/2 lg:px-16"
+        className={cn(
+          "relative flex min-h-dvh min-w-0 w-full flex-col items-center overflow-x-hidden overflow-y-auto bg-[#F3F3F1] px-5 py-10 sm:px-8 lg:w-1/2 lg:px-16 lg:py-12",
+          mode === "login" && "lg:justify-center",
+        )}
         onPointerMove={onPointerRight}
       >
         {/* ambient purple radial + grain behind the card */}
@@ -164,19 +176,23 @@ export function AuthShell({
         )}
 
         <motion.div
-          className="relative z-10 w-full max-w-lg"
+          className="relative z-10 w-full min-w-0 max-w-lg"
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: EASE, delay: 0.05 }}
         >
           {/* mobile wordmark */}
           <Link href="/" className="mb-10 flex items-center gap-2 lg:hidden">
-            <span className="font-display text-xl font-extrabold text-gray-900">SkillBridge</span>
+            <span className="font-display text-xl font-extrabold text-gray-900">
+              SkillBridge
+            </span>
           </Link>
 
-          <Stagger className="space-y-3">
+          <Stagger className="min-w-0 max-w-full space-y-3">
             <StaggerItem>
-              <h1 className="display text-4xl leading-tight text-gray-900">{title}</h1>
+              <h1 className="display text-4xl leading-tight text-gray-900">
+                {title}
+              </h1>
             </StaggerItem>
             <StaggerItem>
               <p className="text-base text-gray-600">{subtitle}</p>
@@ -186,14 +202,14 @@ export function AuthShell({
               {/* Multi-layer frosted glass card holder — matches the landing
                   glass language (.glass / nav pill). The colored aura behind
                   gives the blur something to refract so it reads as real glass. */}
-              <div className="relative mt-10">
+              <div className="relative mt-10 min-w-0 max-w-full">
                 {/* Layer 0 — soft purple/azure aura the glass blurs through */}
                 <div
                   aria-hidden
                   className="glow-purple pointer-events-none absolute -inset-6 -z-10 opacity-70 blur-2xl"
                 />
                 {/* Layer 1 — outer frosted glass shell */}
-                <div className="relative overflow-hidden rounded-[28px] border border-white/70 bg-white/55 p-[1.5px] shadow-soft-lg backdrop-blur-2xl backdrop-saturate-150">
+                <div className="relative w-full min-w-0 max-w-full overflow-hidden rounded-[28px] border border-white/70 bg-white/55 p-[1.5px] shadow-soft-lg backdrop-blur-2xl backdrop-saturate-150">
                   {/* Layer 2 — top sheen (light catching the glass edge) */}
                   <div
                     aria-hidden
@@ -212,7 +228,7 @@ export function AuthShell({
                   />
                   {/* Layer 4 — translucent inner surface (~10% — the holder reads
                       as glass now, the textured field behind refracts through) */}
-                  <div className="relative rounded-[26px] bg-white/10 p-10 sm:p-14">
+                  <div className="relative rounded-[26px] bg-white/10 p-6 sm:p-8 lg:p-10">
                     {children}
                   </div>
                 </div>

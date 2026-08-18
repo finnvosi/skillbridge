@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getToken, clearToken, apiRequest, API_ENDPOINTS } from '@/lib/api-client';
 import type { ApiUser } from '@/lib/api-client';
+import { getPostAuthDestination } from '@/lib/auth-routing';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -22,13 +23,7 @@ export default function DashboardPage() {
           token,
         });
 
-        const roleRedirects: Record<string, string> = {
-          student: '/dashboard/student',
-          employer: '/dashboard/employer',
-          admin: '/dashboard/admin',
-        };
-
-        router.push(roleRedirects[data.user.role] || '/auth/login');
+        router.push(getPostAuthDestination(data.user));
       } catch {
         clearToken();
         router.push('/auth/login');

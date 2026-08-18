@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getToken, clearToken, apiRequest, API_ENDPOINTS, ApiUser } from '@/lib/api-client';
+import { getPostAuthDestination } from '@/lib/auth-routing';
 
 /**
  * Fetches the current user from /auth/me. Redirects to /auth/login when
@@ -30,6 +31,13 @@ export function useAuthGuard(allowedRoles?: ApiUser['role'][]) {
           token,
         });
         if (cancelled) return;
+        if (
+          (data.user.role === 'student' || data.user.role === 'employer') &&
+          !data.user.onboardingCompleted
+        ) {
+          router.replace(getPostAuthDestination(data.user));
+          return;
+        }
         if (allowedRoles && !allowedRoles.includes(data.user.role)) {
           setDenied(true);
           setLoading(false);

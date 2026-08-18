@@ -7,6 +7,7 @@ import { apiRequest, ApiError, AuthResponse, API_ENDPOINTS, storeToken } from "@
 import { Button } from "@/components/ui/button";
 import { AuthField } from "@/components/auth/auth-field";
 import { Stagger, StaggerItem } from "@/components/motion";
+import { getPostAuthDestination } from "@/lib/auth-routing";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
@@ -39,12 +40,7 @@ export function LoginForm() {
       });
       storeToken(data.token, data.refreshToken);
 
-      const roleRedirects: Record<string, string> = {
-        student: "/dashboard/student",
-        employer: "/dashboard/employer",
-        admin: "/dashboard/admin",
-      };
-      router.push(roleRedirects[data.user.role] || "/dashboard");
+      router.push(getPostAuthDestination(data.user));
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "An error occurred. Please try again.");
     } finally {

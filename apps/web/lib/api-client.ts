@@ -26,6 +26,7 @@ export const API_ENDPOINTS = {
   users: {
     profile: '/users/profile',
     updateProfile: '/users/profile',
+    onboarding: '/users/onboarding',
   },
   projects: {
     list: '/projects',
@@ -161,6 +162,9 @@ export interface ApiUser {
   email: string;
   name: string;
   role: 'student' | 'employer' | 'factory' | 'admin' | 'worker';
+  onboardingStep: number;
+  onboardingCompleted: boolean;
+  profile?: Record<string, unknown>;
 }
 
 export interface AuthResponse {

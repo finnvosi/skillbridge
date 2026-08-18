@@ -28,12 +28,10 @@ const registerSchema = z.object({
   body: z.object({
     email: z.string().email(),
     password: z.string().min(8),
-    // Role is required and explicit (no default). The mobile app always sends
-    // it; requiring it prevents silently creating the wrong account type.
-    // SECURITY: only student/employer/worker may self-register. `admin` and
-    // `factory_admin` are provisioned out-of-band by an existing admin — never
-    // exposed to the public endpoint, or anyone could grant themselves admin.
-    role: z.enum(['student', 'employer', 'worker']),
+    // SkillBridge's public marketplace has exactly two self-serve account
+    // types. Admins are provisioned privately; legacy worker/factory roles are
+    // intentionally unavailable here.
+    role: z.enum(['student', 'employer']),
     name: z.string().min(2),
   }),
 });
@@ -59,8 +57,22 @@ function signTokens(user: { id: string; email: string; role: string }) {
   return { token, refreshToken };
 }
 
-function publicUser(user: { id: string; email: string; name: string; role: string }) {
-  return { id: user.id, email: user.email, name: user.name, role: user.role };
+function publicUser(user: {
+  id: string;
+  email: string;
+  name: string;
+  role: string;
+  onboardingStep: number;
+  onboardingCompletedAt: Date | null;
+}) {
+  return {
+    id: user.id,
+    email: user.email,
+    name: user.name,
+    role: user.role,
+    onboardingStep: user.onboardingStep,
+    onboardingCompleted: Boolean(user.onboardingCompletedAt),
+  };
 }
 
 // Register
@@ -87,7 +99,6 @@ router.post(
         // Create the role-specific profile row in the same transaction
         ...(role === 'student' ? { student: { create: {} } } : {}),
         ...(role === 'employer' ? { employer: { create: { companyName: name } } } : {}),
-        ...(role === 'worker' ? { worker: { create: {} } } : {}),
       },
     });
 

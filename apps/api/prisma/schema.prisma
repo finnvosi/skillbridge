@@ -19,10 +19,12 @@ enum UserRole {
 }
 
 enum ProjectStatus {
+  draft
   open
-  in_progress
+  paused
   completed
   cancelled
+  expired
 }
 
 enum ProjectType {
@@ -48,6 +50,8 @@ model User {
   avatar        String?
   emailVerified Boolean  @default(false)
   suspended     Boolean   @default(false)
+  onboardingStep Int     @default(0)
+  onboardingCompletedAt DateTime?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -66,6 +70,9 @@ model Student {
   major         String?
   graduationYear Int?
   skills        String[]
+  location      String?
+  opportunityTypes ProjectType[] @default([])
+  workPreference String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -84,8 +91,14 @@ model Employer {
   id          String    @id @default(cuid())
   userId      String    @unique
   companyName String
+  position    String?
   industry    String?
   companySize Int       @default(0)
+  website     String?
+  location    String?
+  hiringTypes ProjectType[] @default([])
+  hiringSkills String[]  @default([])
+  workPreference String?
   verified    Boolean   @default(false)
   verifiedAt  DateTime?
   createdAt   DateTime  @default(now())

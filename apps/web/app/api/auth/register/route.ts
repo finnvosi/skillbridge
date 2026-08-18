@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate role
-    const validRoles: UserRole[] = ['student', 'worker', 'employer', 'factory_admin'];
+    const validRoles: UserRole[] = ['student', 'employer'];
     if (!validRoles.includes(body.role)) {
       return NextResponse.json(
         { success: false, error: 'Invalid role' },

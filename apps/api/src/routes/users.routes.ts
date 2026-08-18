@@ -20,6 +20,38 @@ const updateProfileSchema = z.object({
   }),
 });
 
+const opportunityType = z.enum(['internship', 'part_time', 'freelance', 'full_time']);
+const workPreference = z.enum(['remote', 'onsite', 'hybrid', 'either']);
+
+const studentOnboardingSchema = z.object({
+  university: z.string().trim().min(2).max(120),
+  major: z.string().trim().min(2).max(120),
+  graduationYear: z
+    .number()
+    .int()
+    .min(new Date().getFullYear())
+    .max(new Date().getFullYear() + 10),
+  location: z.string().trim().min(2).max(120),
+  skills: z.array(z.string().trim().min(1).max(60)).min(1).max(10),
+  opportunityTypes: z.array(opportunityType).min(1).max(4),
+  workPreference,
+});
+
+const employerOnboardingSchema = z.object({
+  companyName: z.string().trim().min(2).max(160),
+  position: z.string().trim().min(2).max(120),
+  industry: z.string().trim().min(2).max(120),
+  companySize: z.number().int().min(1).max(1_000_000),
+  website: z.preprocess(
+    (value) => (value === '' ? undefined : value),
+    z.string().trim().url().max(240).optional()
+  ),
+  location: z.string().trim().min(2).max(120),
+  hiringTypes: z.array(opportunityType).min(1).max(4),
+  hiringSkills: z.array(z.string().trim().min(1).max(60)).min(1).max(10),
+  workPreference,
+});
+
 async function getUserWithProfile(id: string) {
   return prisma.user.findUnique({
     where: { id },
@@ -34,13 +66,22 @@ function profileShape(user: any) {
       major: user.student.major,
       graduationYear: user.student.graduationYear,
       skills: user.student.skills,
+      location: user.student.location,
+      opportunityTypes: user.student.opportunityTypes,
+      workPreference: user.student.workPreference,
     };
   }
   if (user?.employer) {
     return {
       companyName: user.employer.companyName,
+      position: user.employer.position,
       industry: user.employer.industry,
       companySize: user.employer.companySize,
+      website: user.employer.website,
+      location: user.employer.location,
+      hiringTypes: user.employer.hiringTypes,
+      hiringSkills: user.employer.hiringSkills,
+      workPreference: user.employer.workPreference,
       verified: user.employer.verified,
     };
   }
@@ -53,9 +94,21 @@ function profileShape(user: any) {
     };
   }
   if (user?.worker) {
-    return { skills: user.worker.skills };
+    return { skills: user.worker.skills, available: user.worker.available };
   }
   return {};
+}
+
+function ownUserShape(user: any) {
+  return {
+    id: user.id,
+    email: user.email,
+    name: user.name,
+    role: user.role,
+    onboardingStep: user.onboardingStep,
+    onboardingCompleted: Boolean(user.onboardingCompletedAt),
+    profile: profileShape(user),
+  };
 }
 
 // Get own profile
@@ -66,14 +119,76 @@ router.get(
     const user = await getUserWithProfile(req.user!.id);
     if (!user) return res.status(404).json({ error: 'User not found' });
 
+    res.json({ user: ownUserShape(user) });
+  })
+);
+
+// Complete the progressive, role-specific onboarding flow.
+router.put(
+  '/onboarding',
+  authenticate,
+  asyncHandler(async (req: AuthRequest, res: Response) => {
+    const user = await getUserWithProfile(req.user!.id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    if (user.role !== 'student' && user.role !== 'employer') {
+      return res.status(403).json({
+        error: 'Onboarding is only available to students and employers',
+      });
+    }
+
+    if (user.role === 'student') {
+      const parsed = studentOnboardingSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({
+          error: 'Validation failed',
+          details: parsed.error.errors.map((issue) => ({
+            field: issue.path.join('.'),
+            message: issue.message,
+          })),
+        });
+      }
+
+      await prisma.$transaction([
+        prisma.student.upsert({
+          where: { userId: user.id },
+          create: { userId: user.id, ...parsed.data },
+          update: parsed.data,
+        }),
+        prisma.user.update({
+          where: { id: user.id },
+          data: { onboardingStep: 3, onboardingCompletedAt: new Date() },
+        }),
+      ]);
+    } else {
+      const parsed = employerOnboardingSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({
+          error: 'Validation failed',
+          details: parsed.error.errors.map((issue) => ({
+            field: issue.path.join('.'),
+            message: issue.message,
+          })),
+        });
+      }
+
+      await prisma.$transaction([
+        prisma.employer.upsert({
+          where: { userId: user.id },
+          create: { userId: user.id, ...parsed.data },
+          update: parsed.data,
+        }),
+        prisma.user.update({
+          where: { id: user.id },
+          data: { onboardingStep: 3, onboardingCompletedAt: new Date() },
+        }),
+      ]);
+    }
+
+    const updated = await getUserWithProfile(user.id);
     res.json({
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        role: user.role,
-        profile: profileShape(user),
-      },
+      message: 'Onboarding completed successfully',
+      user: ownUserShape(updated),
     });
   })
 );
@@ -133,13 +248,7 @@ router.put(
     const updated = await getUserWithProfile(req.user!.id);
     res.json({
       message: 'Profile updated successfully',
-      user: {
-        id: updated!.id,
-        email: updated!.email,
-        name: updated!.name,
-        role: updated!.role,
-        profile: profileShape(updated),
-      },
+      user: ownUserShape(updated),
     });
   })
 );

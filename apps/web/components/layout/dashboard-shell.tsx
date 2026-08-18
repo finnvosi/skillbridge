@@ -15,7 +15,6 @@ import {
   FileCheck2,
   LogOut,
   Menu,
-  BarChart3,
   Settings,
   User as UserIcon,
   HelpCircle,
@@ -62,13 +61,6 @@ const navItems: NavItem[] = [
     href: "/dashboard/employer/team",
     roles: ["employer"],
     icon: User,
-    section: "employer",
-  },
-  {
-    label: "Analytics",
-    href: "/dashboard/employer/projects",
-    roles: ["employer"],
-    icon: BarChart3,
     section: "employer",
   },
   {

@@ -2,21 +2,18 @@
 
 import { useRef } from "react";
 import Link from "next/link";
-import { CheckCircle2 } from "lucide-react";
+import { ArrowUpRight, CheckCircle2 } from "lucide-react";
 import {
   motion,
-  useScroll,
-  useTransform,
-  useSpring,
-  useMotionValue,
-  useMotionTemplate,
   useReducedMotion,
+  useScroll,
+  useSpring,
+  useTransform,
 } from "framer-motion";
-import { FadeUp, WordReveal, CountUp } from "@/components/motion";
+import { CountUp, FadeUp, WordReveal } from "@/components/motion";
 import { Magnetic } from "@/components/motion/primitives2";
 import { Button } from "@/components/ui/button";
-import { HeroObject } from "./hero-object";
-import { HeroVideo } from "./hero-video";
+import { ProofWebGL } from "./proof-webgl";
 
 const stats = [
   { value: 2400, suffix: "+", label: "Verified students" },
@@ -25,185 +22,153 @@ const stats = [
   { value: 94, suffix: "%", label: "Hire-through rate" },
 ];
 
-type FloatingCard = {
-  initials: string;
-  name: string;
-  role: string;
-  metric: string;
-  pos: string;
-  drift: number;
-  delay: number;
-};
-
-const cards: FloatingCard[] = [
-  { initials: "SD", name: "Chan Dara", role: "Data student", metric: "3 projects verified", pos: "left-2 top-[22%]", drift: -14, delay: 0 },
-  { initials: "MS", name: "Meas Sophea", role: "Talent lead · Mekong", metric: "12 hires on proof", pos: "right-2 top-[30%]", drift: 16, delay: 0.6 },
-  { initials: "KR", name: "Ken Rithy", role: "Founder · CamTech", metric: "Built in Cambodia", pos: "left-6 bottom-[20%]", drift: 12, delay: 1.1 },
-];
-
-/** Floating "verified proof" card — gentle float + scroll parallax. Hook at top level. */
-function FloatingCard({
-  card,
-  scrollYProgress,
-}: {
-  card: FloatingCard;
-  scrollYProgress: import("framer-motion").MotionValue<number>;
-}) {
-  const y = useTransform(scrollYProgress, [0, 1], [0, card.drift * 2.4]);
-  return (
-    <motion.div
-      key={card.name}
-      className={`absolute ${card.pos} w-60 rounded-2xl border border-gray-200/80 bg-white/80 p-4 shadow-soft backdrop-blur-md`}
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: [0, card.drift, 0] }}
-      transition={{
-        opacity: { duration: 0.6, delay: card.delay },
-        y: { duration: 5 + card.delay, repeat: Infinity, ease: "easeInOut", delay: card.delay },
-      }}
-      style={{ y }}
-    >
-      <div className="flex items-center gap-3">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary-light font-display text-sm font-bold text-white">
-          {card.initials}
-        </span>
-        <div className="min-w-0">
-          <p className="truncate font-display text-sm font-bold text-gray-900">{card.name}</p>
-          <p className="truncate text-xs text-gray-500">{card.role}</p>
-        </div>
-      </div>
-      <div className="mt-3 flex items-center gap-1.5">
-        <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
-        <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-primary">
-          {card.metric}
-        </span>
-      </div>
-    </motion.div>
-  );
-}
-
+/**
+ * Landing hero: a cursor-reactive WebGL proof field replaces decorative cards.
+ * The field is progressively enhanced, has a static fallback, and is motion-gated.
+ */
 export function Hero() {
   const reduce = useReducedMotion();
   const sectionRef = useRef<HTMLElement>(null);
-
-  // ----- pointer spotlight -----
-  const mx = useMotionValue(50);
-  const my = useMotionValue(38);
-  const sx = useSpring(mx, { stiffness: 80, damping: 22 });
-  const sy = useSpring(my, { stiffness: 80, damping: 22 });
-  const spotlight = useMotionTemplate`radial-gradient(620px circle at ${sx}% ${sy}%, rgba(60,9,108,0.14), transparent 68%)`;
-
-  const onPointer = (e: React.PointerEvent<HTMLElement>) => {
-    if (reduce || !sectionRef.current) return;
-    const r = sectionRef.current.getBoundingClientRect();
-    mx.set(((e.clientX - r.left) / r.width) * 100);
-    my.set(((e.clientY - r.top) / r.height) * 100);
-  };
-
-  // ----- scroll parallax on copy -----
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start start", "end start"],
   });
-  const copyY = useTransform(scrollYProgress, [0, 1], [0, reduce ? 0 : -70]);
-  const copyOpacity = useTransform(scrollYProgress, [0, 0.8], [1, reduce ? 1 : 0.55]);
+  const copyY = useSpring(
+    useTransform(scrollYProgress, [0, 1], [0, reduce ? 0 : -82]),
+    { stiffness: 90, damping: 26 },
+  );
+  const copyOpacity = useTransform(
+    scrollYProgress,
+    [0, 0.8],
+    [1, reduce ? 1 : 0.42],
+  );
+  const fieldY = useSpring(
+    useTransform(scrollYProgress, [0, 1], [0, reduce ? 0 : -124]),
+    { stiffness: 80, damping: 25 },
+  );
 
   return (
     <section
       ref={sectionRef}
-      onPointerMove={onPointer}
-      className="relative overflow-hidden"
+      className="relative isolate min-h-[780px] overflow-hidden border-b border-[#E6E2F2] bg-[#FCFCFF]"
     >
-      {/* Hero background video — muted autoplay loop, morphs into scrub section */}
-      <HeroVideo />
-      {/* Readability veil over the video — light so the clip shows through */}
-      <div className="absolute inset-0 -z-10 bg-gradient-to-b from-white/40 via-white/25 to-white/70" />
-      <div className="glow-purple absolute inset-0 -z-10" />
-      {/* pointer-following spotlight */}
-      {!reduce && (
-        <motion.div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 -z-10"
-          style={{ background: spotlight }}
-        />
-      )}
-      <div className="bg-grain absolute inset-0 -z-10" />
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 -z-20 bg-[radial-gradient(90%_74%_at_72%_38%,rgba(224,242,254,0.88),transparent_58%),radial-gradient(58%_62%_at_52%_44%,rgba(233,216,253,0.64),transparent_66%),linear-gradient(180deg,#ffffff_0%,#FAF9FF_100%)]"
+      />
+      <div
+        aria-hidden="true"
+        className="bg-grain absolute inset-0 -z-10 opacity-70"
+      />
+      <ProofWebGL containerRef={sectionRef} reducedMotion={reduce} />
 
-      <div className="mx-auto max-w-7xl px-4 pt-20 sm:px-6 lg:px-8 lg:pt-28">
-        <motion.div style={{ y: copyY, opacity: copyOpacity }}>
-          <FadeUp>
-            <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1">
-              <span className="relative flex h-1.5 w-1.5">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-60" />
-                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-primary" />
+      <div className="pointer-events-none absolute inset-y-0 right-[6%] z-0 hidden w-px bg-gradient-to-b from-transparent via-primary/20 to-transparent lg:block" />
+      <div className="pointer-events-none absolute left-[54%] top-[22%] z-0 hidden size-2 rounded-full bg-primary shadow-[0_0_0_11px_rgba(124,58,237,0.1)] lg:block" />
+
+      <div className="relative z-10 mx-auto flex min-h-[780px] max-w-7xl flex-col px-5 pb-0 pt-32 sm:px-8 lg:px-10 lg:pt-40">
+        <div className="grid flex-1 grid-cols-1 items-center gap-12 pb-16 lg:grid-cols-12 lg:gap-10">
+          <motion.div
+            style={{ y: copyY, opacity: copyOpacity }}
+            className="relative lg:col-span-7"
+          >
+            <FadeUp>
+              <div className="inline-flex items-center gap-2 border border-primary/15 bg-white/40 px-3 py-1.5 backdrop-blur-md">
+                <span className="relative flex size-1.5">
+                  {!reduce && (
+                    <span className="absolute inline-flex size-full animate-ping rounded-full bg-primary/65" />
+                  )}
+                  <span className="relative inline-flex size-1.5 rounded-full bg-primary" />
+                </span>
+                <span className="font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-primary">
+                  Cambodia&apos;s verified talent network
+                </span>
+              </div>
+            </FadeUp>
+
+            <h1 className="display mt-8 max-w-4xl text-[clamp(3.8rem,8.2vw,7.7rem)] leading-[0.86] tracking-[-0.068em]">
+              <WordReveal text="Make your" delay={0.1} />
+              <br />
+              <WordReveal text="work" delay={0.24} />{" "}
+              <span className="bg-gradient-to-r from-primary via-primary-light to-accent bg-clip-text text-transparent">
+                <WordReveal text="visible." delay={0.38} />
               </span>
-              <span className="label-mono">Cambodia&apos;s verified talent network</span>
+            </h1>
+
+            <FadeUp delay={0.62}>
+              <p className="mt-9 max-w-xl text-lg leading-relaxed text-[#5E5871] sm:text-xl">
+                SkillBridge turns real student work into a verified signal
+                employers can actually read — before the interview, beyond the
+                résumé.
+              </p>
+            </FadeUp>
+
+            <FadeUp delay={0.76}>
+              <div className="mt-11 flex flex-col gap-3 sm:flex-row sm:items-center">
+                <Magnetic>
+                  <Button
+                    asChild
+                    variant="primary"
+                    size="lg"
+                    className="group rounded-none shadow-soft"
+                  >
+                    <Link href="/auth/register">
+                      Start your proof
+                      <ArrowUpRight className="size-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                    </Link>
+                  </Button>
+                </Magnetic>
+                <Link
+                  href="/#how"
+                  className="inline-flex items-center gap-2 px-3 py-3 font-mono text-[10px] font-medium uppercase tracking-[0.15em] text-gray-600 transition-colors hover:text-primary"
+                >
+                  See the system <span aria-hidden="true">↓</span>
+                </Link>
+              </div>
+            </FadeUp>
+          </motion.div>
+
+          <motion.div
+            style={{ y: fieldY }}
+            className="relative hidden min-h-[420px] lg:col-span-5 lg:block"
+            aria-hidden="true"
+          >
+            <div className="absolute inset-0 border border-white/70 bg-white/10 backdrop-blur-[2px]" />
+            <div className="absolute inset-x-5 top-5 flex items-center justify-between border-b border-primary/15 pb-3 font-mono text-[10px] uppercase tracking-[0.15em] text-primary/70">
+              <span>Proof field / 01</span>
+              <span>Live signal</span>
             </div>
-          </FadeUp>
-
-          {/* Oversized magazine headline */}
-          <h1 className="display mt-8 max-w-5xl text-[clamp(3rem,11vw,8.5rem)] leading-[0.9]">
-            <WordReveal text="Stop sending" delay={0.1} />
-            <br />
-            <WordReveal text="résumés." delay={0.28} />
-            <br />
-            <span className="bg-gradient-to-r from-primary to-primary-light bg-clip-text text-transparent">
-              <WordReveal text="Show the" delay={0.46} />
-            </span>{" "}
-            <span className="bg-gradient-to-r from-primary to-primary-light bg-clip-text text-transparent">
-              <WordReveal text="proof." delay={0.62} />
-            </span>
-          </h1>
-
-          <FadeUp delay={0.8}>
-            <p className="mt-8 max-w-xl text-lg leading-relaxed text-gray-600">
-              SkillBridge turns real student work into verified, portable proof
-              — and helps Cambodian employers hire on what&apos;s been done,
-              not what&apos;s been claimed.
-            </p>
-          </FadeUp>
-
-          <FadeUp delay={0.95}>
-            <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center">
-              <Magnetic>
-                <Button asChild variant="primary" size="lg" className="shadow-soft">
-                  <Link href="/auth/register">Get started free</Link>
-                </Button>
-              </Magnetic>
-              <Button asChild variant="outline" size="lg">
-                <Link href="/#how">See how it works</Link>
-              </Button>
+            <div className="absolute bottom-6 left-6 right-6 flex items-end justify-between border-t border-primary/15 pt-4">
+              <span className="max-w-[14rem] font-display text-2xl font-bold leading-none tracking-[-0.04em] text-[#241438]">
+                Move through the field.
+              </span>
+              <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-primary/70">
+                cursor reactive
+              </span>
             </div>
-          </FadeUp>
-        </motion.div>
-
-        {/* Centerpiece object — anchored, parallax + pointer tilt */}
-        <div className="mt-12 lg:mt-16">
-          <HeroObject />
+          </motion.div>
         </div>
 
-        {/* Stat strip under hero */}
-        <div className="mx-auto mt-8 grid max-w-5xl grid-cols-2 gap-px border-y border-gray-200 bg-gray-200 sm:grid-cols-4">
-          {stats.map((s) => (
-            <div key={s.label} className="bg-white px-6 py-6 text-center">
-              <div className="display text-3xl text-primary sm:text-4xl">
-                <CountUp value={s.value} suffix={s.suffix} />
+        <div className="relative z-10 grid grid-cols-2 border-x border-t border-[#E6E2F2] bg-white/38 backdrop-blur-md sm:grid-cols-4">
+          {stats.map((stat) => (
+            <div
+              key={stat.label}
+              className="border-b border-r border-[#E6E2F2] px-5 py-5 last:border-r-0 sm:border-b-0 sm:px-7 sm:py-7"
+            >
+              <div className="font-display text-3xl font-extrabold tracking-[-0.06em] text-primary sm:text-4xl">
+                <CountUp value={stat.value} suffix={stat.suffix} />
               </div>
-              <div className="mt-1 text-xs uppercase tracking-wide text-gray-500">
-                {s.label}
+              <div className="mt-1.5 font-mono text-[9px] uppercase tracking-[0.13em] text-gray-500 sm:text-[10px]">
+                {stat.label}
               </div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Floating "verified proof" cards — drift + parallax, desktop only */}
-      {!reduce && (
-        <div className="pointer-events-none absolute inset-0 hidden overflow-hidden xl:block">
-          {cards.map((c) => (
-            <FloatingCard key={c.name} card={c} scrollYProgress={scrollYProgress} />
-          ))}
-        </div>
-      )}
+      <div className="pointer-events-none absolute bottom-32 left-[8%] z-10 hidden items-center gap-2 font-mono text-[10px] uppercase tracking-[0.16em] text-primary/65 xl:flex">
+        <CheckCircle2 className="size-3.5" />
+        Cursor field / live proof
+      </div>
     </section>
   );
 }

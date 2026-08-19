@@ -3,11 +3,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import {
-  AnimatePresence,
-  motion,
-  useReducedMotion,
-} from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { gsap } from "gsap";
 import {
   ArrowUpRight,
@@ -162,9 +158,18 @@ function MegaMenu({
             backgroundSize: "56px 56px",
           }}
         />
-        <div data-mega-panel className="absolute inset-y-0 left-0 w-1/3 border-r border-white/10 bg-white/[0.018]" />
-        <div data-mega-panel className="absolute inset-y-0 left-1/3 w-1/3 border-r border-white/10 bg-[#3C096C]/[0.13]" />
-        <div data-mega-panel className="absolute inset-y-0 right-0 w-1/3 bg-white/[0.025]" />
+        <div
+          data-mega-panel
+          className="absolute inset-y-0 left-0 w-1/3 border-r border-white/10 bg-white/[0.018]"
+        />
+        <div
+          data-mega-panel
+          className="absolute inset-y-0 left-1/3 w-1/3 border-r border-white/10 bg-[#3C096C]/[0.13]"
+        />
+        <div
+          data-mega-panel
+          className="absolute inset-y-0 right-0 w-1/3 bg-white/[0.025]"
+        />
         <div className="absolute inset-x-0 top-[57%] h-px bg-gradient-to-r from-transparent via-[#9D4EDD]/70 to-transparent" />
         <div className="absolute left-[54%] top-[57%] size-2 -translate-x-1/2 -translate-y-1/2 bg-[#C77DFF] shadow-[0_0_0_9px_rgba(199,125,255,0.12)]" />
       </motion.div>
@@ -172,22 +177,37 @@ function MegaMenu({
       <div className="relative mx-auto grid h-full max-w-7xl grid-rows-[auto_1fr_auto] px-5 pb-6 pt-8 sm:px-8 sm:pt-10 lg:grid-cols-12 lg:grid-rows-[1fr_auto] lg:gap-x-8 lg:px-10 lg:pb-10">
         <div className="hidden lg:col-span-4 lg:flex lg:flex-col lg:justify-between">
           <div>
-            <p data-mega-reveal className="font-mono text-[10px] uppercase tracking-[0.22em] text-white/45">
+            <p
+              data-mega-reveal
+              className="font-mono text-[10px] uppercase tracking-[0.22em] text-white/45"
+            >
               SkillBridge / Navigation system
             </p>
-            <p data-mega-reveal className="mt-8 max-w-sm font-display text-5xl font-extrabold leading-[0.88] tracking-[-0.055em] text-white xl:text-6xl">
+            <p
+              data-mega-reveal
+              className="mt-8 max-w-sm font-display text-5xl font-extrabold leading-[0.88] tracking-[-0.055em] text-white xl:text-6xl"
+            >
               The proof should travel further than the résumé.
             </p>
           </div>
-          <div data-mega-reveal className="flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.18em] text-white/50">
+          <div
+            data-mega-reveal
+            className="flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.18em] text-white/50"
+          >
             <span className="size-2 rounded-full bg-[#C77DFF]" />
             Built for Cambodia
           </div>
         </div>
 
-        <nav aria-label="Primary menu" className="lg:col-span-7 lg:col-start-6 lg:flex lg:items-center">
+        <nav
+          aria-label="Primary menu"
+          className="lg:col-span-7 lg:col-start-6 lg:flex lg:items-center"
+        >
           <div className="w-full">
-            <p data-mega-reveal className="mb-4 font-mono text-[10px] uppercase tracking-[0.22em] text-white/45 lg:mb-7">
+            <p
+              data-mega-reveal
+              className="mb-4 font-mono text-[10px] uppercase tracking-[0.22em] text-white/45 lg:mb-7"
+            >
               Navigate / 03 routes
             </p>
             <div className="divide-y divide-white/15 border-y border-white/15">
@@ -273,7 +293,9 @@ export function Navbar() {
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
-    const inactiveSurfaces = Array.from(document.querySelectorAll("main, footer"));
+    const inactiveSurfaces = Array.from(
+      document.querySelectorAll("main, footer"),
+    );
     if (open) {
       document.body.style.overflow = "hidden";
       inactiveSurfaces.forEach((surface) => surface.setAttribute("inert", ""));
@@ -329,15 +351,31 @@ export function Navbar() {
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: reduced ? 0 : 0.5, ease: [0.22, 1, 0.36, 1] }}
         className={cn(
-          "pointer-events-auto relative z-20 mx-auto flex h-16 max-w-6xl items-center justify-between rounded-2xl border px-3 pl-3.5 shadow-soft-lg transition-colors duration-300 sm:h-[68px] sm:px-4",
+          "pointer-events-auto relative z-20 mx-auto flex h-16 max-w-6xl items-center justify-between overflow-hidden rounded-2xl border px-3 pl-3.5 shadow-soft-lg transition-[background-color,border-color,box-shadow] duration-500 [isolation:isolate] sm:h-[68px] sm:px-4",
           open
-            ? "border-white/10 bg-[#19181C] text-white backdrop-blur-xl"
+            ? "border-white/15 bg-[#19181C]/78 text-white shadow-[0_20px_65px_-22px_rgba(8,6,12,0.68),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-[28px]"
             : scrolled
-              ? "border-white/60 bg-white/75 backdrop-blur-xl"
-              : "border-white/40 bg-white/45 backdrop-blur-md",
+              ? "border-white/75 bg-white/52 shadow-[0_20px_65px_-28px_rgba(20,16,38,0.28),inset_0_1px_0_rgba(255,255,255,0.95)] backdrop-blur-[28px]"
+              : "border-white/70 bg-white/38 shadow-[0_18px_55px_-30px_rgba(34,22,60,0.22),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-[22px]",
         )}
       >
-        <Link href="/" className="group flex items-center gap-2.5" aria-label="SkillBridge home">
+        <div
+          aria-hidden="true"
+          className={cn(
+            "pointer-events-none absolute inset-0 z-0 bg-[linear-gradient(112deg,rgba(255,255,255,0.68)_0%,rgba(255,255,255,0.2)_34%,rgba(218,232,255,0.28)_58%,rgba(255,255,255,0.58)_100%)]",
+            open &&
+              "bg-[linear-gradient(112deg,rgba(255,255,255,0.1)_0%,rgba(124,58,237,0.13)_47%,rgba(255,255,255,0.06)_100%)]",
+          )}
+        >
+          <span className="absolute -left-10 top-0 h-full w-1/2 -skew-x-12 bg-white/18 blur-2xl" />
+          <span className="absolute -right-8 -top-10 size-28 rounded-full bg-[#C77DFF]/18 blur-3xl" />
+          <span className="absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-white/95 to-transparent" />
+        </div>
+        <Link
+          href="/"
+          className="group relative z-10 flex items-center gap-2.5"
+          aria-label="SkillBridge home"
+        >
           <span className="relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl bg-primary shadow-[0_6px_18px_-6px_rgba(60,9,108,0.6)] transition-transform duration-300 group-hover:scale-105">
             <Image
               src="/skillbridge-logo.svg"
@@ -348,25 +386,37 @@ export function Navbar() {
               priority
             />
           </span>
-          <span className={cn("font-display text-lg font-extrabold tracking-tight", open ? "text-white" : "text-gray-900")}>
+          <span
+            className={cn(
+              "font-display text-lg font-extrabold tracking-tight",
+              open ? "text-white" : "text-gray-900",
+            )}
+          >
             Skill<span className="text-primary">Bridge</span>
           </span>
         </Link>
 
-        <div className="ml-auto flex items-center gap-2">
+        <div className="relative z-10 ml-auto flex items-center gap-2">
           <Link
             href="/auth/login"
             className={cn(
               "hidden rounded-full px-3 py-1.5 font-mono text-[11px] font-medium uppercase tracking-[0.12em] transition-colors md:inline-flex",
-              open ? "text-white/65 hover:text-white" : "text-gray-600 hover:text-primary",
+              open
+                ? "text-white/65 hover:text-white"
+                : "text-gray-600 hover:text-primary",
             )}
           >
             Sign in
           </Link>
         </div>
 
-        <div className="flex items-center gap-2">
-          <Button variant="primary" size="sm" asChild className="group hidden rounded-full md:inline-flex">
+        <div className="relative z-10 flex items-center gap-2">
+          <Button
+            variant="primary"
+            size="sm"
+            asChild
+            className="group hidden rounded-full md:inline-flex"
+          >
             <Link href="/auth/register">
               Get started
               <ArrowUpRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />

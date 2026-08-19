@@ -62,11 +62,11 @@
   --color-canvas: var(--color-titanium);
 
   /* Typography families.
-     Brand spec: Urbanist (display/headings) + Poppins (body).
+     Brand spec: Urbanist (display/headings) + Jost (body).
      Loaded self-hosted via next/font/google in app/layout.tsx, which injects
-     --font-display (Urbanist) and --font-sans (Poppins) as CSS variables on
+     --font-display (Urbanist) and --font-sans (Jost) as CSS variables on
      <html>. The stacks below are fallback chains only — they rarely render. */
-  --font-sans: "Poppins", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-sans: "Jost", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --font-display: "Urbanist", "Helvetica Neue", Helvetica, Arial, ui-sans-serif, system-ui, sans-serif;
 
   /* Border radius (controlled, consistent) */

@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { Urbanist, Poppins } from "next/font/google";
+import { Urbanist, Jost } from "next/font/google";
 import "./globals.css";
 import { PreloaderMount } from "@/components/layout/preloader-mount";
 
-// Brand type system: Urbanist for headings (display), Poppins for body.
+// Brand type system: Urbanist for headings (display), Jost for body.
 // Self-hosted at build time via next/font (no FOUT, works offline).
 const urbanist = Urbanist({
   subsets: ["latin"],
@@ -12,7 +12,7 @@ const urbanist = Urbanist({
   display: "swap",
 });
 
-const poppins = Poppins({
+const jost = Jost({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
   variable: "--font-sans",
@@ -33,7 +33,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`h-full scroll-smooth ${urbanist.variable} ${poppins.variable}`}
+      className={`h-full scroll-smooth ${urbanist.variable} ${jost.variable}`}
     >
       <body className="relative min-h-full flex flex-col h-full bg-white text-foreground font-sans antialiased">
         <PreloaderMount />

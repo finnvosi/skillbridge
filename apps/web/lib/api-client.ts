@@ -11,55 +11,63 @@
 // In dev it defaults to /api/v1 (same-origin) which Next.js rewrites to the
 // Express server on :3001. This keeps requests on the Next.js origin so the
 // dev Content Security Policy doesn't block cross-origin fetches.
-export const API_URL = process.env.NEXT_PUBLIC_API_URL || '/api/v1';
+export const API_URL = process.env.NEXT_PUBLIC_API_URL || "/api/v1";
 
 export const API_ENDPOINTS = {
   auth: {
-    register: '/auth/register',
-    login: '/auth/login',
-    logout: '/auth/logout',
-    me: '/auth/me',
-    refresh: '/auth/refresh',
-    forgotPassword: '/auth/forgot-password',
-    resetPassword: '/auth/reset-password',
+    register: "/auth/register",
+    login: "/auth/login",
+    logout: "/auth/logout",
+    me: "/auth/me",
+    refresh: "/auth/refresh",
+    forgotPassword: "/auth/forgot-password",
+    resetPassword: "/auth/reset-password",
   },
   users: {
-    profile: '/users/profile',
-    updateProfile: '/users/profile',
-    onboarding: '/users/onboarding',
+    profile: "/users/profile",
+    updateProfile: "/users/profile",
+    onboarding: "/users/onboarding",
+    notifications: "/users/notifications",
+    markNotificationRead: (id: string) => `/users/notifications/${id}/read`,
+    markAllNotificationsRead: "/users/notifications/read-all",
   },
   projects: {
-    list: '/projects',
+    list: "/projects",
     detail: (id: string) => `/projects/${id}`,
     apply: (id: string) => `/projects/${id}/apply`,
-    create: '/projects',
-    myApplications: '/projects/student/applications',
-    match: '/projects/student/match',
-    employerProjects: '/projects/employer/projects',
-    employerApplications: '/projects/employer/applications',
-    teamList: '/projects/employer/team',
-    teamInvite: '/projects/employer/team',
+    create: "/projects",
+    myApplications: "/projects/student/applications",
+    match: "/projects/student/match",
+    employerProjects: "/projects/employer/projects",
+    employerApplications: "/projects/employer/applications",
+    updateApplication: (projectId: string, applicationId: string) =>
+      `/projects/${projectId}/applications/${applicationId}`,
+    withdrawApplication: (applicationId: string) =>
+      `/projects/student/applications/${applicationId}/withdraw`,
+    teamList: "/projects/employer/team",
+    teamInvite: "/projects/employer/team",
     teamRemove: (id: string) => `/projects/employer/team/${id}`,
   },
   admin: {
-    overview: '/admin/overview',
-    verifications: '/admin/verifications',
-    verifyUser: (type: string, id: string) => `/admin/verifications/${type}/${id}`,
-    users: '/users',
-    opportunities: '/admin/opportunities',
-    applications: '/admin/applications',
+    overview: "/admin/overview",
+    verifications: "/admin/verifications",
+    verifyUser: (type: string, id: string) =>
+      `/admin/verifications/${type}/${id}`,
+    users: "/users",
+    opportunities: "/admin/opportunities",
+    applications: "/admin/applications",
     deleteUser: (id: string) => `/admin/users/${id}`,
     deleteOpportunity: (id: string) => `/admin/opportunities/${id}`,
     updateApplication: (id: string) => `/admin/applications/${id}`,
   },
   certificates: {
-    list: '/certificates',
+    list: "/certificates",
   },
   students: {
-    search: '/students',
+    search: "/students",
   },
   analytics: {
-    employer: '/analytics/employer/analytics',
+    employer: "/analytics/employer/analytics",
   },
 } as const;
 
@@ -68,14 +76,14 @@ export class ApiError extends Error {
   details?: unknown;
   constructor(message: string, status: number, details?: unknown) {
     super(message);
-    this.name = 'ApiError';
+    this.name = "ApiError";
     this.status = status;
     this.details = details;
   }
 }
 
 interface RequestOptions {
-  method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+  method?: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
   body?: unknown;
   token?: string | null;
   query?: Record<string, string | number | boolean | undefined>;
@@ -89,24 +97,22 @@ interface ErrorBody {
 
 function isErrorBody(value: unknown): value is ErrorBody {
   return (
-    typeof value === 'object' &&
-    value !== null &&
-    !(value instanceof String)
+    typeof value === "object" && value !== null && !(value instanceof String)
   );
 }
 
-function buildUrl(path: string, query?: RequestOptions['query']): string {
+function buildUrl(path: string, query?: RequestOptions["query"]): string {
   // API_URL is now a same-origin path (e.g. /api/v1) so requests stay on the
   // Next.js origin and pass the dev Content Security Policy. The Next rewrite
   // proxies /api/v1/* -> the Express backend on :3001.
   const base =
-    typeof window !== 'undefined' && API_URL.startsWith('/')
+    typeof window !== "undefined" && API_URL.startsWith("/")
       ? `${window.location.origin}${API_URL}`
       : API_URL;
   const url = new URL(`${base}${path}`);
   if (query) {
     for (const [key, value] of Object.entries(query)) {
-      if (value !== undefined && value !== '') {
+      if (value !== undefined && value !== "") {
         url.searchParams.set(key, String(value));
       }
     }
@@ -116,20 +122,20 @@ function buildUrl(path: string, query?: RequestOptions['query']): string {
 
 export async function apiRequest<T = unknown>(
   path: string,
-  { method = 'GET', body, token, query }: RequestOptions = {}
+  { method = "GET", body, token, query }: RequestOptions = {},
 ): Promise<T> {
   const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   };
   if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
+    headers["Authorization"] = `Bearer ${token}`;
   }
 
   const res = await fetch(buildUrl(path, query), {
     method,
     headers,
     body: body !== undefined ? JSON.stringify(body) : undefined,
-    credentials: 'include', // for any cookie-based flows
+    credentials: "include", // for any cookie-based flows
   });
 
   let data: unknown = null;
@@ -161,7 +167,7 @@ export interface ApiUser {
   id: string;
   email: string;
   name: string;
-  role: 'student' | 'employer' | 'factory' | 'admin' | 'worker';
+  role: "student" | "employer" | "factory" | "admin" | "worker";
   onboardingStep: number;
   onboardingCompleted: boolean;
   profile?: Record<string, unknown>;
@@ -179,22 +185,22 @@ export interface AuthResponse {
  * with its bearer tokens.
  */
 export function storeToken(token: string, refreshToken: string): void {
-  if (typeof window !== 'undefined') {
-    localStorage.setItem('token', token);
-    localStorage.setItem('refreshToken', refreshToken);
+  if (typeof window !== "undefined") {
+    localStorage.setItem("token", token);
+    localStorage.setItem("refreshToken", refreshToken);
   }
 }
 
 export function getToken(): string | null {
-  if (typeof window !== 'undefined') {
-    return localStorage.getItem('token');
+  if (typeof window !== "undefined") {
+    return localStorage.getItem("token");
   }
   return null;
 }
 
 export function clearToken(): void {
-  if (typeof window !== 'undefined') {
-    localStorage.removeItem('token');
-    localStorage.removeItem('refreshToken');
+  if (typeof window !== "undefined") {
+    localStorage.removeItem("token");
+    localStorage.removeItem("refreshToken");
   }
 }

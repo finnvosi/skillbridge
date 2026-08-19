@@ -1,8 +1,8 @@
-import { Router, Request, Response } from 'express';
-import { z } from 'zod';
-import { prisma } from '../db/prisma';
-import { asyncHandler, validate } from '../middleware/validation';
-import { authenticate, AuthRequest } from '../middleware/auth';
+import { Router, Request, Response } from "express";
+import { z } from "zod";
+import { prisma } from "../db/prisma";
+import { asyncHandler, validate } from "../middleware/validation";
+import { authenticate, AuthRequest } from "../middleware/auth";
 
 const router = Router();
 
@@ -20,8 +20,13 @@ const updateProfileSchema = z.object({
   }),
 });
 
-const opportunityType = z.enum(['internship', 'part_time', 'freelance', 'full_time']);
-const workPreference = z.enum(['remote', 'onsite', 'hybrid', 'either']);
+const opportunityType = z.enum([
+  "internship",
+  "part_time",
+  "freelance",
+  "full_time",
+]);
+const workPreference = z.enum(["remote", "onsite", "hybrid", "either"]);
 
 const studentOnboardingSchema = z.object({
   university: z.string().trim().min(2).max(120),
@@ -43,8 +48,8 @@ const employerOnboardingSchema = z.object({
   industry: z.string().trim().min(2).max(120),
   companySize: z.number().int().min(1).max(1_000_000),
   website: z.preprocess(
-    (value) => (value === '' ? undefined : value),
-    z.string().trim().url().max(240).optional()
+    (value) => (value === "" ? undefined : value),
+    z.string().trim().url().max(240).optional(),
   ),
   location: z.string().trim().min(2).max(120),
   hiringTypes: z.array(opportunityType).min(1).max(4),
@@ -113,37 +118,37 @@ function ownUserShape(user: any) {
 
 // Get own profile
 router.get(
-  '/profile',
+  "/profile",
   authenticate,
   asyncHandler(async (req: AuthRequest, res: Response) => {
     const user = await getUserWithProfile(req.user!.id);
-    if (!user) return res.status(404).json({ error: 'User not found' });
+    if (!user) return res.status(404).json({ error: "User not found" });
 
     res.json({ user: ownUserShape(user) });
-  })
+  }),
 );
 
 // Complete the progressive, role-specific onboarding flow.
 router.put(
-  '/onboarding',
+  "/onboarding",
   authenticate,
   asyncHandler(async (req: AuthRequest, res: Response) => {
     const user = await getUserWithProfile(req.user!.id);
-    if (!user) return res.status(404).json({ error: 'User not found' });
+    if (!user) return res.status(404).json({ error: "User not found" });
 
-    if (user.role !== 'student' && user.role !== 'employer') {
+    if (user.role !== "student" && user.role !== "employer") {
       return res.status(403).json({
-        error: 'Onboarding is only available to students and employers',
+        error: "Onboarding is only available to students and employers",
       });
     }
 
-    if (user.role === 'student') {
+    if (user.role === "student") {
       const parsed = studentOnboardingSchema.safeParse(req.body);
       if (!parsed.success) {
         return res.status(400).json({
-          error: 'Validation failed',
+          error: "Validation failed",
           details: parsed.error.errors.map((issue) => ({
-            field: issue.path.join('.'),
+            field: issue.path.join("."),
             message: issue.message,
           })),
         });
@@ -164,9 +169,9 @@ router.put(
       const parsed = employerOnboardingSchema.safeParse(req.body);
       if (!parsed.success) {
         return res.status(400).json({
-          error: 'Validation failed',
+          error: "Validation failed",
           details: parsed.error.errors.map((issue) => ({
-            field: issue.path.join('.'),
+            field: issue.path.join("."),
             message: issue.message,
           })),
         });
@@ -187,23 +192,31 @@ router.put(
 
     const updated = await getUserWithProfile(user.id);
     res.json({
-      message: 'Onboarding completed successfully',
+      message: "Onboarding completed successfully",
       user: ownUserShape(updated),
     });
-  })
+  }),
 );
 
 // Update own profile
 router.put(
-  '/profile',
+  "/profile",
   authenticate,
   validate(updateProfileSchema),
   asyncHandler(async (req: AuthRequest, res: Response) => {
-    const { name, university, major, graduationYear, skills, companyName, industry, companySize } =
-      req.body;
+    const {
+      name,
+      university,
+      major,
+      graduationYear,
+      skills,
+      companyName,
+      industry,
+      companySize,
+    } = req.body;
 
     const user = await prisma.user.findUnique({ where: { id: req.user!.id } });
-    if (!user) return res.status(404).json({ error: 'User not found' });
+    if (!user) return res.status(404).json({ error: "User not found" });
 
     // Update base User fields
     if (name) {
@@ -211,7 +224,7 @@ router.put(
     }
 
     // Update role-specific profile
-    if (user.role === 'student') {
+    if (user.role === "student") {
       await prisma.student.upsert({
         where: { userId: user.id },
         create: {
@@ -228,12 +241,12 @@ router.put(
           ...(skills !== undefined ? { skills } : {}),
         },
       });
-    } else if (user.role === 'employer') {
+    } else if (user.role === "employer") {
       await prisma.employer.upsert({
         where: { userId: user.id },
         create: {
           userId: user.id,
-          companyName: companyName ?? name ?? 'Unknown Company',
+          companyName: companyName ?? name ?? "Unknown Company",
           industry: industry ?? null,
           companySize: companySize ?? 0,
         },
@@ -247,22 +260,80 @@ router.put(
 
     const updated = await getUserWithProfile(req.user!.id);
     res.json({
-      message: 'Profile updated successfully',
+      message: "Profile updated successfully",
       user: ownUserShape(updated),
     });
-  })
+  }),
+);
+
+router.get(
+  "/notifications",
+  authenticate,
+  asyncHandler(async (req: AuthRequest, res: Response) => {
+    const limit = Math.min(50, Math.max(1, Number(req.query.limit) || 20));
+    const [notifications, unreadCount] = await Promise.all([
+      prisma.notification.findMany({
+        where: { userId: req.user!.id },
+        orderBy: { createdAt: "desc" },
+        take: limit,
+        select: {
+          id: true,
+          applicationId: true,
+          type: true,
+          title: true,
+          body: true,
+          readAt: true,
+          createdAt: true,
+        },
+      }),
+      prisma.notification.count({
+        where: { userId: req.user!.id, readAt: null },
+      }),
+    ]);
+    res.json({ notifications, unreadCount });
+  }),
+);
+
+router.patch(
+  "/notifications/:id/read",
+  authenticate,
+  asyncHandler(async (req: AuthRequest, res: Response) => {
+    const notification = await prisma.notification.updateMany({
+      where: { id: req.params.id, userId: req.user!.id },
+      data: { readAt: new Date() },
+    });
+    if (notification.count !== 1)
+      return res.status(404).json({ error: "Notification not found" });
+    res.json({ message: "Notification marked as read" });
+  }),
+);
+
+router.post(
+  "/notifications/read-all",
+  authenticate,
+  asyncHandler(async (req: AuthRequest, res: Response) => {
+    const result = await prisma.notification.updateMany({
+      where: { userId: req.user!.id, readAt: null },
+      data: { readAt: new Date() },
+    });
+    res.json({ message: "Notifications marked as read", count: result.count });
+  }),
 );
 
 // Get all users (admin only)
 router.get(
-  '/',
+  "/",
   authenticate,
   asyncHandler(async (req: AuthRequest, res: Response) => {
-    if (req.user!.role !== 'admin') {
-      return res.status(403).json({ error: 'Admin access required' });
+    if (req.user!.role !== "admin") {
+      return res.status(403).json({ error: "Admin access required" });
     }
 
-    const { role, page = '1', limit = '20' } = req.query as Record<string, string>;
+    const {
+      role,
+      page = "1",
+      limit = "20",
+    } = req.query as Record<string, string>;
     const pageNum = Math.max(1, parseInt(page));
     const limitNum = Math.min(100, Math.max(1, parseInt(limit)));
 
@@ -272,8 +343,14 @@ router.get(
         where,
         skip: (pageNum - 1) * limitNum,
         take: limitNum,
-        orderBy: { createdAt: 'desc' },
-        select: { id: true, email: true, name: true, role: true, createdAt: true },
+        orderBy: { createdAt: "desc" },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          role: true,
+          createdAt: true,
+        },
       }),
       prisma.user.count({ where }),
     ]);
@@ -287,16 +364,16 @@ router.get(
         totalPages: Math.ceil(total / limitNum),
       },
     });
-  })
+  }),
 );
 
 // Get user by ID
 router.get(
-  '/:id',
+  "/:id",
   authenticate,
   asyncHandler(async (req: AuthRequest, res: Response) => {
     const user = await getUserWithProfile(req.params.id);
-    if (!user) return res.status(404).json({ error: 'User not found' });
+    if (!user) return res.status(404).json({ error: "User not found" });
 
     res.json({
       user: {
@@ -307,41 +384,39 @@ router.get(
         profile: profileShape(user),
       },
     });
-  })
+  }),
 );
-
 
 // Change user role (admin only)
 router.put(
-  '/:id/role',
+  "/:id/role",
   authenticate,
   asyncHandler(async (req: AuthRequest, res: Response) => {
-    if (req.user!.role !== 'admin') {
-      return res.status(403).json({ error: 'Admin access required' });
+    if (req.user!.role !== "admin") {
+      return res.status(403).json({ error: "Admin access required" });
     }
-    const { role } = req.body as { role: 'student' | 'employer' | 'admin' };
-    
-    if (!['student', 'employer', 'admin'].includes(role)) {
-      return res.status(400).json({ error: 'Invalid role' });
+    const { role } = req.body as { role: "student" | "employer" | "admin" };
+
+    if (!["student", "employer", "admin"].includes(role)) {
+      return res.status(400).json({ error: "Invalid role" });
     }
-    
+
     // If changing from student, remove student profile
-    if (role !== 'student') {
+    if (role !== "student") {
       await prisma.student.deleteMany({ where: { userId: req.params.id } });
     }
     // If changing from employer, remove employer profile
-    if (role !== 'employer') {
+    if (role !== "employer") {
       await prisma.employer.deleteMany({ where: { userId: req.params.id } });
     }
-    
+
     const user = await prisma.user.update({
       where: { id: req.params.id },
       data: { role },
     });
-    
-    res.json({ message: 'Role updated', user });
-  })
-);
 
+    res.json({ message: "Role updated", user });
+  }),
+);
 
 export default router;

@@ -36,9 +36,26 @@ enum ProjectType {
 
 enum ApplicationStatus {
   pending
+  reviewing
+  shortlisted
   accepted
+  hired
   rejected
   withdrawn
+}
+
+enum ApplicationEventType {
+  application_submitted
+  application_reviewed
+  candidate_shortlisted
+  application_accepted
+  candidate_hired
+  application_rejected
+  application_withdrawn
+}
+
+enum NotificationType {
+  application_status_changed
 }
 
 model User {
@@ -59,6 +76,8 @@ model User {
   employer  Employer?
   factory   Factory?
   worker    Worker?
+  applicationStatusHistory ApplicationStatusHistory[]
+  notifications Notification[]
 
   @@index([role])
 }
@@ -181,6 +200,8 @@ model Application {
   projectId      String
   studentId      String
   status         ApplicationStatus @default(pending)
+  reviewNote     String?
+  candidateFeedback String?
   coverLetter    String?
   proposedBudget Float?
   createdAt      DateTime         @default(now())
@@ -188,11 +209,64 @@ model Application {
 
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
   student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  statusHistory ApplicationStatusHistory[]
+  events        ApplicationEvent[]
+  notifications Notification[]
 
   @@unique([projectId, studentId])
   @@index([projectId])
   @@index([studentId])
   @@index([status])
+}
+
+// These workflow records already exist in the applied hiring-workflow
+// migration. Keep them in the Prisma schema so lifecycle writes are typed and
+// generated client access matches the database.
+model ApplicationStatusHistory {
+  id                String            @id @default(cuid())
+  applicationId     String
+  previousStatus    ApplicationStatus
+  newStatus         ApplicationStatus
+  actorId           String?
+  reviewNote        String?
+  candidateFeedback String?
+  createdAt         DateTime          @default(now())
+
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  actor       User?       @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([applicationId, createdAt])
+  @@index([actorId])
+}
+
+model ApplicationEvent {
+  id            String               @id @default(cuid())
+  applicationId String
+  eventType     ApplicationEventType
+  actorId       String?
+  createdAt     DateTime             @default(now())
+
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@index([applicationId, createdAt])
+  @@index([eventType, createdAt])
+}
+
+model Notification {
+  id            String           @id @default(cuid())
+  userId        String
+  applicationId String?
+  type          NotificationType
+  title         String
+  body          String
+  readAt        DateTime?
+  createdAt     DateTime         @default(now())
+
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  application Application? @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([applicationId])
 }
 
 model Certificate {

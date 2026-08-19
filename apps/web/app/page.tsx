@@ -30,6 +30,7 @@ import { Hero } from "@/components/sections/hero";
 import { CaseStudies } from "@/components/sections/case-studies";
 import { StickySteps } from "@/components/sections/sticky-steps";
 import { ScrubShowcase } from "@/components/sections/scrub-showcase";
+import { GapScrollStory } from "@/components/sections/gap-scroll-story";
 
 const proof = [
   "Phnom Penh Labs",
@@ -93,31 +94,8 @@ export default function Home() {
           ]}
         />
 
-        {/* ============ PROBLEM / MANIFESTO (asymmetric editorial) ============ */}
-        <section className="border-b border-gray-200 px-4 py-24 sm:px-6 lg:px-8">
-          <div className="mx-auto grid max-w-7xl grid-cols-1 gap-12 lg:grid-cols-12">
-            <FadeUp className="lg:col-span-4">
-              <p className="label-mono">001 — The gap</p>
-              <h2 className="display mt-4 text-4xl leading-[1.02] sm:text-5xl">
-                A degree says you showed up.
-              </h2>
-            </FadeUp>
-            <FadeUp delay={0.1} className="lg:col-span-8">
-              <p className="text-2xl leading-relaxed text-gray-700 sm:text-3xl">
-                Cambodia has thousands of sharp students and hundreds of
-                companies that need them. The gap isn&apos;t talent or intent —
-                it&apos;s <span className="text-primary">proof</span>. SkillBridge
-                makes real work the unit of trust: captured once, attested by
-                the people who saw it, and portable for life.
-              </p>
-              <div className="mt-8 flex flex-wrap gap-2">
-                <Badge variant="outline">For students</Badge>
-                <Badge variant="outline">For employers</Badge>
-                <Badge variant="outline">Built in Cambodia</Badge>
-              </div>
-            </FadeUp>
-          </div>
-        </section>
+        {/* ============ THE GAP — scroll-drawn signal path ============ */}
+        <GapScrollStory />
 
         {/* ============ PROOF MARQUEE ============ */}
         <section className="overflow-hidden border-b border-gray-200 bg-gray-50 py-5">

@@ -1,16 +1,22 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { getToken, clearToken, apiRequest, API_ENDPOINTS, ApiUser } from '@/lib/api-client';
-import { getPostAuthDestination } from '@/lib/auth-routing';
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import {
+  getToken,
+  clearToken,
+  apiRequest,
+  API_ENDPOINTS,
+  ApiUser,
+} from "@/lib/api-client";
+import { getPostAuthDestination } from "@/lib/auth-routing";
 
 /**
  * Fetches the current user from /auth/me. Redirects to /auth/login when
  * there's no token or the token is invalid. Returns loading / user / error so
  * callers can render skeletons and access-denied states.
  */
-export function useAuthGuard(allowedRoles?: ApiUser['role'][]) {
+export function useAuthGuard(allowedRoles?: ApiUser["role"][]) {
   const router = useRouter();
   const [user, setUser] = useState<ApiUser | null>(null);
   const [loading, setLoading] = useState(true);
@@ -19,20 +25,23 @@ export function useAuthGuard(allowedRoles?: ApiUser['role'][]) {
   useEffect(() => {
     const token = getToken();
     if (!token) {
-      router.replace('/auth/login');
+      router.replace("/auth/login");
       return;
     }
 
     let cancelled = false;
     (async () => {
       try {
-        const data = await apiRequest<{ user: ApiUser }>(API_ENDPOINTS.auth.me, {
-          method: 'GET',
-          token,
-        });
+        const data = await apiRequest<{ user: ApiUser }>(
+          API_ENDPOINTS.auth.me,
+          {
+            method: "GET",
+            token,
+          },
+        );
         if (cancelled) return;
         if (
-          (data.user.role === 'student' || data.user.role === 'employer') &&
+          (data.user.role === "student" || data.user.role === "employer") &&
           !data.user.onboardingCompleted
         ) {
           router.replace(getPostAuthDestination(data.user));
@@ -48,7 +57,7 @@ export function useAuthGuard(allowedRoles?: ApiUser['role'][]) {
       } catch {
         if (cancelled) return;
         clearToken();
-        router.replace('/auth/login');
+        router.replace("/auth/login");
       }
     })();
 

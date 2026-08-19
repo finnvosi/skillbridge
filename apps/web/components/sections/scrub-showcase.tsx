@@ -1,7 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { motion, useScroll, useTransform, useSpring, useReducedMotion } from "framer-motion";
+import {
+  motion,
+  useScroll,
+  useTransform,
+  useSpring,
+  useReducedMotion,
+} from "framer-motion";
 
 /**
  * Full-screen scroll-scrub: hero.mp4 plays behind the whole viewport as a
@@ -158,13 +164,21 @@ export function ScrubShowcase() {
 
         {/* Floating editorial content */}
         <div className="relative z-10 mx-auto flex h-full max-w-7xl flex-col justify-between px-4 py-20 sm:px-6 lg:px-8">
-          <motion.div style={{ y: headlineY, opacity: headlineOpacity }}>
-            <p className="label-mono text-white/70">The mechanic</p>
-            <h2 className="display mt-3 max-w-3xl text-4xl leading-tight text-white sm:text-6xl">
-              Proof isn&apos;t a PDF.
-              <br />
-              It&apos;s an object.
-            </h2>
+          <motion.div
+            style={{ y: headlineY, opacity: headlineOpacity }}
+            className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between"
+          >
+            <div>
+              <p className="label-mono text-white/70">The mechanic</p>
+              <h2 className="display mt-3 max-w-3xl text-4xl leading-tight text-white sm:text-6xl">
+                Proof isn&apos;t a PDF.
+                <br />
+                It&apos;s an object.
+              </h2>
+            </div>
+            <p className="shrink-0 self-start font-mono text-[10px] font-medium uppercase tracking-[0.22em] text-white/45 sm:text-right sm:text-xs">
+              003 — Proof
+            </p>
           </motion.div>
 
           {/* Steps that float in/out as you scroll */}
@@ -184,9 +198,7 @@ export function ScrubShowcase() {
             )}
           </span>
           <span className="text-white/40">·</span>
-          <span>
-            {fps}fps · SCRUB ▸ scroll
-          </span>
+          <span>{fps}fps · SCRUB ▸ scroll</span>
         </div>
       </div>
     </section>

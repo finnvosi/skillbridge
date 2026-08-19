@@ -114,7 +114,7 @@ function StaticSteps({ steps }: { steps: Step[] }) {
  */
 export function StickySteps({
   eyebrow = "How it works",
-  title = "Four steps. No theatre.",
+  title = "Four steps. One record.",
   steps,
   className,
 }: {

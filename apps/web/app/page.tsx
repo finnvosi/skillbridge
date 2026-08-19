@@ -22,15 +22,17 @@ import {
   CountUp,
   Parallax,
   ScrollVelocityMarquee,
-  Tilt,
 } from "@/components/motion";
-import { Magnetic, ScaleOnScroll, StickySwap } from "@/components/motion/primitives2";
-import { HeroObject } from "@/components/sections/hero-object";
+import {
+  Magnetic,
+  ScaleOnScroll,
+  StickySwap,
+} from "@/components/motion/primitives2";
 import { Hero } from "@/components/sections/hero";
 import { CaseStudies } from "@/components/sections/case-studies";
 import { StickySteps } from "@/components/sections/sticky-steps";
-import { ScrubShowcase } from "@/components/sections/scrub-showcase";
 import { GapScrollStory } from "@/components/sections/gap-scroll-story";
+import { OpportunityCoverflow } from "@/components/sections/opportunity-coverflow";
 
 const proof = [
   "Phnom Penh Labs",
@@ -44,9 +46,27 @@ const proof = [
 ];
 
 const opportunities = [
-  { title: "Frontend Internship", company: "Phnom Penh Labs", loc: "Phnom Penh", type: "Internship", skill: "React" },
-  { title: "UX Research Assistant", company: "Mekong Studio", loc: "Remote", type: "Part-time", skill: "Research" },
-  { title: "Junior Data Analyst", company: "CamTech Solutions", loc: "Siem Reap", type: "Full-time", skill: "SQL" },
+  {
+    title: "Frontend Internship",
+    company: "Phnom Penh Labs",
+    loc: "Phnom Penh",
+    type: "Internship",
+    skill: "React",
+  },
+  {
+    title: "UX Research Assistant",
+    company: "Mekong Studio",
+    loc: "Remote",
+    type: "Part-time",
+    skill: "Research",
+  },
+  {
+    title: "Junior Data Analyst",
+    company: "CamTech Solutions",
+    loc: "Siem Reap",
+    type: "Full-time",
+    skill: "SQL",
+  },
 ];
 
 const studentPoints = [
@@ -63,16 +83,43 @@ const employerPoints = [
 ];
 
 const testimonials = [
-  { quote: "We stopped trusting résumés. SkillBridge shows us the actual work — and our shortlist time dropped to days.", name: "Meas Sophea", role: "Talent lead, Mekong Studio" },
-  { quote: "My class projects became my ticket. I got a paid internship without ever writing a cover letter.", name: "Chan Dara", role: "Data student, Siem Reap" },
-  { quote: "Finally a platform built for Cambodia's students, not a copy of a Western job board.", name: "Ken Rithy", role: "Founder, CamTech Solutions" },
+  {
+    quote:
+      "We stopped trusting résumés. SkillBridge shows us the actual work — and our shortlist time dropped to days.",
+    name: "Meas Sophea",
+    role: "Talent lead, Mekong Studio",
+  },
+  {
+    quote:
+      "My class projects became my ticket. I got a paid internship without ever writing a cover letter.",
+    name: "Chan Dara",
+    role: "Data student, Siem Reap",
+  },
+  {
+    quote:
+      "Finally a platform built for Cambodia's students, not a copy of a Western job board.",
+    name: "Ken Rithy",
+    role: "Founder, CamTech Solutions",
+  },
 ];
 
 const faqs = [
-  { q: "Is SkillBridge only for tech roles?", a: "No. Any student with real, demonstrable work — design, data, writing, ops, engineering — can build a verified record and get discovered." },
-  { q: "How is a profile 'verified'?", a: "Each project is attested by the employer or lecturer who saw the work. No self-claiming. That's what makes the record trustworthy." },
-  { q: "Does it cost students anything?", a: "Creating a student profile and applying is free. Employers pay to post and manage verified opportunities." },
-  { q: "Where does my record live?", a: "With you. It's portable — when you move cities or roles, your proof moves with you, not locked in one inbox." },
+  {
+    q: "Is SkillBridge only for tech roles?",
+    a: "No. Any student with real, demonstrable work — design, data, writing, ops, engineering — can build a verified record and get discovered.",
+  },
+  {
+    q: "How is a profile 'verified'?",
+    a: "Each project is attested by the employer or lecturer who saw the work. No self-claiming. That's what makes the record trustworthy.",
+  },
+  {
+    q: "Does it cost students anything?",
+    a: "Creating a student profile and applying is free. Employers pay to post and manage verified opportunities.",
+  },
+  {
+    q: "Where does my record live?",
+    a: "With you. It's portable — when you move cities or roles, your proof moves with you, not locked in one inbox.",
+  },
 ];
 
 export default function Home() {
@@ -105,12 +152,28 @@ export default function Home() {
         {/* ============ HOW IT WORKS (sticky stagger-stop scroll) ============ */}
         <StickySteps
           eyebrow="How it works"
-          title="Four steps. No theatre."
+          title="Four steps. One record."
           steps={[
-            { n: "01", t: "Build a verified profile", d: "Students prove skills with real coursework and projects. Employers verify — so the record means something." },
-            { n: "02", t: "Post & discover", d: "Employers publish real roles. Students find work matched to what they can actually do, not a wish list." },
-            { n: "03", t: "Apply, work, get reviewed", d: "Students ship real work. Employers attest it. Every completed project becomes permanent, portable proof." },
-            { n: "04", t: "Get hired on proof", d: "No inflated resumes. Hiring decisions ride on verified experience both sides can trust." },
+            {
+              n: "01",
+              t: "Build a verified profile",
+              d: "Students prove skills with real coursework and projects. Employers verify — so the record means something.",
+            },
+            {
+              n: "02",
+              t: "Post & discover",
+              d: "Employers publish real roles. Students find work matched to what they can actually do, not a wish list.",
+            },
+            {
+              n: "03",
+              t: "Apply, work, get reviewed",
+              d: "Students ship real work. Employers attest it. Every completed project becomes permanent, portable proof.",
+            },
+            {
+              n: "04",
+              t: "Get hired on proof",
+              d: "No inflated resumes. Hiring decisions ride on verified experience both sides can trust.",
+            },
           ]}
         />
 
@@ -121,59 +184,50 @@ export default function Home() {
               <div className="flex flex-col gap-4 border-b border-gray-200 pb-6 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                   <p className="label-mono">Open now</p>
-                  <ScaleOnScroll className="mt-3 inline-block" from={0.9} to={1.04}>
-                    <h2 className="display text-4xl sm:text-5xl">Real opportunities</h2>
+                  <ScaleOnScroll
+                    className="mt-3 inline-block"
+                    from={0.9}
+                    to={1.04}
+                  >
+                    <h2 className="display text-4xl sm:text-5xl">
+                      Real opportunities
+                    </h2>
                   </ScaleOnScroll>
                 </div>
-                <Link href="/auth/register" className="font-mono text-xs font-medium uppercase tracking-[0.14em] text-primary hover:underline">
+                <Link
+                  href="/auth/register"
+                  className="font-mono text-xs font-medium uppercase tracking-[0.14em] text-primary hover:underline"
+                >
                   Browse all →
                 </Link>
               </div>
             </FadeUp>
-            <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {opportunities.map((opp, i) => (
-                <FadeUp key={opp.title} delay={i * 0.1} as="div">
-                  <Tilt intensity={6}>
-                    <Card className="group h-full rounded-2xl border-gray-200 shadow-soft transition-shadow duration-300 hover:shadow-soft-lg">
-                      <div className="flex h-full flex-col p-6">
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <h3 className="font-display text-lg font-bold text-gray-900">{opp.title}</h3>
-                            <p className="mt-1 text-sm text-gray-500">{opp.company}</p>
-                          </div>
-                          <Badge variant="primary">{opp.type}</Badge>
-                        </div>
-                        <div className="mt-6 flex items-center gap-2 text-xs uppercase tracking-wide text-gray-500">
-                          <span>📍 {opp.loc}</span>
-                          <span className="text-gray-300">·</span>
-                          <span className="text-primary">{opp.skill}</span>
-                        </div>
-                      </div>
-                    </Card>
-                  </Tilt>
-                </FadeUp>
-              ))}
-            </div>
+            <OpportunityCoverflow opportunities={opportunities} />
           </div>
         </section>
-
-        {/* ============ 3D SCROLL-SCRUB SHOWCASE ============ */}
-        <ScrubShowcase />
 
         {/* ============ PINNED HORIZONTAL CASE STUDIES ============ */}
         <CaseStudies />
 
         {/* ============ STUDENTS / EMPLOYERS (asymmetric) ============ */}
         <section className="grid grid-cols-1 border-b border-gray-200 lg:grid-cols-2">
-          <div id="students" className="border-b border-gray-200 px-4 py-16 sm:px-6 lg:border-b-0 lg:border-r lg:px-8">
+          <div
+            id="students"
+            className="border-b border-gray-200 px-4 py-16 sm:px-6 lg:border-b-0 lg:border-r lg:px-8"
+          >
             <FadeUp>
               <p className="label-mono">For students</p>
-              <h3 className="display mt-4 text-3xl sm:text-4xl">Your work is your résumé.</h3>
+              <h3 className="display mt-4 text-3xl sm:text-4xl">
+                Your work is your résumé.
+              </h3>
               <ul className="mt-8 space-y-4">
                 {studentPoints.map((p) => {
                   const Icon = p.icon;
                   return (
-                    <li key={p.t} className="flex items-start gap-3 border-t border-gray-100 pt-4">
+                    <li
+                      key={p.t}
+                      className="flex items-start gap-3 border-t border-gray-100 pt-4"
+                    >
                       <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
                         <Icon className="h-4 w-4" />
                       </span>
@@ -211,7 +265,10 @@ export default function Home() {
                 {employerPoints.map((p) => {
                   const Icon = p.icon;
                   return (
-                    <li key={p.t} className="flex items-start gap-3 border-t border-gray-100 pt-4">
+                    <li
+                      key={p.t}
+                      className="flex items-start gap-3 border-t border-gray-100 pt-4"
+                    >
                       <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
                         <Icon className="h-4 w-4" />
                       </span>
@@ -243,7 +300,9 @@ export default function Home() {
             <FadeUp>
               <div className="border-b border-gray-200 pb-6">
                 <p className="label-mono">Voices</p>
-                <h2 className="display mt-3 text-4xl sm:text-5xl">From the network</h2>
+                <h2 className="display mt-3 text-4xl sm:text-5xl">
+                  From the network
+                </h2>
               </div>
             </FadeUp>
             <Stagger className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-3">
@@ -255,7 +314,9 @@ export default function Home() {
                       &ldquo;{t.quote}&rdquo;
                     </p>
                     <div className="mt-6 border-t border-gray-100 pt-4">
-                      <p className="font-display text-sm font-bold text-gray-900">{t.name}</p>
+                      <p className="font-display text-sm font-bold text-gray-900">
+                        {t.name}
+                      </p>
                       <p className="text-xs text-gray-500">{t.role}</p>
                     </div>
                   </Card>
@@ -266,7 +327,10 @@ export default function Home() {
         </section>
 
         {/* ============ TRUST / MANIFESTO ============ */}
-        <section id="trust" className="relative overflow-hidden border-b border-gray-200 px-4 py-20 sm:px-6 lg:px-8">
+        <section
+          id="trust"
+          className="relative overflow-hidden border-b border-gray-200 px-4 py-20 sm:px-6 lg:px-8"
+        >
           <div className="glow-purple absolute inset-0 -z-10 opacity-60" />
           <div className="mx-auto max-w-4xl text-center">
             <FadeUp>
@@ -293,7 +357,9 @@ export default function Home() {
             <FadeUp>
               <div className="border-b border-gray-200 pb-6 text-center">
                 <p className="label-mono">Questions</p>
-                <h2 className="display mt-3 text-4xl sm:text-5xl">Frequently asked</h2>
+                <h2 className="display mt-3 text-4xl sm:text-5xl">
+                  Frequently asked
+                </h2>
               </div>
             </FadeUp>
             <div className="mt-10 divide-y divide-gray-100">
@@ -301,12 +367,16 @@ export default function Home() {
                 <FadeUp key={f.q} delay={i * 0.05}>
                   <details className="group py-5">
                     <summary className="flex cursor-pointer list-none items-center justify-between gap-4">
-                      <span className="font-display text-lg font-bold text-gray-900">{f.q}</span>
+                      <span className="font-display text-lg font-bold text-gray-900">
+                        {f.q}
+                      </span>
                       <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-gray-200 text-primary transition-transform group-open:rotate-45">
                         <ArrowRight className="h-4 w-4" />
                       </span>
                     </summary>
-                    <p className="mt-3 text-sm leading-relaxed text-gray-600">{f.a}</p>
+                    <p className="mt-3 text-sm leading-relaxed text-gray-600">
+                      {f.a}
+                    </p>
                   </details>
                 </FadeUp>
               ))}
@@ -325,7 +395,11 @@ export default function Home() {
               </h2>
             </FadeUp>
             <Magnetic>
-              <Button asChild size="lg" className="bg-white text-primary shadow-soft hover:bg-gray-100 focus-visible:ring-white">
+              <Button
+                asChild
+                size="lg"
+                className="bg-white text-primary shadow-soft-lg hover:bg-gray-100 focus-visible:ring-white focus-visible:ring-offset-2"
+              >
                 <Link href="/auth/register">Get started free</Link>
               </Button>
             </Magnetic>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useAuth } from "@/lib/useAuth";
 
 type ProofWebGLProps = {
   containerRef: React.RefObject<HTMLElement | null>;
@@ -85,14 +86,40 @@ function createProgram(gl: WebGLRenderingContext) {
 }
 
 /**
+ * Static stand-in for the live proof field. Shown to anonymous visitors (and
+ * while auth state is still resolving) so we never ship the heavy WebGL canvas
+ * to a signed-out user — and never flash it before we know who they are.
+ */
+function StaticPoster() {
+  return (
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-0 opacity-95 [mask-image:radial-gradient(ellipse_78%_74%_at_70%_44%,black,transparent)]"
+    >
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_28%,rgba(124,58,237,0.30),transparent_46%),radial-gradient(circle_at_72%_36%,rgba(199,125,255,0.22),transparent_42%),radial-gradient(circle_at_78%_54%,rgba(56,189,248,0.18),transparent_44%),radial-gradient(circle_at_50%_82%,rgba(60,9,108,0.30),transparent_52%)]" />
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.06)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.06)_1px,transparent_1px)] bg-[size:42px_42px] [mask-image:radial-gradient(ellipse_70%_70%_at_60%_45%,black,transparent)]" />
+    </div>
+  );
+}
+
+/**
  * Lightweight raw-WebGL field. The fragment shader becomes a static proof-map
  * when reduced motion is requested; on fine pointers it responds to the cursor.
+ * The heavy canvas is gated to authenticated visitors — anon users get the
+ * StaticPoster instead.
  */
 export function ProofWebGL({ containerRef, reducedMotion }: ProofWebGLProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [supported, setSupported] = useState(true);
+  const { user, loading } = useAuth();
+
+  // Anonymous or still-resolving auth: render the static poster. This avoids a
+  // flash-of-heavy-canvas for signed-out visitors and keeps authed users on the
+  // live animation.
+  const showStatic = loading || !user;
 
   useEffect(() => {
+    if (showStatic) return;
     const canvas = canvasRef.current;
     const container = containerRef.current;
     if (!canvas || !container) return;
@@ -197,7 +224,11 @@ export function ProofWebGL({ containerRef, reducedMotion }: ProofWebGLProps) {
       gl.deleteBuffer(buffer);
       gl.deleteProgram(program);
     };
-  }, [containerRef, reducedMotion]);
+  }, [containerRef, reducedMotion, showStatic]);
+
+  if (showStatic) {
+    return <StaticPoster />;
+  }
 
   if (!supported) {
     return (

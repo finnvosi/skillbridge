@@ -108,11 +108,11 @@ export function GapScrollStory() {
               <br />
               <span className="text-gradient">Proof is invisible.</span>
             </h2>
-            <p className="mt-9 max-w-2xl text-lg leading-relaxed text-[#6E6A85] sm:text-xl lg:text-2xl">
+            <p className="mt-9 max-w-2xl text-lg leading-relaxed text-[#4A4760] sm:text-xl lg:text-2xl">
               Students are already building. Employers are already hiring. What
               is missing is a shared record of work both sides can trust.
             </p>
-            <p className="mt-7 font-mono text-[10px] uppercase tracking-[0.2em] text-[#6E6A85]">
+            <p className="mt-7 font-mono text-[10px] uppercase tracking-[0.2em] text-[#5B5872]">
               Scroll to make the signal visible ↓
             </p>
           </div>

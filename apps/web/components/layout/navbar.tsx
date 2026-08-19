@@ -405,14 +405,6 @@ export function Navbar() {
               priority
             />
           </span>
-          <span
-            className={cn(
-              "font-display text-lg font-extrabold tracking-tight",
-              open ? "text-white" : "text-gray-900",
-            )}
-          >
-            Skill<span className="text-primary">Bridge</span>
-          </span>
         </Link>
 
         <div className="relative z-10 ml-auto flex items-center gap-2">

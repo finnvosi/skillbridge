@@ -74,13 +74,13 @@ export function OpportunityCoverflow({
           move(1);
         }
       }}
-      className="group/flow relative mt-10 outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-4"
+      className="group/flow relative mt-8 outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-4"
     >
       <p className="sr-only" aria-live="polite">
         Showing {active + 1} of {total}: {opportunities[active].title}
       </p>
 
-      <div className="relative h-[22rem] overflow-hidden [perspective:1200px] sm:h-[24rem]">
+      <div className="relative h-[80vh] overflow-hidden [perspective:1200px]">
         <div className="absolute inset-x-0 top-[55%] h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
         {opportunities.map((opportunity, index) => {
           const offset = cyclicOffset(index, active, total);
@@ -118,7 +118,7 @@ export function OpportunityCoverflow({
             >
               <div
                 className={cn(
-                  "relative min-h-[18rem] overflow-hidden rounded-[1.65rem] border p-6 shadow-soft transition-shadow sm:min-h-[19.5rem] sm:p-7",
+                  "relative min-h-[62vh] overflow-hidden rounded-[1.65rem] border p-6 shadow-soft transition-shadow sm:min-h-[66vh] sm:p-7",
                   isActive
                     ? "border-primary/20 bg-white shadow-soft-lg"
                     : "border-gray-200/90 bg-white/85"
@@ -161,7 +161,7 @@ export function OpportunityCoverflow({
                   <Link
                     href="/auth/register"
                     aria-label="Explore this opportunity"
-                    className="relative mt-4 flex w-full items-center justify-between border-t border-gray-100 pt-4 text-sm font-semibold text-gray-900 transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    className="relative mt-4 flex w-full items-center justify-between rounded-full bg-primary px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                   >
                     Explore this opportunity
                     <ArrowUpRight className="h-4 w-4" />
@@ -173,39 +173,44 @@ export function OpportunityCoverflow({
         })}
       </div>
 
-      <div className="mt-3 flex items-center justify-center gap-3 sm:justify-between">
-        <div className="flex items-center gap-1" aria-label="Carousel position">
-          {opportunities.map((opportunity, index) => (
+      <div className="mt-3 flex flex-col gap-3 sm:mt-4">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex shrink-0 items-center gap-1" aria-label="Carousel position">
+            {opportunities.map((opportunity, index) => (
+              <button
+                key={opportunity.title}
+                type="button"
+                aria-label={`Show ${opportunity.title}`}
+                aria-current={index === active ? "true" : undefined}
+                onClick={() => setActive(index)}
+                className={cn(
+                  "h-2 rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
+                  index === active ? "w-7 bg-primary" : "w-2 bg-gray-300 hover:bg-gray-400"
+                )}
+              />
+            ))}
+          </div>
+          <span className="min-w-0 flex-1 truncate px-2 text-center font-mono text-xs text-gray-500">
+            {opportunities[active].title} · {String(active + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
+          </span>
+          <div className="flex shrink-0 gap-1 rounded-full border border-gray-200 bg-white p-1 shadow-sm">
             <button
-              key={opportunity.title}
               type="button"
-              aria-label={`Show ${opportunity.title}`}
-              aria-current={index === active ? "true" : undefined}
-              onClick={() => setActive(index)}
-              className={cn(
-                "h-2 rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
-                index === active ? "w-7 bg-primary" : "w-2 bg-gray-300 hover:bg-gray-400"
-              )}
-            />
-          ))}
-        </div>
-        <div className="absolute right-0 top-[22.75rem] flex gap-2 sm:static">
-          <button
-            type="button"
-            aria-label="Previous opportunity"
-            onClick={() => move(-1)}
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-700 shadow-sm transition hover:border-primary/30 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </button>
-          <button
-            type="button"
-            aria-label="Next opportunity"
-            onClick={() => move(1)}
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-700 shadow-sm transition hover:border-primary/30 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </button>
+              aria-label="Previous opportunity"
+              onClick={() => move(-1)}
+              className="flex h-9 w-9 items-center justify-center rounded-full text-gray-700 transition hover:bg-gray-100 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              aria-label="Next opportunity"
+              onClick={() => move(1)}
+              className="flex h-9 w-9 items-center justify-center rounded-full text-gray-700 transition hover:bg-gray-100 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
         </div>
       </div>
     </section>

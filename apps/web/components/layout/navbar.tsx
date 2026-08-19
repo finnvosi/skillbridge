@@ -276,20 +276,12 @@ function MegaMenu({
 }
 
 export function Navbar() {
-  const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const reduced = useReducedMotion();
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLElement | null>(null);
   const topLineRef = useRef<HTMLSpanElement>(null);
   const bottomLineRef = useRef<HTMLSpanElement>(null);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
@@ -351,20 +343,18 @@ export function Navbar() {
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: reduced ? 0 : 0.5, ease: [0.22, 1, 0.36, 1] }}
         className={cn(
-          "pointer-events-auto relative z-20 mx-auto flex h-16 max-w-6xl items-center justify-between overflow-hidden rounded-2xl border px-3 pl-3.5 shadow-soft-lg transition-[background-color,border-color,box-shadow] duration-500 [isolation:isolate] sm:h-[68px] sm:px-4",
+          "pointer-events-auto relative z-20 mx-auto flex h-16 max-w-6xl items-center justify-between overflow-hidden rounded-2xl border px-3 pl-3.5 transition-[background-color,border-color,box-shadow] duration-500 [isolation:isolate] sm:h-[68px] sm:px-4",
           open
             ? "border-white/15 bg-[#19181C]/78 text-white shadow-[0_20px_65px_-22px_rgba(8,6,12,0.68),inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-[28px]"
-            : scrolled
-              ? "border-white/75 bg-white/52 shadow-[0_20px_65px_-28px_rgba(20,16,38,0.28),inset_0_1px_0_rgba(255,255,255,0.95)] backdrop-blur-[28px]"
-              : "border-white/70 bg-white/38 shadow-[0_18px_55px_-30px_rgba(34,22,60,0.22),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-[22px]",
+            : "border-transparent bg-transparent shadow-none backdrop-blur-none",
         )}
       >
         <div
           aria-hidden="true"
           className={cn(
-            "pointer-events-none absolute inset-0 z-0 bg-[linear-gradient(112deg,rgba(255,255,255,0.68)_0%,rgba(255,255,255,0.2)_34%,rgba(218,232,255,0.28)_58%,rgba(255,255,255,0.58)_100%)]",
+            "pointer-events-none absolute inset-0 z-0 opacity-0 transition-opacity duration-500",
             open &&
-              "bg-[linear-gradient(112deg,rgba(255,255,255,0.1)_0%,rgba(124,58,237,0.13)_47%,rgba(255,255,255,0.06)_100%)]",
+              "bg-[linear-gradient(112deg,rgba(255,255,255,0.1)_0%,rgba(124,58,237,0.13)_47%,rgba(255,255,255,0.06)_100%)] opacity-100",
           )}
         >
           <span className="absolute -left-10 top-0 h-full w-1/2 -skew-x-12 bg-white/18 blur-2xl" />

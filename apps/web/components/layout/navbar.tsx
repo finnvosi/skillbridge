@@ -3,7 +3,13 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import {
+  AnimatePresence,
+  motion,
+  useMotionValueEvent,
+  useReducedMotion,
+  useScroll,
+} from "framer-motion";
 import { gsap } from "gsap";
 import {
   ArrowUpRight,
@@ -277,11 +283,28 @@ function MegaMenu({
 
 export function Navbar() {
   const [open, setOpen] = useState(false);
+  const [hidden, setHidden] = useState(false);
   const reduced = useReducedMotion();
+  const { scrollY } = useScroll();
+  const lastScrollY = useRef(0);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLElement | null>(null);
   const topLineRef = useRef<HTMLSpanElement>(null);
   const bottomLineRef = useRef<HTMLSpanElement>(null);
+
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    const delta = latest - lastScrollY.current;
+
+    if (reduced || open || latest < 80) {
+      setHidden(false);
+    } else if (delta > 6) {
+      setHidden(true);
+    } else if (delta < -6) {
+      setHidden(false);
+    }
+
+    lastScrollY.current = latest;
+  });
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
@@ -340,8 +363,14 @@ export function Navbar() {
       <ScrollProgress className="rounded-full" />
       <motion.div
         initial={{ y: -24, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: reduced ? 0 : 0.5, ease: [0.22, 1, 0.36, 1] }}
+        animate={{
+          y: hidden && !open && !reduced ? "-130%" : 0,
+          opacity: hidden && !open && !reduced ? 0 : 1,
+        }}
+        transition={{
+          duration: reduced ? 0 : 0.34,
+          ease: [0.22, 1, 0.36, 1],
+        }}
         className={cn(
           "pointer-events-auto relative z-20 mx-auto flex h-16 max-w-6xl items-center justify-between overflow-hidden rounded-2xl border px-3 pl-3.5 transition-[background-color,border-color,box-shadow] duration-500 [isolation:isolate] sm:h-[68px] sm:px-4",
           open

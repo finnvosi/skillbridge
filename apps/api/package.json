@@ -10,6 +10,7 @@
     "postinstall": "prisma generate --schema=prisma/schema.prisma",
     "seed": "ts-node-dev --transpile-only scripts/seed.ts",
     "test": "bash scripts/contract-test.sh",
+    "test:certificate-storage": "bash scripts/certificate-storage-contract-test.sh",
     "lint": "eslint src --ext ts",
     "format": "prettier --write src"
   },
@@ -18,6 +19,7 @@
     "@skillbridge/config": "workspace:*",
     "@skillbridge/types": "workspace:*",
     "@skillbridge/utils": "workspace:*",
+    "@supabase/supabase-js": "^2.110.8",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",

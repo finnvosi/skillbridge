@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/useAuth";
 type ProofWebGLProps = {
   containerRef: React.RefObject<HTMLElement | null>;
   reducedMotion: boolean | null;
+  allowAnonymous?: boolean;
 };
 
 const vertexShader = `
@@ -105,10 +106,15 @@ function StaticPoster() {
 /**
  * Lightweight raw-WebGL field. The fragment shader becomes a static proof-map
  * when reduced motion is requested; on fine pointers it responds to the cursor.
- * The heavy canvas is gated to authenticated visitors — anon users get the
- * StaticPoster instead.
+ * The heavy canvas can be gated for the hero, while trust sections may opt into
+ * the same interactive field for anonymous visitors. All paths have a static
+ * fallback.
  */
-export function ProofWebGL({ containerRef, reducedMotion }: ProofWebGLProps) {
+export function ProofWebGL({
+  containerRef,
+  reducedMotion,
+  allowAnonymous = false,
+}: ProofWebGLProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [supported, setSupported] = useState(true);
   const { user, loading } = useAuth();
@@ -116,7 +122,7 @@ export function ProofWebGL({ containerRef, reducedMotion }: ProofWebGLProps) {
   // Anonymous or still-resolving auth: render the static poster. This avoids a
   // flash-of-heavy-canvas for signed-out visitors and keeps authed users on the
   // live animation.
-  const showStatic = loading || !user;
+  const showStatic = !allowAnonymous && (loading || !user);
 
   useEffect(() => {
     if (showStatic) return;

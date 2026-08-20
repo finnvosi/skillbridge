@@ -227,3 +227,33 @@ html.has-custom-cursor,
 html.has-custom-cursor * {
   cursor: none !important;
 }
+
+/* Network testimonials: the track contains two identical halves, so its
+   50% translation loops continuously. Motion pauses on intent instead of
+   consuming attention while someone reads a card. */
+@keyframes network-testimonials-scroll {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-50%);
+  }
+}
+
+.network-testimonials-track {
+  animation: network-testimonials-scroll linear infinite;
+  will-change: transform;
+}
+
+.network-testimonials-track-reverse {
+  animation-direction: reverse;
+}
+
+/* Keep hero copy and metrics inside the phone viewport even when an animated
+   headline has a larger intrinsic width than the mobile grid. */
+@media (max-width: 639px) {
+  .hero-mobile-bound {
+    width: 100%;
+    max-width: min(350px, calc(100vw - 2.5rem)) !important;
+  }
+}

@@ -65,11 +65,11 @@ export function Hero() {
       <div className="pointer-events-none absolute inset-y-0 right-[6%] z-0 hidden w-px bg-gradient-to-b from-transparent via-primary/20 to-transparent lg:block" />
       <div className="pointer-events-none absolute left-[54%] top-[22%] z-0 hidden size-2 rounded-full bg-primary shadow-[0_0_0_11px_rgba(124,58,237,0.1)] lg:block" />
 
-      <div className="relative z-10 mx-auto flex min-h-[780px] max-w-7xl flex-col px-5 pb-0 pt-32 sm:px-8 lg:px-10 lg:pt-40">
-        <div className="grid flex-1 grid-cols-1 items-center gap-12 pb-16 lg:grid-cols-12 lg:gap-10">
+      <div className="relative z-10 mx-auto flex w-full min-w-0 min-h-[780px] max-w-[100vw] flex-col px-5 pb-0 pt-32 sm:px-8 lg:max-w-7xl lg:px-10 lg:pt-40">
+        <div className="grid min-w-0 flex-1 grid-cols-1 items-center gap-12 pb-16 lg:grid-cols-12 lg:gap-10">
           <motion.div
             style={{ y: copyY, opacity: copyOpacity }}
-            className="relative lg:col-span-7"
+            className="relative w-full min-w-0 lg:col-span-7"
           >
             <FadeUp>
               <div className="inline-flex items-center gap-2 border border-primary/15 bg-white/40 px-3 py-1.5 backdrop-blur-md">
@@ -85,17 +85,24 @@ export function Hero() {
               </div>
             </FadeUp>
 
-            <h1 className="display mt-8 max-w-4xl text-[clamp(3.8rem,8.2vw,7.7rem)] leading-[0.86] tracking-[-0.068em]">
-              <WordReveal text="Make your" delay={0.1} />
-              <br />
-              <WordReveal text="work" delay={0.24} />{" "}
-              <span className="bg-gradient-to-r from-primary via-primary-light to-accent bg-clip-text text-transparent">
-                <WordReveal text="visible." delay={0.38} />
+            <h1 className="display mt-8 max-w-full text-[clamp(3.8rem,8.2vw,7.7rem)] leading-[0.86] tracking-[-0.068em]">
+              <span className="block">
+                <WordReveal text="Make your" delay={0.1} />
+              </span>
+              <span className="flex max-w-full flex-wrap items-baseline gap-x-[0.18em]">
+                <WordReveal text="work" delay={0.24} />
+                <span className="basis-full sm:basis-auto">
+                  <WordReveal
+                    text="visible."
+                    delay={0.38}
+                    wordClassName="bg-gradient-to-r from-primary via-primary-light to-accent bg-clip-text text-transparent"
+                  />
+                </span>
               </span>
             </h1>
 
             <FadeUp delay={0.62}>
-              <p className="mt-9 max-w-xl text-lg leading-relaxed text-[#5E5871] sm:text-xl">
+              <p className="hero-mobile-bound mt-9 w-full break-words text-lg leading-relaxed text-[#5E5871] sm:max-w-xl sm:text-xl">
                 SkillBridge turns real student work into a verified signal
                 employers can actually read — before the interview, beyond the
                 résumé.
@@ -119,7 +126,7 @@ export function Hero() {
                 </Magnetic>
                 <Link
                   href="/#how"
-                  className="inline-flex items-center gap-2 px-3 py-3 font-mono text-[10px] font-medium uppercase tracking-[0.15em] text-gray-600 transition-colors hover:text-primary"
+                  className="inline-flex min-h-11 items-center gap-2 px-3 py-3 font-mono text-[10px] font-medium uppercase tracking-[0.15em] text-gray-600 transition-colors hover:text-primary"
                 >
                   See the system <span aria-hidden="true">↓</span>
                 </Link>
@@ -148,16 +155,16 @@ export function Hero() {
           </motion.div>
         </div>
 
-        <div className="relative z-10 grid grid-cols-2 border-x border-t border-[#E6E2F2] bg-white/38 backdrop-blur-md sm:grid-cols-4">
+        <div className="hero-mobile-bound relative z-10 grid w-full min-w-0 grid-cols-[repeat(2,minmax(0,1fr))] border-x border-t border-[#E6E2F2] bg-white/38 backdrop-blur-md sm:grid-cols-4">
           {stats.map((stat) => (
             <div
               key={stat.label}
-              className="border-b border-r border-[#E6E2F2] px-5 py-5 last:border-r-0 sm:border-b-0 sm:px-7 sm:py-7"
+              className="min-w-0 border-b border-r border-[#E6E2F2] px-5 py-5 last:border-r-0 sm:border-b-0 sm:px-7 sm:py-7"
             >
               <div className="font-display text-3xl font-extrabold tracking-[-0.06em] text-primary sm:text-4xl">
                 <CountUp value={stat.value} suffix={stat.suffix} />
               </div>
-              <div className="mt-1.5 font-mono text-[9px] uppercase tracking-[0.13em] text-gray-500 sm:text-[10px]">
+              <div className="mt-1.5 break-words font-mono text-[9px] uppercase tracking-[0.13em] text-gray-500 sm:text-[10px]">
                 {stat.label}
               </div>
             </div>

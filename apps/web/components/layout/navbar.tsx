@@ -72,7 +72,7 @@ function MenuToggle({
       aria-controls="site-mega-menu"
       aria-expanded={open}
       className={cn(
-        "group relative flex h-10 items-center gap-2.5 rounded-full border px-3.5 font-mono text-[10px] font-medium uppercase tracking-[0.16em] transition-colors sm:h-11 sm:px-4",
+        "group relative flex h-11 min-w-11 items-center gap-2.5 rounded-full border px-3.5 font-mono text-[10px] font-medium uppercase tracking-[0.16em] transition-colors sm:h-11 sm:px-4",
         open
           ? "border-white/20 bg-white text-[#121214]"
           : "border-gray-200/80 bg-white/70 text-gray-700 hover:border-primary/25 hover:text-primary",
@@ -411,7 +411,7 @@ export function Navbar() {
           <Link
             href="/auth/login"
             className={cn(
-              "hidden rounded-full px-3 py-1.5 font-mono text-[11px] font-medium uppercase tracking-[0.12em] transition-colors md:inline-flex",
+              "hidden min-h-11 items-center rounded-full px-3 py-1.5 font-mono text-[11px] font-medium uppercase tracking-[0.12em] transition-colors md:inline-flex",
               open
                 ? "text-white/65 hover:text-white"
                 : "text-gray-600 hover:text-primary",
@@ -426,7 +426,7 @@ export function Navbar() {
             variant="primary"
             size="sm"
             asChild
-            className="group hidden rounded-full md:inline-flex"
+            className="group hidden min-h-[44px] items-center rounded-full md:inline-flex"
           >
             <Link href="/auth/register">
               Get started

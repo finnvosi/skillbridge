@@ -120,10 +120,12 @@ export function StaggerItem({
 export function WordReveal({
   text,
   className,
+  wordClassName,
   delay = 0,
 }: {
   text: string;
   className?: string;
+  wordClassName?: string;
   delay?: number;
 }) {
   const reduce = useReducedMotion();
@@ -138,9 +140,12 @@ export function WordReveal({
       aria-label={text}
     >
       {words.map((w, i) => (
-        <span key={i} className="inline-block overflow-hidden align-bottom">
+        <span
+          key={i}
+          className="inline-block overflow-hidden align-bottom pb-[0.22em]"
+        >
           <motion.span
-            className="inline-block"
+            className={cn("inline-block", wordClassName)}
             variants={{
               hidden: { y: "110%", opacity: 0, filter: "blur(8px)" },
               show: {

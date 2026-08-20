@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { apiRequest, API_ENDPOINTS, getToken, ApiError } from '@/lib/api-client';
+import { getSupabaseCertificatesBucket, getSupabaseClient } from '@/lib/supabase';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -38,6 +39,10 @@ export default function StudentProfilePage() {
   const [skillInput, setSkillInput] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [certificateTitle, setCertificateTitle] = useState('');
+  const [certificateDescription, setCertificateDescription] = useState('');
+  const [certificateFile, setCertificateFile] = useState<File | null>(null);
+  const [certificateUploading, setCertificateUploading] = useState(false);
   const [certs, setCerts] = useState<
     { id: string; title: string; description?: string | null; verified: boolean; createdAt: string }[]
   >([]);
@@ -89,6 +94,82 @@ export default function StudentProfilePage() {
     }
   };
   const removeSkill = (s: string) => setSkills(skills.filter((x) => x !== s));
+
+  const selectCertificateFile = (file: File | undefined) => {
+    if (!file) return;
+    const allowed = ['application/pdf', 'image/png', 'image/jpeg'];
+    if (!allowed.includes(file.type)) {
+      setError('Certificates must be PDF, PNG, or JPG files');
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      setError('Certificate files must be 10MB or smaller');
+      return;
+    }
+    setError('');
+    setCertificateFile(file);
+  };
+
+  const uploadCertificate = async () => {
+    if (!token || !certificateTitle.trim() || !certificateFile) {
+      setError('Add a certificate title and file before uploading');
+      return;
+    }
+
+    setCertificateUploading(true);
+    setError('');
+    setSuccess('');
+    try {
+      const uploadData = await apiRequest<{
+        upload: { path: string; token: string; signedUrl: string };
+      }>(API_ENDPOINTS.certificates.uploadUrl, {
+        method: 'POST',
+        token,
+        body: {
+          mimeType: certificateFile.type,
+          originalName: certificateFile.name,
+          fileSize: certificateFile.size,
+        },
+      });
+
+      const { error: storageError } = await getSupabaseClient()
+        .storage
+        .from(getSupabaseCertificatesBucket())
+        .uploadToSignedUrl(
+          uploadData.upload.path,
+          uploadData.upload.token,
+          certificateFile,
+          { contentType: certificateFile.type },
+        );
+      if (storageError) throw storageError;
+
+      await apiRequest(API_ENDPOINTS.certificates.complete, {
+        method: 'POST',
+        token,
+        body: {
+          title: certificateTitle.trim(),
+          description: certificateDescription.trim() || undefined,
+          fileKey: uploadData.upload.path,
+          mimeType: certificateFile.type,
+          originalName: certificateFile.name,
+          fileSize: certificateFile.size,
+        },
+      });
+
+      const refreshed = await apiRequest<{
+        certificates: { id: string; title: string; description?: string | null; verified: boolean; createdAt: string }[];
+      }>(API_ENDPOINTS.certificates.list, { method: 'GET', token });
+      setCerts(refreshed.certificates ?? []);
+      setCertificateTitle('');
+      setCertificateDescription('');
+      setCertificateFile(null);
+      setSuccess('Certificate uploaded successfully');
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Certificate upload failed');
+    } finally {
+      setCertificateUploading(false);
+    }
+  };
 
   const save = async () => {
     setSaving(true);
@@ -252,6 +333,38 @@ export default function StudentProfilePage() {
         <h2 className="flex items-center gap-2 font-display text-lg font-semibold text-gray-900">
           <FileText className="h-4 w-4 text-primary" /> Certifications
         </h2>
+        <div className="mt-4 space-y-3 rounded-xl border border-gray-100 bg-gray-50 p-4">
+          <Input
+            value={certificateTitle}
+            onChange={(e) => setCertificateTitle(e.target.value)}
+            placeholder="Certificate title"
+            aria-label="Certificate title"
+          />
+          <Textarea
+            value={certificateDescription}
+            onChange={(e) => setCertificateDescription(e.target.value)}
+            placeholder="Description (optional)"
+            aria-label="Certificate description"
+          />
+          <Input
+            type="file"
+            accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/png,image/jpeg"
+            onChange={(e) => selectCertificateFile(e.target.files?.[0])}
+            aria-label="Certificate file"
+          />
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-xs text-gray-500">
+              {certificateFile ? certificateFile.name : 'PDF, PNG, or JPG. Maximum 10MB.'}
+            </p>
+            <Button
+              type="button"
+              onClick={uploadCertificate}
+              disabled={certificateUploading || !certificateTitle.trim() || !certificateFile}
+            >
+              {certificateUploading ? 'Uploading...' : 'Upload certificate'}
+            </Button>
+          </div>
+        </div>
         {certs.length === 0 ? (
           <p className="mt-2 text-sm text-gray-500">
             No certificates yet. Upload credentials to build trust with employers.

@@ -62,6 +62,9 @@ export const API_ENDPOINTS = {
   },
   certificates: {
     list: "/certificates",
+    uploadUrl: "/certificates/upload-url",
+    complete: "/certificates/complete",
+    delete: (id: string) => `/certificates/${id}`,
   },
   students: {
     search: "/students",

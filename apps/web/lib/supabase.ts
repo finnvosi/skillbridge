@@ -10,3 +10,7 @@ export function getSupabaseClient() {
 
   return createClient(url, key);
 }
+
+export function getSupabaseCertificatesBucket() {
+  return process.env.NEXT_PUBLIC_SUPABASE_CERTIFICATES_BUCKET || 'certificates';
+}

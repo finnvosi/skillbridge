@@ -94,7 +94,35 @@ export function buildCertificateKey(studentId: string, extension: string) {
   return `students/${studentId}/${crypto.randomBytes(16).toString('hex')}.${extension}`;
 }
 
-function isManagedCertificateKey(fileKey: string) {
+export function isManagedCertificateKey(fileKey: string, studentId?: string) {
+  const prefix = studentId ? `students/${studentId}/` : 'students/';
+  return fileKey.startsWith(prefix) && /^students\/[A-Za-z0-9_-]+\/[a-f0-9]{32}\.(pdf|png|jpg)$/.test(fileKey);
+}
+
+export async function createCertificateUploadUrl(fileKey: string) {
+  const { bucket } = getConfig();
+  const { data, error } = await getClient().storage.from(bucket).createSignedUploadUrl(fileKey);
+  if (error || !data?.signedUrl || !data.token) {
+    const storageError = new Error('Certificate upload URL could not be created');
+    (storageError as Error & { status?: number }).status = 502;
+    throw storageError;
+  }
+  return { signedUrl: data.signedUrl, token: data.token, path: fileKey };
+}
+
+export async function downloadCertificateObject(fileKey: string) {
+  if (!isManagedCertificateKey(fileKey)) return null;
+  const { bucket } = getConfig();
+  const { data, error } = await getClient().storage.from(bucket).download(fileKey);
+  if (error || !data) {
+    const storageError = new Error('Certificate file could not be read');
+    (storageError as Error & { status?: number }).status = 502;
+    throw storageError;
+  }
+  return Buffer.from(await data.arrayBuffer());
+}
+
+function isManagedCertificateKeyLegacy(fileKey: string) {
   return /^students\/[A-Za-z0-9_-]+\/[a-f0-9]{32}\.(pdf|png|jpg)$/.test(fileKey);
 }
 
@@ -117,7 +145,7 @@ export async function uploadCertificateObject(
 }
 
 export async function createCertificateDownloadUrl(fileKey: string) {
-  if (!isManagedCertificateKey(fileKey)) return null;
+  if (!isManagedCertificateKeyLegacy(fileKey)) return null;
   const { bucket } = getConfig();
   const { data, error } = await getClient().storage
     .from(bucket)
@@ -131,7 +159,7 @@ export async function createCertificateDownloadUrl(fileKey: string) {
 }
 
 export async function deleteCertificateObject(fileKey: string) {
-  if (!isManagedCertificateKey(fileKey)) return;
+  if (!isManagedCertificateKeyLegacy(fileKey)) return;
   const { bucket } = getConfig();
   const { error } = await getClient().storage.from(bucket).remove([fileKey]);
   if (error) {

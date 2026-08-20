@@ -12,6 +12,7 @@
     "test": "bash scripts/contract-test.sh",
     "test:certificate-storage": "bash scripts/certificate-storage-contract-test.sh",
     "test:presigned-certificates": "bash scripts/presigned-certificate-contract-test.sh",
+    "test:certificate-verification": "bash scripts/certificate-verification-contract-test.sh",
     "lint": "eslint src --ext ts",
     "format": "prettier --write src"
   },

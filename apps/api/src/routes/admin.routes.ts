@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { prisma } from '../db/prisma';
 import { asyncHandler } from '../middleware/validation';
 import { authenticate, authorize, AuthRequest } from '../middleware/auth';
+import { createCertificateDownloadUrl } from '../services/certificate-storage';
 
 const router = Router();
 
@@ -81,6 +82,94 @@ router.put(
 
     res.json({ message: `${type} verified successfully` });
   })
+);
+
+// List certificates awaiting review. Preview URLs are short-lived and admin-only.
+router.get(
+  '/certificates',
+  asyncHandler(async (req: AuthRequest, res: Response) => {
+    const requestedStatus = typeof req.query.status === 'string' ? req.query.status : 'pending';
+    const status = ['pending', 'verified', 'rejected'].includes(requestedStatus)
+      ? requestedStatus
+      : 'pending';
+    const certificates = await prisma.certificate.findMany({
+      where: { verificationStatus: status as any },
+      include: {
+        student: { include: { user: { select: { name: true, email: true } } } },
+      },
+      orderBy: { createdAt: 'asc' },
+      take: 100,
+    });
+
+    res.json({
+      status,
+      certificates: await Promise.all(
+        certificates.map(async (certificate) => ({
+          id: certificate.id,
+          title: certificate.title,
+          description: certificate.description,
+          mimeType: certificate.mimeType,
+          fileSize: certificate.fileSize,
+          verificationStatus: certificate.verificationStatus,
+          verificationNote: certificate.verificationNote,
+          rejectionReason: certificate.rejectionReason,
+          verifiedAt: certificate.verifiedAt,
+          verifiedBy: certificate.verifiedBy,
+          createdAt: certificate.createdAt,
+          student: {
+            id: certificate.student.id,
+            name: certificate.student.user.name,
+            email: certificate.student.user.email,
+          },
+          previewUrl: await createCertificateDownloadUrl(certificate.fileKey),
+        })),
+      ),
+    });
+  }),
+);
+
+// Approve or reject a certificate. Rejection requires a candidate-facing reason.
+router.patch(
+  '/certificates/:id',
+  asyncHandler(async (req: AuthRequest, res: Response) => {
+    const { status, rejectionReason, verificationNote } = req.body as {
+      status?: string;
+      rejectionReason?: string;
+      verificationNote?: string;
+    };
+    if (status !== 'verified' && status !== 'rejected') {
+      return res.status(400).json({ error: 'Status must be verified or rejected' });
+    }
+    if (status === 'rejected' && (!rejectionReason || rejectionReason.trim().length < 3)) {
+      return res.status(400).json({ error: 'A rejection reason is required' });
+    }
+
+    const existing = await prisma.certificate.findUnique({ where: { id: req.params.id } });
+    if (!existing) return res.status(404).json({ error: 'Certificate not found' });
+
+    const certificate = await prisma.certificate.update({
+      where: { id: existing.id },
+      data: {
+        verificationStatus: status as any,
+        verified: status === 'verified',
+        verifiedAt: status === 'verified' ? new Date() : null,
+        verifiedBy: req.user!.id,
+        verificationNote: verificationNote?.trim() || null,
+        rejectionReason: status === 'rejected' ? rejectionReason!.trim() : null,
+      },
+    });
+
+    res.json({
+      message: `Certificate ${status}`,
+      certificate: {
+        id: certificate.id,
+        verificationStatus: certificate.verificationStatus,
+        verified: certificate.verified,
+        verifiedAt: certificate.verifiedAt,
+        rejectionReason: certificate.rejectionReason,
+      },
+    });
+  }),
 );
 
 // List opportunities (with applicant counts)

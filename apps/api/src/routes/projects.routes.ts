@@ -506,11 +506,12 @@ router.get(
           include: {
             user: { select: { name: true, email: true } },
             certificates: {
-              where: { verified: true },
+              where: { verificationStatus: "verified" },
               select: {
                 id: true,
                 title: true,
                 verified: true,
+                verificationStatus: true,
                 verifiedAt: true,
               },
               orderBy: { createdAt: "desc" },

@@ -44,7 +44,7 @@ export default function StudentProfilePage() {
   const [certificateFile, setCertificateFile] = useState<File | null>(null);
   const [certificateUploading, setCertificateUploading] = useState(false);
   const [certs, setCerts] = useState<
-    { id: string; title: string; description?: string | null; verified: boolean; createdAt: string }[]
+    { id: string; title: string; description?: string | null; verified: boolean; verificationStatus?: 'pending' | 'verified' | 'rejected'; rejectionReason?: string | null; createdAt: string }[]
   >([]);
 
   const completion = Math.round(
@@ -157,7 +157,7 @@ export default function StudentProfilePage() {
       });
 
       const refreshed = await apiRequest<{
-        certificates: { id: string; title: string; description?: string | null; verified: boolean; createdAt: string }[];
+        certificates: { id: string; title: string; description?: string | null; verified: boolean; verificationStatus?: 'pending' | 'verified' | 'rejected'; rejectionReason?: string | null; createdAt: string }[];
       }>(API_ENDPOINTS.certificates.list, { method: 'GET', token });
       setCerts(refreshed.certificates ?? []);
       setCertificateTitle('');
@@ -379,16 +379,19 @@ export default function StudentProfilePage() {
                 <div className="min-w-0">
                   <p className="flex items-center gap-2 font-medium text-gray-900">
                     {c.title}
-                    {c.verified && (
+                    {(c.verificationStatus === 'verified' || (!c.verificationStatus && c.verified)) && (
                       <CheckCircle2 className="h-3.5 w-3.5 text-green-600" />
                     )}
                   </p>
                   {c.description && (
                     <p className="truncate text-xs text-gray-500">{c.description}</p>
                   )}
+                  {c.verificationStatus === 'rejected' && c.rejectionReason && (
+                    <p className="mt-1 text-xs text-red-600">{c.rejectionReason}</p>
+                  )}
                 </div>
-                <Badge variant={c.verified ? 'primary' : 'outline'} size="sm">
-                  {c.verified ? 'Verified' : 'Pending'}
+                <Badge variant={c.verificationStatus === 'verified' || (!c.verificationStatus && c.verified) ? 'primary' : c.verificationStatus === 'rejected' ? 'neutral' : 'outline'} size="sm">
+                  {c.verificationStatus === 'rejected' ? 'Rejected' : c.verificationStatus === 'verified' || (!c.verificationStatus && c.verified) ? 'Verified' : 'Pending'}
                 </Badge>
               </li>
             ))}

@@ -54,6 +54,12 @@ enum ApplicationEventType {
   application_withdrawn
 }
 
+enum CertificateVerificationStatus {
+  pending
+  verified
+  rejected
+}
+
 enum NotificationType {
   application_status_changed
 }
@@ -280,6 +286,16 @@ model Certificate {
   fileSize    Int      // bytes
   verified    Boolean  @default(false)
   verifiedAt  DateTime?
+  // Explicit verification lifecycle state. Prefer this over `verified` for
+  // product logic; `verified` is retained for backward compatibility.
+  verificationStatus CertificateVerificationStatus @default(pending)
+  // Internal admin note — MUST NOT be returned to students or employers.
+  verificationNote String?
+  // Candidate-facing rejection reason — returned to the student on rejection.
+  rejectionReason  String?
+  // Reviewer audit trail.
+  verifiedBy String?
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -287,6 +303,7 @@ model Certificate {
 
   @@index([studentId])
   @@index([verified])
+  @@index([verificationStatus])
 }
 
 model PortfolioItem {

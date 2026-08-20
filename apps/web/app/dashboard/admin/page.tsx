@@ -16,6 +16,7 @@ import {
   ShieldCheck,
   Users,
   AlertCircle,
+  FileText,
 } from "lucide-react";
 
 interface AdminStats {
@@ -91,7 +92,7 @@ export default function AdminDashboardPage() {
       )}
 
       {/* Action cards */}
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <div className="p-6">
             <div className="flex items-center gap-3 mb-4">
@@ -105,6 +106,23 @@ export default function AdminDashboardPage() {
             </p>
             <Button asChild>
               <a href="/dashboard/admin/verifications">Review pending</a>
+            </Button>
+          </div>
+        </Card>
+
+        <Card>
+          <div className="p-6">
+            <div className="mb-4 flex items-center gap-3">
+              <FileText className="h-6 w-6 text-primary" />
+              <h3 className="font-display text-lg font-semibold text-gray-900">
+                Certificate review
+              </h3>
+            </div>
+            <p className="mb-4 text-sm text-gray-500">
+              Review student proof before employers see it.
+            </p>
+            <Button asChild variant="outline">
+              <a href="/dashboard/admin/certificates">Review certificates</a>
             </Button>
           </div>
         </Card>

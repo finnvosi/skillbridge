@@ -229,6 +229,8 @@ router.get(
             mimeType: true,
             fileSize: true,
             verified: true,
+            verificationStatus: true,
+            rejectionReason: true,
             verifiedAt: true,
             createdAt: true,
             updatedAt: true,
@@ -250,6 +252,9 @@ router.get(
         mimeType: certificate.mimeType,
         fileSize: certificate.fileSize,
         verified: certificate.verified,
+        verificationStatus: certificate.verificationStatus,
+        rejectionReason:
+          certificate.verificationStatus === 'rejected' ? certificate.rejectionReason : null,
         verifiedAt: certificate.verifiedAt,
         createdAt: certificate.createdAt,
         updatedAt: certificate.updatedAt,

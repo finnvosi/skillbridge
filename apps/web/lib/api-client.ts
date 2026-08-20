@@ -51,6 +51,8 @@ export const API_ENDPOINTS = {
   admin: {
     overview: "/admin/overview",
     verifications: "/admin/verifications",
+    certificates: "/admin/certificates",
+    reviewCertificate: (id: string) => `/admin/certificates/${id}`,
     verifyUser: (type: string, id: string) =>
       `/admin/verifications/${type}/${id}`,
     users: "/users",

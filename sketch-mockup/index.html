@@ -101,9 +101,9 @@
     box-shadow:0 1px 4px rgba(120,108,150,.10);
     display:flex;flex-direction:column;gap:13px;margin-bottom:16px}
   .idtop{display:flex;align-items:center;gap:13px}
-  .avatar{width:54px;height:54px;border-radius:16px;background:linear-gradient(145deg,#7A69A8,#5B4C84);
-    display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(107,91,149,.22)}
-  .avatar svg circle,.avatar svg path{fill:#fff}
+  .avatar{width:54px;height:54px;border-radius:50%;background:var(--surfaceMuted,#EFEBF5);border:1.5px solid var(--navy);
+    display:flex;align-items:center;justify-content:center}
+  .avatar svg circle,.avatar svg path{fill:none;stroke:var(--navy);stroke-width:1.5}
   .idname{font-family:var(--serif);font-weight:800;font-size:20px;color:var(--ink);letter-spacing:-.01em}
   .idrole{font-family:var(--body);font-weight:500;font-size:13px;color:var(--muted)}
   .idpill{margin-left:auto;display:inline-flex;align-items:center;gap:5px;padding:6px 10px;border-radius:999px;
@@ -194,7 +194,7 @@
           <!-- job card -->
           <div class="card">
             <div class="toprow">
-              <div class="vbadge"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="#2BA372" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Company checked</div>
+              <div class="vbadge"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="#2BA372" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Company checked</div>
               <div class="checked">Checked 12 Aug</div>
             </div>
             <div class="jt">Packer — Garment Line B</div>
@@ -204,7 +204,7 @@
               <div class="fact"><div class="fl">Shift</div><div class="fv">Day</div></div>
               <div class="fact"><div class="fl">Distance</div><div class="fv">4 km</div></div>
             </div>
-            <div class="match"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="#2BA372" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>You match 4 of 5 skills</div>
+            <div class="match"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="#2BA372" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>You match 4 of 5 skills</div>
             <div class="foot">
               <div class="wechecked">We checked the company and this vacancy.</div>
               <div class="viewjob">View job <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="#6B5B95" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
@@ -242,9 +242,9 @@
         <div class="pad">
           <div class="ident">
             <div class="idtop">
-              <div class="avatar"><svg width="26" height="26" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" fill="#6B5B95"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6" fill="#6B5B95"/></svg></div>
+              <div class="avatar"><svg width="26" height="26" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="9" r="3.5" fill="none" stroke="#6B5B95" stroke-width="1.5"/><path d="M5 20c0-3.6 3.1-5.5 7-5.5s7 1.9 7 5.5" fill="none" stroke="#6B5B95" stroke-width="1.5" stroke-linecap="round"/></svg></div>
               <div><div class="idname">Sophea Chan</div><div class="idrole">Machine Operator</div></div>
-              <div class="idpill"><svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="#2BA372" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Verified</div>
+              <div class="idpill"><svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="#2BA372" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Verified</div>
             </div>
             <div class="idrow"><span>📍 Phnom Penh</span><span>·</span><span>🌐 Khmer, English</span><span>·</span><span>🕘 Available now</span></div>
             <div class="idrow idmeta"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M6 10V8a6 6 0 1112 0v2" stroke="#6B5B95" stroke-width="1.4"/><rect x="4" y="10" width="16" height="11" rx="2" stroke="#6B5B95" stroke-width="1.4"/></svg><span>Identity · National ID verified 2 Aug 2026</span></div>
@@ -257,9 +257,9 @@
 
           <div class="skills">
             <div class="sect">Skills</div>
-            <span class="skill"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="#2BA372" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Machine sewing</span>
-            <span class="skill"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="#2BA372" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>QC inspection</span>
-            <span class="skill"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="#2BA372" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Packaging</span>
+            <span class="skill"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="#2BA372" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Machine sewing</span>
+            <span class="skill"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="#2BA372" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>QC inspection</span>
+            <span class="skill"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="#2BA372" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Packaging</span>
             <span class="skill off">Forklift license</span>
             <span class="skill off">English B1</span>
           </div>

@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>SkillBridge — Market Pulse (Fiverr-inspired)</title>
+<style>
+  :root{
+    --green:#1DBF73; --greenDark:#15A866; --greenSoft:#E7F7EF;
+    --ink:#404145; --inkSoft:#74767E; --line:#E4E5E7;
+    --bg:#F7F7F8; --paper:#FFFFFF;
+    --red:#E0312B; --redSoft:#FCE8E7;
+    --gold:#F5A623;
+    --serif:'Urbanist',system-ui,sans-serif;
+    --body:'Jost',system-ui,sans-serif;
+    --kh:'Noto Sans Khmer',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased}
+  html,body{background:#ECECEE}
+  body{font-family:var(--body);display:flex;flex-direction:column;align-items:center;padding:28px 12px 18px}
+  .deck{display:flex;gap:54px;align-items:flex-start;flex-wrap:wrap;justify-content:center}
+  .phone{width:330px;background:var(--paper);border-radius:44px;padding:11px;position:relative;
+    box-shadow:0 24px 60px rgba(40,40,50,.16);}
+  .screen{background:var(--bg);border-radius:34px;overflow:hidden;height:760px;display:flex;flex-direction:column}
+  .status{display:flex;justify-content:space-between;align-items:center;padding:14px 22px 4px;font-family:var(--body);font-weight:700;font-size:13px;color:var(--ink)}
+  .status .dots{display:flex;gap:4px;align-items:center}
+  .status .dots span{width:5px;height:5px;border-radius:50%;background:var(--ink);display:block}
+  .header{display:flex;align-items:center;gap:12px;padding:10px 20px 12px}
+  .logo{width:36px;height:36px;border-radius:11px;background:var(--green);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(29,191,115,.35)}
+  .logo svg{width:20px;height:20px}
+  .logotxt{font-family:var(--serif);font-weight:800;font-size:17px;color:var(--ink);letter-spacing:-.01em}
+  .lang{margin-left:auto;font-family:var(--body);font-weight:700;font-size:12px;color:var(--inkSoft);border:1px solid var(--line);border-radius:999px;padding:5px 12px}
+  .scroll{flex:1;overflow:hidden;padding:6px 18px 10px;display:flex;flex-direction:column;gap:14px}
+  .search{display:flex;align-items:center;gap:8px;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+  .search svg{width:18px;height:18px;flex:0 0 auto}
+  .search input{border:none;outline:none;background:transparent;font-family:var(--body);font-size:14px;color:var(--ink);width:100%}
+  .chips{display:flex;gap:8px;flex-wrap:wrap}
+  .chip{font-family:var(--body);font-weight:700;font-size:12.5px;color:var(--inkSoft);background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:9px 14px}
+  .chip.on{background:var(--green);color:#fff;border-color:var(--green);box-shadow:0 4px 10px rgba(29,191,115,.3)}
+  .chip.demo{background:var(--bg)}
+  .eyebrow{font-family:var(--body);font-weight:800;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--inkSoft);margin-top:2px}
+  .card{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:0 2px 10px rgba(40,40,50,.05);display:flex;flex-direction:column;gap:12px}
+  .ctitle{font-family:var(--serif);font-weight:800;font-size:21px;color:var(--ink);letter-spacing:-.015em;line-height:1.18}
+  .company{display:flex;align-items:center;gap:6px;font-family:var(--body);font-weight:600;font-size:12.5px;color:var(--inkSoft)}
+  .company svg{width:14px;height:14px}
+  .facts{display:flex;gap:10px}
+  .fact{flex:1;background:var(--bg);border-radius:12px;padding:11px 12px}
+  .fact .lab{font-family:var(--body);font-weight:800;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--inkSoft)}
+  .fact .val{font-family:var(--serif);font-weight:800;font-size:16px;color:var(--ink);margin-top:3px}
+  .vbadge{display:inline-flex;align-items:center;gap:6px;font-family:var(--body);font-weight:700;font-size:11.5px;color:var(--greenDark);background:var(--greenSoft);border-radius:999px;padding:6px 11px}
+  .vbadge svg{width:13px;height:13px}
+  .match{display:inline-flex;align-items:center;gap:6px;font-family:var(--body);font-weight:700;font-size:12px;color:var(--ink)}
+  .match svg{width:15px;height:15px}
+  .foot{display:flex;flex-direction:column;gap:7px;margin-top:auto}
+  .wechecked{font-family:var(--body);font-size:11.5px;color:var(--inkSoft);font-style:italic;line-height:1.4}
+  .viewjob{display:flex;align-items:center;gap:6px;align-self:flex-end;font-family:var(--body);font-weight:800;font-size:14px;color:var(--greenDark)}
+  .cta{display:flex;align-items:center;justify-content:center;gap:9px;background:var(--green);color:#fff;
+    font-family:var(--body);font-weight:800;font-size:15.5px;border-radius:999px;padding:15px;margin-top:10px;
+    box-shadow:0 8px 20px rgba(29,191,115,.4)}
+  .cta svg{width:18px;height:18px}
+  /* passport */
+  .ident{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:0 2px 10px rgba(40,40,50,.05);display:flex;flex-direction:column;gap:13px;margin-bottom:16px}
+  .idtop{display:flex;align-items:center;gap:13px}
+  .avatar{width:54px;height:54px;border-radius:14px;background:var(--green);display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+  .avatar svg{width:26px;height:26px}
+  .idname{font-family:var(--serif);font-weight:800;font-size:20px;color:var(--ink);letter-spacing:-.01em}
+  .idrole{font-family:var(--body);font-weight:600;font-size:13px;color:var(--inkSoft)}
+  .idpill{margin-left:auto;display:inline-flex;align-items:center;gap:5px;padding:6px 11px;border-radius:999px;background:var(--greenSoft);color:var(--greenDark);font-family:var(--body);font-weight:800;font-size:10px}
+  .idpill svg{width:12px;height:12px}
+  .idrow{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-family:var(--body);font-weight:600;font-size:12.5px;color:var(--inkSoft)}
+  .idmeta{margin-top:2px;color:var(--inkSoft);font-weight:700;font-size:11.5px;gap:6px;display:flex;align-items:center}
+  .idmeta svg{flex:0 0 auto}
+  .readiness{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:0 2px 10px rgba(40,40,50,.05)}
+  .readl{font-family:var(--body);font-weight:800;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--inkSoft)}
+  .readv{font-family:var(--serif);font-weight:800;font-size:18px;color:var(--ink);margin:4px 0 10px}
+  .track{height:9px;background:var(--bg);border-radius:999px;overflow:hidden}
+  .fill{height:100%;width:72%;background:var(--green);border-radius:999px}
+  .skills{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:0 2px 10px rgba(40,40,50,.05)}
+  .sect{font-family:var(--body);font-weight:800;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--inkSoft);margin-bottom:10px}
+  .skill{display:inline-flex;align-items:center;gap:6px;margin:0 8px 8px 0;font-family:var(--body);font-weight:700;font-size:12.5px;color:var(--greenDark);background:var(--greenSoft);border:1px solid #BDEBD6;border-radius:999px;padding:7px 11px}
+  .skill svg{width:13px;height:13px}
+  .skill.off{color:var(--inkSoft);background:var(--bg);border-color:var(--line)}
+  /* tab bar — bold filled icons, green active */
+  .tabbar{background:var(--paper);border-top:1px solid var(--line);height:78px;border-radius:0 0 34px 34px;display:flex;align-items:center;justify-content:space-around;padding:0 6px}
+  .tab{display:flex;flex-direction:column;align-items:center;gap:5px;color:var(--inkSoft);font-family:var(--body);font-weight:700;font-size:10px;padding:10px 0;width:64px}
+  .tab svg{width:24px;height:24px}
+  .tab svg path,.tab svg rect,.tab svg circle,.tab svg polygon{fill:var(--inkSoft);stroke:none}
+  .tab.on{color:var(--greenDark)}
+  .tab.on svg path,.tab.on svg rect,.tab.on svg circle,.tab.on svg polygon{fill:var(--green)}
+  /* icon helper: filled only */
+  svg path{stroke-linejoin:round}
+  .kh{font-family:var(--kh)}
+  .tag{display:inline-block;margin-top:4px}
+  .legend{margin-top:14px;width:100%;max-width:760px;display:flex;gap:18px;flex-wrap:wrap;justify-content:center;font-family:var(--body);font-size:11px;color:#555}
+  .legend .sw{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid #e2e2e5;border-radius:999px;padding:6px 12px}
+  .legend .dot{width:13px;height:13px;border-radius:4px;display:block}
+  .caption{font-family:var(--body);text-align:center;color:#555;font-size:13px;max-width:720px;margin:6px 10px 0;line-height:1.5}
+  .caption b{color:#222}
+</style>
+</head>
+<body>
+  <div class="deck">
+    <!-- PHONE 1: JOBS -->
+    <div class="phone">
+      <div class="screen">
+        <div class="status"><span>9:41</span><span class="dots"><span></span><span></span><span></span></span></div>
+        <div class="header">
+          <div class="logo"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2l8 3v6c0 5-3.5 8.5-8 11-4.5-2.5-8-6-8-11V5l8-3z" fill="#fff"/></svg></div>
+          <div class="logotxt">SkillBridge</div>
+          <div class="lang">EN</div>
+        </div>
+        <div class="scroll">
+          <div class="search">
+            <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#74767E" stroke-width="2"/><path d="M21 21l-4-4" stroke="#74767E" stroke-width="2" stroke-linecap="round"/></svg>
+            <input placeholder="Search job or skill"/>
+          </div>
+          <div class="chips">
+            <div class="chip on">Near me</div>
+            <div class="chip">Day shift</div>
+            <div class="chip">Salary</div>
+            <div class="chip demo">Demo</div>
+          </div>
+          <div class="eyebrow">Recommended for you · 3 verified</div>
+          <div class="card">
+            <div class="ctitle">Packer — Garment Line B</div>
+            <div class="company"><svg viewBox="0 0 24 24" fill="none"><path d="M4 21V8l8-5 8 5v13" fill="#74767E"/><path d="M9 21v-6h6v6" fill="#fff"/></svg>Phnom Penh Textiles</div>
+            <div class="facts">
+              <div class="fact"><div class="lab">Pay</div><div class="val">$240K/mo</div></div>
+              <div class="fact"><div class="lab">Shift</div><div class="val">Day</div></div>
+              <div class="fact"><div class="lab">Distance</div><div class="val">4 km</div></div>
+            </div>
+            <div class="vbadge"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="#15A866" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Company checked</div>
+            <div class="match"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="#1DBF73" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>You match 4 of 5 skills</div>
+            <div class="foot">
+              <div class="wechecked">We checked the company. Not affiliated with any scam report.</div>
+              <div class="viewjob">View job →</div>
+            </div>
+          </div>
+          <div class="cta">Apply with Passport
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 2l8 3v6c0 5-3.5 8.5-8 11-4.5-2.5-8-6-8-11V5l8-3z" fill="#fff"/></svg>
+          </div>
+        </div>
+        <div class="tabbar">
+          <div class="tab on"><svg viewBox="0 0 24 24" fill="none"><rect x="4" y="8" width="16" height="12" rx="2.5"/><path d="M9 8V6.5a2 2 0 012-2h2a2 2 0 012 2V8"/><path d="M4 13h16"/></svg>Jobs</div>
+          <div class="tab"><svg viewBox="0 0 24 24" fill="none"><rect x="6" y="4" width="12" height="16" rx="2.5"/><path d="M9 9h6M9 13h6M9 17h4"/></svg>Applications</div>
+          <div class="tab"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3l7 2.5v5.2c0 4.3-3 7.4-7 9.5-4-2.1-7-5.2-7-9.5V5.5z"/><circle cx="12" cy="11" r="2.2"/></svg>Passport</div>
+          <div class="tab"><svg viewBox="0 0 24 24" fill="none"><path d="M4 11l8-6 8 6"/><path d="M6 10.5V19a1 1 0 001 1h10a1 1 0 001-1v-8.5"/></svg>Help</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PHONE 2: PASSPORT -->
+    <div class="phone">
+      <div class="screen">
+        <div class="status"><span>9:41</span><span class="dots"><span></span><span></span><span></span></span></div>
+        <div class="header">
+          <div class="logo"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2l8 3v6c0 5-3.5 8.5-8 11-4.5-2.5-8-6-8-11V5l8-3z" fill="#fff"/></svg></div>
+          <div class="logotxt">SkillBridge</div>
+          <div class="lang">EN</div>
+        </div>
+        <div class="scroll">
+          <div class="ident">
+            <div class="idtop">
+              <div class="avatar"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="9" r="4" fill="#fff"/><path d="M5 20c0-4 3-6 7-6s7 2 7 6" fill="#fff"/></svg></div>
+              <div><div class="idname">Sophea Chan</div><div class="idrole">Machine Operator</div></div>
+              <div class="idpill"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="#15A866" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Verified</div>
+            </div>
+            <div class="idrow"><span>📍 Phnom Penh</span><span>·</span><span>🌐 Khmer, English</span><span>·</span><span>🕘 Available now</span></div>
+            <div class="idmeta"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="9" rx="2" fill="#74767E"/><path d="M8 11V8a4 4 0 018 0v3" fill="none" stroke="#74767E" stroke-width="2"/></svg>Identity · National ID verified 2 Aug 2026</div>
+          </div>
+          <div class="readiness">
+            <div class="readl">Ready for applications</div>
+            <div class="readv">72%</div>
+            <div class="track"><div class="fill"></div></div>
+          </div>
+          <div class="skills">
+            <div class="sect">Skills</div>
+            <span class="skill"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="#15A866" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Machine sewing</span>
+            <span class="skill"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="#15A866" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>QC inspection</span>
+            <span class="skill"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="#15A866" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Packaging</span>
+            <span class="skill off">Forklift license</span>
+            <span class="skill off">English B1</span>
+          </div>
+          <div class="cta">Apply with Passport
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 2l8 3v6c0 5-3.5 8.5-8 11-4.5-2.5-8-6-8-11V5l8-3z" fill="#fff"/></svg>
+          </div>
+        </div>
+        <div class="tabbar">
+          <div class="tab"><svg viewBox="0 0 24 24" fill="none"><rect x="4" y="8" width="16" height="12" rx="2.5"/><path d="M9 8V6.5a2 2 0 012-2h2a2 2 0 012 2V8"/><path d="M4 13h16"/></svg>Jobs</div>
+          <div class="tab"><svg viewBox="0 0 24 24" fill="none"><rect x="6" y="4" width="12" height="16" rx="2.5"/><path d="M9 9h6M9 13h6M9 17h4"/></svg>Applications</div>
+          <div class="tab on"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3l7 2.5v5.2c0 4.3-3 7.4-7 9.5-4-2.1-7-5.2-7-9.5V5.5z"/><circle cx="12" cy="11" r="2.2"/></svg>Passport</div>
+          <div class="tab"><svg viewBox="0 0 24 24" fill="none"><path d="M4 11l8-6 8 6"/><path d="M6 10.5V19a1 1 0 001 1h10a1 1 0 001-1v-8.5"/></svg>Help</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="caption"><b>SkillBridge — Market Pulse</b> (Fiverr-inspired theme). A completely different language from Connected Calm: vivid <b>Fiverr Green</b> anchor, near-black ink, white surfaces, <b>bold heavy typography</b>, <b>capsule green buttons</b>, and <b>solid filled icons</b> with a green active state. Energetic marketplace feel vs calm minimal.</div>
+
+  <div class="legend">
+    <span class="sw"><span class="dot" style="background:#1DBF73"></span>Fiverr Green — anchor + apply</span>
+    <span class="sw"><span class="dot" style="background:#404145"></span>Near-Black Ink</span>
+    <span class="sw"><span class="dot" style="background:#F7F7F8"></span>Light Gray Canvas</span>
+    <span class="sw"><span class="dot" style="background:#15A866"></span>Verified Green</span>
+    <span class="sw"><span class="dot" style="background:#E0312B"></span>Risk Red</span>
+  </div>
+</body>
+</html>

@@ -140,12 +140,7 @@ export function NetworkTestimonials({
             aria-hidden="true"
             className="absolute left-1/2 top-1/2 flex gap-4 [transform:translateX(-39%)_translateY(-50%)_translateZ(-90px)_rotateX(16deg)_rotateY(-9deg)_rotateZ(4deg)] [transform-style:preserve-3d] sm:gap-5 lg:left-1/2"
           >
-            <div className="sm:hidden">
-              <NetworkColumn testimonials={testimonials} column={0} />
-            </div>
-            <div className="hidden sm:block">
-              <NetworkColumn testimonials={testimonials} column={0} />
-            </div>
+            <NetworkColumn testimonials={testimonials} column={0} />
             <div className="hidden sm:block">
               <NetworkColumn testimonials={testimonials} column={1} />
             </div>

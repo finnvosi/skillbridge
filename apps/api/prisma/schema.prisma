@@ -64,6 +64,7 @@ enum NotificationType {
   application_status_changed
   certificate_verified
   certificate_rejected
+  verification_requested
 }
 
 model User {

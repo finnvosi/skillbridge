@@ -8,3 +8,9 @@ allowBuilds:
   prisma: true
   sharp: true
   unrs-resolver: true
+# Force every workspace package to the app's exact React/RN versions so no
+# second copy (e.g. @skillbridge/ui's ^19.0.0 -> 19.2.4) reaches native builds.
+overrides:
+  react: 19.2.3
+  react-dom: 19.2.3
+  react-native: 0.86.2

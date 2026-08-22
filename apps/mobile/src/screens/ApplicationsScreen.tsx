@@ -148,7 +148,7 @@ export default function ApplicationsScreen({ onOpenJob }: { onOpenJob?: (jobId: 
 function PressableRow({ onPress, label }: { onPress: () => void; label: string }) {
   return (
     <View style={styles.viewRow}>
-      <AppText style={styles.viewLabel} onPress={onPress as any}>{label}</AppText>
+      <AppText style={styles.viewLabel} onPress={() => onPress()}>{label}</AppText>
       <Icon name="arrowRight" size={16} color={colors.primary} />
     </View>
   );

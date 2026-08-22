@@ -89,7 +89,7 @@ function PressableOpacity({
 }: {
   children: React.ReactNode;
   onPress?: () => void;
-  hitSlop?: any;
+  hitSlop?: import('react-native').Insets | number;
 }) {
   return (
     <Pressable onPress={onPress} hitSlop={hitSlop} style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}>

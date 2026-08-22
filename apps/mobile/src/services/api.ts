@@ -69,3 +69,11 @@ export async function apiRequest<T = unknown>(
 
   return data as T;
 }
+
+// Type-safe error message extraction for `catch (err: unknown)` blocks.
+// ApiError (and the standard Error it extends) expose `.message`; this narrows
+// `unknown` without resorting to `any`.
+export function errMessage(err: unknown, fallback: string): string {
+  if (err instanceof Error) return err.message;
+  return fallback;
+}

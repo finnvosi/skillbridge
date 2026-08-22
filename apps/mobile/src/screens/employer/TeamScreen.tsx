@@ -11,7 +11,7 @@ import {
   TextInput,
 } from 'react-native';
 import { Card, Button, Badge } from '@skillbridge/ui';
-import { apiRequest } from '../../services/api';
+import { apiRequest, errMessage } from '../../services/api';
 import { API_ENDPOINTS } from '../../config';
 import { useAuthStore } from '../../store/auth';
 import { colors, spacing, typography, radius } from '../../theme';
@@ -50,8 +50,8 @@ export default function TeamScreen() {
         { method: 'GET', token }
       );
       setMembers(data.members ?? []);
-    } catch (err: any) {
-      Alert.alert('Error', err?.message || 'Failed to load team');
+    } catch (err: unknown) {
+      Alert.alert('Error', errMessage(err, 'Failed to load team'));
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -77,8 +77,8 @@ export default function TeamScreen() {
       setName('');
       setEmail('');
       Alert.alert('Success', 'Teammate invited.');
-    } catch (err: any) {
-      Alert.alert('Error', err?.message || 'Failed to invite');
+    } catch (err: unknown) {
+      Alert.alert('Error', errMessage(err, 'Failed to invite'));
     } finally {
       setInviting(false);
     }
@@ -100,8 +100,8 @@ export default function TeamScreen() {
                 token,
               });
               setMembers((m) => m.filter((x) => x.id !== id));
-            } catch (err: any) {
-              Alert.alert('Error', err?.message || 'Failed to remove');
+            } catch (err: unknown) {
+              Alert.alert('Error', errMessage(err, 'Failed to remove'));
             }
           },
         },

@@ -3,7 +3,7 @@ import { View, Text, ScrollView, StyleSheet, ActivityIndicator, Alert } from 're
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
 import { Card, Badge, Button } from '@skillbridge/ui';
-import { apiRequest } from '../../services/api';
+import { apiRequest, errMessage } from '../../services/api';
 import { API_ENDPOINTS } from '../../config';
 import { useAuthStore } from '../../store/auth';
 import type { RootStackParamList } from '../../App';
@@ -53,8 +53,8 @@ export default function ProjectDetailScreen({ navigation, route }: Props) {
           { method: 'GET', token }
         );
         setProject(data.project);
-      } catch (err: any) {
-        Alert.alert('Error', err?.message || 'Failed to load project');
+      } catch (err: unknown) {
+        Alert.alert('Error', errMessage(err, 'Failed to load project'));
       } finally {
         setLoading(false);
       }
@@ -70,8 +70,8 @@ export default function ProjectDetailScreen({ navigation, route }: Props) {
         body: { coverLetter: 'I would love to work on this project.' },
       });
       Alert.alert('Applied!', `You applied to "${project.title}".`);
-    } catch (err: any) {
-      Alert.alert('Error', err?.message || 'Failed to apply');
+    } catch (err: unknown) {
+      Alert.alert('Error', errMessage(err, 'Failed to apply'));
     }
   };
 

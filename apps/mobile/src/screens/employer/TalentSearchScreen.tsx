@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Card, Badge } from '@skillbridge/ui';
-import { apiRequest } from '../../services/api';
+import { apiRequest, errMessage, ApiError } from '../../services/api';
 import { API_ENDPOINTS } from '../../config';
 import { useAuthStore } from '../../store/auth';
 import { colors, spacing, typography, radius } from '../../theme';
@@ -76,13 +76,13 @@ export default function TalentSearchScreen({ navigation }: Props) {
         token,
       });
       setStudents(data.students ?? []);
-    } catch (err: any) {
+    } catch (err: unknown) {
       // If the user isn't an employer, the API returns 403 — graceful empty state
-      if (err?.status === 403) {
+      if (err instanceof ApiError && err.status === 403) {
         setStudents([]);
       } else {
         if (opts.refresh) {
-          Alert.alert('Error', err?.message || 'Failed to load talent');
+          Alert.alert('Error', errMessage(err, 'Failed to load talent'));
         } else {
           setStudents([]);
         }

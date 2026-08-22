@@ -36,6 +36,13 @@ module.exports = [
       'expo/use-dom-exports': 'error',
       'expo/no-env-var-destructuring': 'error',
       'expo/no-dynamic-env-var': 'error',
+      // The app uses React 18.3 without the React Compiler, so the
+      // compiler-specific react-hooks rules are false-positives here.
+      // Keep the classic hooks rules above; only disable the compiler ones.
+      'react-hooks/set-state-in-effect': 'off',
+      'react-hooks/purity': 'off',
+      'react-hooks/immutability': 'off',
+      'react-hooks/preserve-manual-memoization': 'off',
       'import/first': 'warn',
       'import/no-duplicates': 'warn',
       'no-console': 'off',

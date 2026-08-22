@@ -3,13 +3,15 @@ import {
   View,
   Text,
   TouchableOpacity,
+  TextInput,
   StyleSheet,
   Alert,
   ActivityIndicator,
   Platform,
 } from 'react-native';
 import { Card, Badge } from '@skillbridge/ui';
-import { apiRequest, ApiError } from '../services/api';
+import { AppText } from './ui';
+import { apiRequest, ApiError, errMessage } from '../services/api';
 import { API_ENDPOINTS } from '../config';
 import { useAuthStore } from '../store/auth';
 import { colors, spacing, typography, radius } from '../theme';
@@ -54,8 +56,8 @@ export default function CertificateSection() {
         { method: 'GET', token }
       );
       setCertificates(data.certificates);
-    } catch (err: any) {
-      Alert.alert('Error', err?.message || 'Failed to load certificates');
+    } catch (err: unknown) {
+      Alert.alert('Error', errMessage(err, 'Failed to load certificates'));
     } finally {
       setLoading(false);
     }
@@ -88,8 +90,8 @@ export default function CertificateSection() {
       setFileBase64('');
       setFileName('');
       loadCertificates();
-    } catch (err: any) {
-      Alert.alert('Error', err?.message || 'Failed to upload');
+    } catch (err: unknown) {
+      Alert.alert('Error', errMessage(err, 'Failed to upload'));
     } finally {
       setUploading(false);
     }
@@ -108,8 +110,8 @@ export default function CertificateSection() {
               token,
             });
             setCertificates((prev) => prev.filter((c) => c.id !== id));
-          } catch (err: any) {
-            Alert.alert('Error', err?.message || 'Failed to delete');
+          } catch (err: unknown) {
+            Alert.alert('Error', errMessage(err, 'Failed to delete'));
           }
         },
       },
@@ -224,10 +226,6 @@ export default function CertificateSection() {
   );
 }
 
-// Inline TextInput for React Native (avoids import issues)
-const { TextInput } = require('react-native');
-
-import { AppText } from './ui';
 const styles = StyleSheet.create({
   container: { padding: spacing.lg, gap: spacing.md },
   sectionTitle: {

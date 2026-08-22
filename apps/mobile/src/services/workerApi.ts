@@ -275,8 +275,9 @@ export async function updatePassport(
     // The endpoint returns flat fields (same shape as GET /me/passport). If a
     // future version wraps the payload in a `passport` key, unwrap it so this
     // client keeps working.
-    const p = (res as any).passport ?? res;
-    return mapPassport(p as ApiPassport);
+    const wrapped = res as { passport?: ApiPassport };
+    const p = wrapped.passport ?? (res as ApiPassport);
+    return mapPassport(p);
   } catch {
     return null;
   }

@@ -11,6 +11,8 @@ import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import type { BottomTabBarButtonProps } from '@react-navigation/bottom-tabs';
+import type { NativeStackScreenProps, NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Pressable, Text, StyleSheet, View, ActivityIndicator, Alert } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -56,7 +58,7 @@ function TabBarIcon({ name, focused }: { name: IconName; focused: boolean }) {
   return <Icon name={name} size={22} color={focused ? colors.primary : colors.muted} />;
 }
 
-function MainTabs({ navigation, route }: any) {
+function MainTabs({ navigation, route }: NativeStackScreenProps<RootStackParamList, 'Main'>) {
   const { t } = useT();
   return (
     <Tab.Navigator
@@ -74,7 +76,7 @@ function MainTabs({ navigation, route }: any) {
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.muted,
         tabBarLabelStyle: { fontSize: 11, fontWeight: typography.weight.medium, marginTop: 2 },
-        tabBarButton: (props: any) => (
+        tabBarButton: (props: BottomTabBarButtonProps) => (
           <Pressable
             accessibilityRole="button"
             accessibilityState={{ selected: props.accessibilityState?.selected }}
@@ -148,7 +150,7 @@ function JobDetailWithBlock({
   navigation,
 }: {
   job: DemoJob;
-  navigation: any;
+  navigation: NativeStackNavigationProp<RootStackParamList>;
 }) {
   const { t } = useT();
   const token = useAuthStore((s) => s.token);
@@ -177,7 +179,7 @@ function JobDetailWithBlock({
       job={job}
       onBack={() => navigation.goBack()}
       onApply={() => navigation.navigate('ApplyReview', { jobId: job.id })}
-      onReport={() => navigation.navigate('Report')}
+      onReport={() => navigation.navigate('Report', {})}
       onBlock={handleBlock}
     />
   );

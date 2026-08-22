@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Card, Badge, Button } from '@skillbridge/ui';
-import { apiRequest } from '../../services/api';
+import { apiRequest, errMessage } from '../../services/api';
 import { API_ENDPOINTS } from '../../config';
 import { useAuthStore } from '../../store/auth';
 import type { RootStackParamList } from '../../App';
@@ -63,8 +63,8 @@ export default function ProjectsScreen({ navigation }: Props) {
         token,
       });
       setProjects(data.projects);
-    } catch (err: any) {
-      Alert.alert('Error', err?.message || 'Failed to load projects');
+    } catch (err: unknown) {
+      Alert.alert('Error', errMessage(err, 'Failed to load projects'));
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -87,8 +87,8 @@ export default function ProjectsScreen({ navigation }: Props) {
         body: { coverLetter: 'I would love to work on this project.' },
       });
       Alert.alert('Applied!', `You applied to "${p.title}".`);
-    } catch (err: any) {
-      Alert.alert('Error', err?.message || 'Failed to apply');
+    } catch (err: unknown) {
+      Alert.alert('Error', errMessage(err, 'Failed to apply'));
     }
   };
 

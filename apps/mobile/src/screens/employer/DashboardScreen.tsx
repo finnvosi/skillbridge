@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Card, Badge, Button } from '@skillbridge/ui';
-import { apiRequest } from '../../services/api';
+import { apiRequest, errMessage } from '../../services/api';
 import { API_ENDPOINTS } from '../../config';
 import { useAuthStore } from '../../store/auth';
 import { colors, spacing, typography, radius } from '../../theme';
@@ -45,22 +45,37 @@ export default function EmployerDashboardScreen({ navigation }: Props) {
   const [loading, setLoading] = React.useState(true);
   const [refreshing, setRefreshing] = React.useState(false);
 
-  const [projects, setProjects] = React.useState<any[]>([]);
-  const [applications, setApplications] = React.useState<any[]>([]);
-  const [analytics, setAnalytics] = React.useState<any>(null);
+type ApiProject = Record<string, unknown>;
+
+type ApiApplication = {
+  id: string;
+  status: string;
+  student?: { user?: { name?: string } };
+  project?: { title?: string };
+};
+
+type ApiAnalytics = {
+  talentScore?: number;
+  acceptanceRate?: number;
+  funnel?: Record<string, number>;
+};
+
+  const [projects, setProjects] = React.useState<ApiProject[]>([]);
+  const [applications, setApplications] = React.useState<ApiApplication[]>([]);
+  const [analytics, setAnalytics] = React.useState<ApiAnalytics | null>(null);
 
   const load = React.useCallback(async () => {
     try {
       const [projRes, appsRes, anRes] = await Promise.all([
-        apiRequest<{ projects: any[] }>(API_ENDPOINTS.employer.projects, {
+        apiRequest<{ projects: ApiProject[] }>(API_ENDPOINTS.employer.projects, {
           method: 'GET',
           token,
         }),
-        apiRequest<{ applications: any[] }>(API_ENDPOINTS.employer.applications, {
+        apiRequest<{ applications: ApiApplication[] }>(API_ENDPOINTS.employer.applications, {
           method: 'GET',
           token,
         }),
-        apiRequest(API_ENDPOINTS.employer.analytics, {
+        apiRequest<ApiAnalytics>(API_ENDPOINTS.employer.analytics, {
           method: 'GET',
           token,
         }).catch(() => null),
@@ -69,8 +84,8 @@ export default function EmployerDashboardScreen({ navigation }: Props) {
       setProjects(projRes.projects ?? []);
       setApplications(appsRes.applications ?? []);
       setAnalytics(anRes);
-    } catch (err: any) {
-      Alert.alert('Error', err?.message || 'Failed to load dashboard');
+    } catch (err: unknown) {
+      Alert.alert('Error', errMessage(err, 'Failed to load dashboard'));
     } finally {
       setLoading(false);
       setRefreshing(false);

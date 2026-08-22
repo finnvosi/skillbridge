@@ -11,7 +11,10 @@ import * as React from 'react';
 declare module 'react' {
   namespace JSX {
     interface ElementClass {
-      render?: any;
+      // RN host/class components don't satisfy the strict `props` member that
+      // @types/react 18.3 requires on JSX.ElementClass. We widen to a callable
+      // render instead of `any` so the shim stays type-safe.
+      render?: (...args: unknown[]) => unknown;
     }
   }
 }

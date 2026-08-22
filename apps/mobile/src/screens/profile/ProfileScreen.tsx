@@ -10,7 +10,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useAuthStore } from '../../store/auth';
-import { apiRequest } from '../../services/api';
+import { apiRequest, errMessage } from '../../services/api';
 import { API_ENDPOINTS } from '../../config';
 import { Button, Input, Card, Badge } from '@skillbridge/ui';
 import { colors, spacing, typography, radius } from '../../theme';
@@ -56,8 +56,8 @@ export default function ProfileScreen() {
         setMajor(p.major || '');
         setGraduationYear(p.graduationYear ? String(p.graduationYear) : '');
         setSkills(p.skills || []);
-      } catch (err: any) {
-        if (active) Alert.alert('Error', err?.message || 'Failed to load profile');
+      } catch (err: unknown) {
+        if (active) Alert.alert('Error', errMessage(err, 'Failed to load profile'));
       } finally {
         if (active) setLoading(false);
       }
@@ -79,7 +79,13 @@ export default function ProfileScreen() {
   const save = async () => {
     setSaving(true);
     try {
-      const body: any = { name };
+      const body: {
+        name: string;
+        university?: string;
+        major?: string;
+        graduationYear?: number;
+        skills?: string[];
+      } = { name };
       if (isStudent) {
         body.university = university || undefined;
         body.major = major || undefined;
@@ -92,8 +98,8 @@ export default function ProfileScreen() {
       );
       updateUser({ name: data.user.name });
       Alert.alert('Saved', 'Profile updated.');
-    } catch (err: any) {
-      Alert.alert('Error', err?.message || 'Failed to save');
+    } catch (err: unknown) {
+      Alert.alert('Error', errMessage(err, 'Failed to save'));
     } finally {
       setSaving(false);
     }

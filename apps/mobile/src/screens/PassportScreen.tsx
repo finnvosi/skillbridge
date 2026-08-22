@@ -38,7 +38,6 @@ export default function PassportScreen() {
   const passport = remotePassport ?? storePassport;
 
   const verifiedCount = passport.skills.filter((s) => s.verified).length;
-  const readiness = Math.round((verifiedCount / passport.skills.length) * 100) || 0;
   const record = passport.workRecords[0];
 
   return (
@@ -87,7 +86,7 @@ export default function PassportScreen() {
               <StatusPill icon="shieldCheck" label={t('passport.verified')} tone="success" />
             </View>
             <AppText style={styles.recordMeta}>
-              {record.startYear}–{record.endYear ?? 'Present'} · {record.skills.join(', ')}
+              {record.startYear}–{record.endYear ?? 'Present'}{record.skills.length > 0 ? ` · ${record.skills.join(', ')}` : ''}
             </AppText>
             <View style={[styles.provenance, { backgroundColor: colors.successSoft }]}>
               <Icon name="checkCircle" size={15} color={colors.success} />
@@ -96,41 +95,70 @@ export default function PassportScreen() {
               </AppText>
             </View>
           </Card>
-        ) : null}
+        ) : (
+          <Card style={styles.card}>
+            <SectionLabel>{t('passport.verifiedWork')}</SectionLabel>
+            <View style={styles.emptyBox}>
+              <Icon name="info" size={16} color={colors.muted} />
+              <AppText style={[styles.emptyText, { color: colors.muted }]}>{t('passport.noWorkRecords')}</AppText>
+            </View>
+          </Card>
+        )}
 
         {/* Skills */}
         <Card style={styles.card}>
           <SectionLabel>{t('passport.skills')}</SectionLabel>
-          <View style={styles.skills}>
-            {passport.skills.map((s, i) => (
-              <View key={i} style={[styles.skill, s.verified ? styles.skillOn : styles.skillOff]}>
-                <Icon name={s.verified ? 'shieldCheck' : 'check'} size={14} color={s.verified ? colors.success : colors.mutedLight} />
-                <AppText style={[styles.skillText, s.verified ? styles.skillTextOn : styles.skillTextOff]}>{s.name}</AppText>
-                <AppText style={[styles.skillTag, s.verified ? styles.skillTagOn : styles.skillTagOff]}>
-                  {s.verified ? t('passport.verified') : t('passport.selfDeclared')}
-                </AppText>
-              </View>
-            ))}
-          </View>
+          {passport.skills.length > 0 ? (
+            <View style={styles.skills}>
+              {passport.skills.map((s, i) => (
+                <View key={i} style={[styles.skill, s.verified ? styles.skillOn : styles.skillOff]}>
+                  <Icon name={s.verified ? 'shieldCheck' : 'check'} size={14} color={s.verified ? colors.success : colors.mutedLight} />
+                  <AppText style={[styles.skillText, s.verified ? styles.skillTextOn : styles.skillTextOff]}>{s.name}</AppText>
+                  <AppText style={[styles.skillTag, s.verified ? styles.skillTagOn : styles.skillTagOff]}>
+                    {s.verified ? t('passport.verified') : t('passport.selfDeclared')}
+                  </AppText>
+                </View>
+              ))}
+            </View>
+          ) : (
+            <View style={styles.emptyBox}>
+              <Icon name="info" size={16} color={colors.muted} />
+              <AppText style={[styles.emptyText, { color: colors.muted }]}>{t('passport.noSkills')}</AppText>
+            </View>
+          )}
         </Card>
 
         {/* Languages + safety */}
         <Card style={styles.card}>
           <SectionLabel>{t('passport.languages')}</SectionLabel>
-          <View style={styles.chips}>
-            {passport.languages.map((l, i) => (
-              <View key={i} style={styles.langChip}><AppText style={styles.langText}>{l}</AppText></View>
-            ))}
-          </View>
+          {passport.languages.length > 0 ? (
+            <View style={styles.chips}>
+              {passport.languages.map((l, i) => (
+                <View key={i} style={styles.langChip}><AppText style={styles.langText}>{l}</AppText></View>
+              ))}
+            </View>
+          ) : (
+            <View style={styles.emptyBox}>
+              <Icon name="info" size={16} color={colors.muted} />
+              <AppText style={[styles.emptyText, { color: colors.muted }]}>{t('passport.noLanguages')}</AppText>
+            </View>
+          )}
           <SectionLabel>{t('passport.safety')}</SectionLabel>
-          <View style={styles.chips}>
-            {passport.safetyQualifications.map((q, i) => (
-              <View key={i} style={styles.safetyChip}>
-                <Icon name="shieldCheck" size={14} color={colors.success} />
-                <AppText style={styles.safetyText}>{q}</AppText>
-              </View>
-            ))}
-          </View>
+          {passport.safetyQualifications.length > 0 ? (
+            <View style={styles.chips}>
+              {passport.safetyQualifications.map((q, i) => (
+                <View key={i} style={styles.safetyChip}>
+                  <Icon name="shieldCheck" size={14} color={colors.success} />
+                  <AppText style={styles.safetyText}>{q}</AppText>
+                </View>
+              ))}
+            </View>
+          ) : (
+            <View style={styles.emptyBox}>
+              <Icon name="info" size={16} color={colors.muted} />
+              <AppText style={[styles.emptyText, { color: colors.muted }]}>{t('passport.noSafety')}</AppText>
+            </View>
+          )}
         </Card>
 
         {/* Share toggle */}
@@ -184,6 +212,8 @@ const styles = StyleSheet.create({
   recordRole: { fontSize: typography.size.md, fontWeight: typography.weight.semibold as any, color: colors.ink },
   recordCompany: { fontSize: typography.size.sm, color: colors.muted },
   recordMeta: { fontSize: typography.size.sm, color: colors.ink, marginTop: spacing.xs },
+  emptyBox: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, padding: spacing.md, backgroundColor: colors.surfaceMuted, borderRadius: radius.sm },
+  emptyText: { flex: 1, fontSize: typography.size.sm, color: colors.muted, lineHeight: typography.size.sm * typography.lineHeight.relaxed },
   skills: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   skill: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, paddingVertical: spacing.sm, paddingHorizontal: spacing.md, borderRadius: radius.pill, borderWidth: 1 },
   skillOn: { backgroundColor: colors.successSoft, borderColor: colors.success },

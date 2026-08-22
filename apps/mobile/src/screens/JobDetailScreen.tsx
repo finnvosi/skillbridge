@@ -1,16 +1,15 @@
-// Job detail — verification evidence, honesty copy, pay/shift/location/conditions,
-// match reasons, and the two CTAs: Apply with Passport, Report a concern.
+// Job detail — title, pay/shift/location, what we verified and cannot guarantee,
+// match reasons, and the two actions: Apply with Passport, Report a concern.
 import React from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors, typography, spacing, radius } from '../theme';
+import { colors, typography, spacing, radius, shadow } from '../theme';
 import { DemoJob } from '../types';
 import { useT } from '../hooks/useT';
 import { Icon, IconName } from '../components/Icon';
-import { Card, VerifyBadge, StatusPill, Button, DemoTag, SectionLabel } from '../components/ui';
+import { Card, VerifyBadge, StatusPill, Button, DemoTag, SectionLabel, AppText } from '../components/ui';
 import { BackBar } from '../components/BackBar';
 
-import { AppText } from './../components/ui';
 const VERIFY_LABEL: Record<DemoJob['verificationLevel'], string> = {
   job_checked: 'jobs.jobChecked',
   company_checked: 'jobs.companyChecked',
@@ -45,6 +44,7 @@ export default function JobDetailScreen({
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <BackBar title={job.title} onBack={onBack} right={<DemoTag onDark />} />
       <ScrollView contentContainerStyle={styles.scroll}>
+        {/* Title card: verification level first, then company, then summary. */}
         <Card elevated style={styles.head}>
           <View style={styles.headTop}>
             <VerifyBadge level={job.verificationLevel} label={t(VERIFY_LABEL[job.verificationLevel])} />
@@ -63,32 +63,50 @@ export default function JobDetailScreen({
           <View style={styles.facts}>
             <Fact icon="money" label={t('job.pay')} value={`$${job.payPerMonth}${job.currency === 'USD' ? '' : 'K'}`} sub="/mo" />
             <Fact icon="clock" label={t('job.shift')} value={t(SHIFT_LABEL[job.shift])} />
-            <Fact icon="briefcase" label={t('job.type')} value={t(EMP_LABEL[job.employmentType])} />
             <Fact icon="pin" label={t('job.distance')} value={`${job.location} · ${job.distanceKm}${t('jobs.km')}`} />
+            <Fact icon="briefcase" label={t('job.type')} value={t(EMP_LABEL[job.employmentType])} />
           </View>
         </Card>
 
-        {/* What we checked + cannot guarantee */}
+        {/* What we checked + honest empty state */}
         <Card style={styles.card}>
           <SectionLabel>{t('job.whatChecked')}</SectionLabel>
-          {job.evidence.map((e, i) => (
-            <Row key={i} icon={e.checked ? 'checkCircle' : 'info'} tone={e.checked ? colors.success : colors.muted}>
-              <AppText style={styles.evLabel}>{e.label}</AppText>
-              <AppText style={styles.evDetail}>{e.detail}</AppText>
-            </Row>
-          ))}
-          <View style={styles.gap} />
-          <SectionLabel>{t('job.cannotGuarantee')}</SectionLabel>
-          <View style={[styles.noteBox, { backgroundColor: colors.warningSoft, borderColor: colors.warning }]}>
-            <Icon name="alert" size={18} color={colors.warningInk} />
-            <View style={{ flex: 1 }}>
-              {job.cannotGuarantee.map((c, i) => (
-                <AppText key={i} style={[styles.noteText, { color: colors.warningInk }]}>
-                  • {c}
-                </AppText>
-              ))}
+          {job.evidence.length > 0 ? (
+            job.evidence.map((e, i) => (
+              <Row key={i} icon={e.checked ? 'checkCircle' : 'info'} tone={e.checked ? colors.success : colors.muted}>
+                <AppText style={styles.evLabel}>{e.label}</AppText>
+                <AppText style={styles.evDetail}>{e.detail}</AppText>
+              </Row>
+            ))
+          ) : (
+            <View style={styles.emptyEvidence}>
+              <Icon name="info" size={16} color={colors.muted} />
+              <AppText style={styles.emptyEvidenceText}>{t('job.noChecksListed')}</AppText>
             </View>
+          )}
+          <View style={styles.gap} />
+          <View style={[styles.dangerLabel, { backgroundColor: colors.dangerSoft, borderColor: colors.danger }]}>
+            <Icon name="alert" size={16} color={colors.danger} />
+            <AppText style={[styles.dangerLabelText, { color: colors.danger }]}>{t('job.cannotGuarantee')}</AppText>
           </View>
+
+          {job.cannotGuarantee.length > 0 ? (
+            <View style={[styles.noteBox, { backgroundColor: colors.warningSoft, borderColor: colors.warning }]}>
+              <Icon name="alert" size={18} color={colors.warningInk} />
+              <View style={{ flex: 1 }}>
+                {job.cannotGuarantee.map((c, i) => (
+                  <AppText key={i} style={[styles.noteText, { color: colors.warningInk }]}>
+                    • {c}
+                  </AppText>
+                ))}
+              </View>
+            </View>
+          ) : (
+            <View style={[styles.noteBox, { backgroundColor: colors.successSoft, borderColor: colors.success }]}>
+              <Icon name="checkCircle" size={18} color={colors.success} />
+              <AppText style={[styles.noteText, { color: colors.ink }]}>{t('job.cannotGuaranteeEmpty')}</AppText>
+            </View>
+          )}
         </Card>
 
         {/* Conditions */}
@@ -110,17 +128,24 @@ export default function JobDetailScreen({
           </View>
 
           <SectionLabel>{t('job.matchingSkills')}</SectionLabel>
-          <View style={styles.skills}>
-            {job.skillMatches.map((s, i) => (
-              <View key={i} style={[styles.skill, s.matched ? styles.skillOn : styles.skillOff]}>
-                <Icon name={s.matched ? 'checkCircle' : 'close'} size={14} color={s.matched ? colors.success : colors.mutedLight} />
-                <AppText style={[styles.skillText, s.matched ? styles.skillTextOn : styles.skillTextOff]}>{s.skill}</AppText>
-                {s.verified ? (
-                  <StatusPill icon="shieldCheck" label={t('passport.verified')} tone="success" />
-                ) : null}
-              </View>
-            ))}
-          </View>
+          {job.skillMatches.length > 0 ? (
+            <View style={styles.skills}>
+              {job.skillMatches.map((s, i) => (
+                <View key={i} style={[styles.skill, s.matched ? styles.skillOn : styles.skillOff]}>
+                  <Icon name={s.matched ? 'checkCircle' : 'close'} size={14} color={s.matched ? colors.success : colors.mutedLight} />
+                  <AppText style={[styles.skillText, s.matched ? styles.skillTextOn : styles.skillTextOff]}>{s.skill}</AppText>
+                  {s.verified ? (
+                    <StatusPill icon="shieldCheck" label={t('passport.verified')} tone="success" />
+                  ) : null}
+                </View>
+              ))}
+            </View>
+          ) : (
+            <View style={styles.emptyBox}>
+              <Icon name="info" size={16} color={colors.muted} />
+              <AppText style={[styles.emptyText, { color: colors.muted }]}>{t('job.noSkillsListed')}</AppText>
+            </View>
+          )}
 
           {job.missingRequirements.length > 0 ? (
             <>
@@ -191,7 +216,7 @@ const styles = StyleSheet.create({
   company: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
   companyText: { fontSize: typography.size.base, color: colors.muted },
   summary: { fontSize: typography.size.base, color: colors.ink, lineHeight: typography.size.base * typography.lineHeight.relaxed },
-  factsCard: {},
+  factsCard: { ...shadow.sm },
   facts: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md },
   fact: { width: '47%', gap: spacing.xs },
   factHead: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
@@ -205,6 +230,8 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm },
   noteBox: { flexDirection: 'row', gap: spacing.sm, padding: spacing.md, borderRadius: radius.sm, borderWidth: 1 },
   noteText: { fontSize: typography.size.sm, lineHeight: typography.size.sm * typography.lineHeight.relaxed },
+  dangerLabel: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, padding: spacing.sm, borderRadius: radius.sm, borderWidth: 1 },
+  dangerLabelText: { fontSize: typography.size.sm, fontWeight: typography.weight.semibold as any },
   condGrid: { gap: spacing.sm },
   cond: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, backgroundColor: colors.surfaceMuted, borderRadius: radius.sm, padding: spacing.md },
   condText: { flex: 1, fontSize: typography.size.base },
@@ -222,4 +249,8 @@ const styles = StyleSheet.create({
   skillTextOff: { color: colors.muted },
   missing: { fontSize: typography.size.sm, color: colors.muted, lineHeight: typography.size.sm * typography.lineHeight.relaxed },
   cta: { gap: spacing.sm, marginTop: spacing.sm },
+  emptyEvidence: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, padding: spacing.md, backgroundColor: colors.surfaceMuted, borderRadius: radius.sm },
+  emptyEvidenceText: { flex: 1, fontSize: typography.size.sm, color: colors.muted, lineHeight: typography.size.sm * typography.lineHeight.relaxed },
+  emptyBox: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, padding: spacing.md, backgroundColor: colors.surfaceMuted, borderRadius: radius.sm },
+  emptyText: { flex: 1, fontSize: typography.size.sm, color: colors.muted, lineHeight: typography.size.sm * typography.lineHeight.relaxed },
 });

@@ -26,6 +26,7 @@ import { Icon, IconName } from './components/Icon';
 import { RootStackParamList, MainTabParamList } from './navigation';
 import WelcomeScreen from './screens/WelcomeScreen';
 import ConsentScreen from './screens/ConsentScreen';
+import OnboardingPreferencesScreen from './screens/OnboardingPreferencesScreen';
 import PhoneSignInScreen from './screens/auth/PhoneSignInScreen';
 import OtpVerifyScreen from './screens/auth/OtpVerifyScreen';
 import LoginScreen from './screens/auth/LoginScreen';
@@ -38,6 +39,7 @@ import JobDetailScreen from './screens/JobDetailScreen';
 import ApplyReviewScreen from './screens/ApplyReviewScreen';
 import ReportScreen from './screens/ReportScreen';
 import NotificationCenterScreen from './screens/NotificationCenterScreen';
+import AddWorkRecordScreen from './screens/AddWorkRecordScreen';
 import ProfileEditScreen from './screens/ProfileEditScreen';
 import { DEMO_JOBS } from './data/fixtures';
 import { DemoApplication, DemoJob } from './types';
@@ -113,7 +115,12 @@ function MainTabs({ navigation, route }: any) {
       >
         {({ navigation }) => (
           <PassportScreen
-            onEditPassport={() => navigation.navigate('ProfileEdit')}
+            onEditPassport={() =>
+              navigation.navigate('ProfileEdit', {
+                passport: useAppStore.getState().passport,
+              })
+            }
+            onAddWorkRecord={() => navigation.navigate('AddWorkRecord')}
           />
         )}
       </Tab.Screen>
@@ -248,6 +255,9 @@ export default function App() {
         ) : !hasConsented ? (
           /* Safety promise + consent gate (blueprint flow order). */
           <Stack.Screen name="Consent" component={ConsentScreen} />
+        ) : isWorker && !user?.onboardingCompleted ? (
+          /* Worker preferences onboarding (blueprint §7 must-ship). */
+          <Stack.Screen name="Onboarding" component={OnboardingPreferencesScreen} />
         ) : isWorker ? (
           <>
             <Stack.Screen name="Main" component={MainTabs} />
@@ -302,6 +312,14 @@ export default function App() {
             <Stack.Screen name="NotificationCenter">
               {({ navigation }) => (
                 <NotificationCenterScreen onBack={() => navigation.goBack()} />
+              )}
+            </Stack.Screen>
+            <Stack.Screen name="AddWorkRecord">
+              {({ navigation }) => (
+                <AddWorkRecordScreen
+                  onBack={() => navigation.goBack()}
+                  onSaved={() => navigation.goBack()}
+                />
               )}
             </Stack.Screen>
           </>

@@ -1,33 +1,55 @@
-// Career Passport — identity, skills, one employer-verified work record,
-// verification date/provenance, and a local demo share toggle.
-// Stays on-device; nothing is sent to a server.
-import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, Switch, Pressable, StyleSheet } from 'react-native';
+// Career Passport — identity, skills, work history with verification states,
+// and a local demo share toggle.
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, ScrollView, Switch, Pressable, StyleSheet, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors, typography, spacing, radius } from '../theme';
 import { useT } from '../hooks/useT';
 import { useAppStore } from '../store/useAppStore';
 import { Icon, IconName } from '../components/Icon';
 import { Header } from '../components/Header';
-import { Card, StatusPill, DemoTag, SectionLabel } from '../components/ui';
-import { fetchPassport } from '../services/workerApi';
+import { Card, StatusPill, DemoTag, SectionLabel, Button } from '../components/ui';
+import { fetchPassport, requestWorkRecordVerification, deleteWorkRecord } from '../services/workerApi';
+import { ApiError } from '../services/api';
 import { USE_REMOTE_API } from '../config';
 import { useAuthStore } from '../store/auth';
-import { DemoPassport } from '../types';
+import { DemoPassport, WorkRecord } from '../types';
 import { AppText } from './../components/ui';
-export default function PassportScreen({ onEditPassport }: { onEditPassport?: () => void }) {
+export default function PassportScreen({
+  onEditPassport,
+  onAddWorkRecord,
+}: {
+  onEditPassport?: () => void;
+  onAddWorkRecord?: () => void;
+}) {
   const { t, formatDate } = useT();
   const storePassport = useAppStore((s) => s.passport);
   const setShareEnabled = useAppStore((s) => s.setShareEnabled);
+  const setPassport = useAppStore((s) => s.setPassport);
   const token = useAuthStore((s) => s.token);
   const [remotePassport, setRemotePassport] = useState<DemoPassport | null>(null);
+
+  const load = useCallback(async () => {
+    if (!USE_REMOTE_API || !token) return;
+    const data = await fetchPassport(token);
+    if (data) {
+      setRemotePassport(data);
+      setPassport(data);
+    }
+  }, [token, setPassport]);
 
   useEffect(() => {
     if (!USE_REMOTE_API || !token) return;
     let alive = true;
     fetchPassport(token)
       .then((data) => {
-        if (alive && data) setRemotePassport(data);
+        if (alive && data) {
+          setRemotePassport(data);
+          // Sync the live remote passport into the store so the Edit screen
+          // (which reads the store at navigation time) pre-fills with the
+          // same data the tab is showing, not the local demo fallback.
+          setPassport(data);
+        }
       })
       .catch(() => {
         // keep store fallback
@@ -35,12 +57,42 @@ export default function PassportScreen({ onEditPassport }: { onEditPassport?: ()
     return () => {
       alive = false;
     };
-  }, [token]);
+  }, [token, setPassport]);
 
   const passport = remotePassport ?? storePassport;
 
   const verifiedCount = passport.skills.filter((s) => s.verified).length;
-  const record = passport.workRecords[0];
+  const records = passport.workRecords;
+  const [busyId, setBusyId] = useState<string | null>(null);
+
+  const runAction = async (id: string, fn: () => Promise<unknown>, okKey: string) => {
+    setBusyId(id);
+    try {
+      await fn();
+      await load().catch(() => {});
+      Alert.alert(t('common.demo'), t(okKey));
+    } catch (error) {
+      Alert.alert(
+        t('common.error'),
+        error instanceof ApiError ? error.message : t('onboarding.saveError'),
+      );
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const handleRequestVerification = (r: WorkRecord) =>
+    runAction(r.id, () => requestWorkRecordVerification(r.id, token), 'workrecord.requested');
+
+  const handleDelete = (r: WorkRecord) =>
+    Alert.alert(t('workrecord.title'), t('passport.deleteRecord') + '?', [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: t('passport.deleteRecord'),
+        style: 'destructive',
+        onPress: () => runAction(r.id, () => deleteWorkRecord(r.id, token), 'workrecord.deleted'),
+      },
+    ]);
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
@@ -94,37 +146,85 @@ export default function PassportScreen({ onEditPassport }: { onEditPassport?: ()
           </View>
         </Card>
 
-        {/* Verified work record */}
-        {record ? (
-          <Card style={styles.card}>
-            <SectionLabel>{t('passport.verifiedWork')}</SectionLabel>
-            <View style={styles.recordHead}>
-              <Icon name="building" size={18} color={colors.primary} />
-              <View style={{ flex: 1 }}>
-                <AppText style={styles.recordRole}>{record.role}</AppText>
-                <AppText style={styles.recordCompany}>{record.company} · {record.workplace}</AppText>
-              </View>
-              <StatusPill icon="shieldCheck" label={t('passport.verified')} tone="success" />
-            </View>
-            <AppText style={styles.recordMeta}>
-              {record.startYear}–{record.endYear ?? 'Present'}{record.skills.length > 0 ? ` · ${record.skills.join(', ')}` : ''}
-            </AppText>
-            <View style={[styles.provenance, { backgroundColor: colors.successSoft }]}>
-              <Icon name="checkCircle" size={15} color={colors.success} />
-              <AppText style={[styles.provenanceText, { color: colors.ink }]}>
-                {t('passport.verified')} {record.verifiedBy} · {formatDate(record.verifiedAt)}
-              </AppText>
-            </View>
-          </Card>
-        ) : (
-          <Card style={styles.card}>
-            <SectionLabel>{t('passport.verifiedWork')}</SectionLabel>
+        {/* Work history */}
+        <Card style={styles.card}>
+          <SectionLabel>{t('passport.verifiedWork')}</SectionLabel>
+          {records.length > 0 ? (
+            records.map((r) => {
+              const verified = r.status === 'employer_verified';
+              const requested = r.status === 'verification_requested';
+              return (
+                <View key={r.id} style={styles.recordBlock}>
+                  <View style={styles.recordHead}>
+                    <Icon name="building" size={18} color={colors.primary} />
+                    <View style={{ flex: 1 }}>
+                      <AppText style={styles.recordRole}>{r.role}</AppText>
+                      <AppText style={styles.recordCompany}>
+                        {r.company}{r.workplace ? ` · ${r.workplace}` : ''}
+                      </AppText>
+                    </View>
+                    {verified ? (
+                      <StatusPill icon="shieldCheck" label={t('passport.verified')} tone="success" />
+                    ) : requested ? (
+                      <StatusPill icon="clock" label={t('passport.verificationRequested')} tone="warning" />
+                    ) : (
+                      <StatusPill icon="user" label={t('passport.selfDeclared')} tone="neutral" />
+                    )}
+                  </View>
+                  <AppText style={styles.recordMeta}>
+                    {r.startYear}–{r.endYear ?? 'Present'}{r.skills.length > 0 ? ` · ${r.skills.join(', ')}` : ''}
+                  </AppText>
+
+                  {verified ? (
+                    <View style={[styles.provenance, { backgroundColor: colors.successSoft }]}>
+                      <Icon name="checkCircle" size={15} color={colors.success} />
+                      <AppText style={[styles.provenanceText, { color: colors.ink }]}>
+                        {t('passport.verified')} {r.verifiedBy || r.company}
+                      </AppText>
+                    </View>
+                  ) : (
+                    <View style={styles.recordActions}>
+                      {!requested ? (
+                        <Pressable
+                          accessibilityRole="button"
+                          disabled={busyId === r.id}
+                          onPress={() => handleRequestVerification(r)}
+                          style={({ pressed }) => [styles.actionBtn, pressed && { opacity: 0.8 }]}
+                        >
+                          <Icon name="shieldCheck" size={15} color={colors.primary} />
+                          <AppText style={styles.actionBtnText}>
+                            {busyId === r.id ? t('common.loading') : t('passport.requestVerification')}
+                          </AppText>
+                        </Pressable>
+                      ) : null}
+                      <Pressable
+                        accessibilityRole="button"
+                        disabled={busyId === r.id}
+                        onPress={() => handleDelete(r)}
+                        style={({ pressed }) => [styles.actionBtn, pressed && { opacity: 0.8 }]}
+                      >
+                        <Icon name="close" size={15} color={colors.danger} />
+                        <AppText style={[styles.actionBtnText, { color: colors.danger }]}>
+                          {t('passport.deleteRecord')}
+                        </AppText>
+                      </Pressable>
+                    </View>
+                  )}
+                </View>
+              );
+            })
+          ) : (
             <View style={styles.emptyBox}>
               <Icon name="info" size={16} color={colors.muted} />
               <AppText style={[styles.emptyText, { color: colors.muted }]}>{t('passport.noWorkRecords')}</AppText>
             </View>
-          </Card>
-        )}
+          )}
+          {onAddWorkRecord ? (
+            <Button variant="secondary" icon="plus" fullWidth onPress={onAddWorkRecord} style={styles.addBtn}>
+              {t('passport.addRecord')}
+            </Button>
+          ) : null}
+        </Card>
 
         {/* Skills */}
         <Card style={styles.card}>
@@ -229,9 +329,14 @@ const styles = StyleSheet.create({
   provenance: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, padding: spacing.md, borderRadius: radius.sm },
   provenanceText: { flex: 1, fontSize: typography.size.xs, color: colors.primary, lineHeight: typography.size.xs * typography.lineHeight.relaxed },
   card: { gap: spacing.sm },
+  recordBlock: { gap: spacing.sm, paddingTop: spacing.sm, borderTopWidth: 1, borderTopColor: colors.border },
   recordHead: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   recordRole: { fontSize: typography.size.md, fontWeight: typography.weight.semibold as any, color: colors.ink },
   recordCompany: { fontSize: typography.size.sm, color: colors.muted },
+  recordActions: { flexDirection: 'row', alignItems: 'center', gap: spacing.lg, marginTop: spacing.xs },
+  actionBtn: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, minHeight: 40, paddingVertical: spacing.xs, paddingRight: spacing.sm },
+  actionBtnText: { fontSize: typography.size.sm, color: colors.primary, fontWeight: typography.weight.semibold },
+  addBtn: { marginTop: spacing.sm },
   recordMeta: { fontSize: typography.size.sm, color: colors.ink, marginTop: spacing.xs },
   emptyBox: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, padding: spacing.md, backgroundColor: colors.surfaceMuted, borderRadius: radius.sm },
   emptyText: { flex: 1, fontSize: typography.size.sm, color: colors.muted, lineHeight: typography.size.sm * typography.lineHeight.relaxed },

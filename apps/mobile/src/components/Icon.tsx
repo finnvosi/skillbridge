@@ -31,7 +31,8 @@ export type IconName =
   | 'language'
   | 'list'
   | 'bell'
-  | 'edit';
+  | 'edit'
+  | 'plus';
 
 interface IconProps {
   name: IconName;
@@ -316,6 +317,12 @@ const BUILDERS: Record<IconName, Builder> = {
       {seg(14, 4, 20, 10, t, c)}
       {seg(4, 20, 15, 9, t, c)}
       {seg(15, 9, 12, 6, t, c)}
+    </>
+  ),
+  plus: (c, t) => (
+    <>
+      {seg(12, 5, 12, 19, t, c)}
+      {seg(5, 12, 19, 12, t, c)}
     </>
   ),
 };

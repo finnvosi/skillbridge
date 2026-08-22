@@ -301,7 +301,10 @@ router.patch(
       },
     });
 
-    res.json({ passport: updated });
+    // Return flat fields, matching the GET /me/passport shape so the mobile
+    // client can map the response with the same adapter. `workRecords` is
+    // intentionally excluded (verifier-managed, not self-editable).
+    res.json({ ...updated });
   }),
 );
 
@@ -344,6 +347,141 @@ router.post(
       data: { readAt: new Date() },
     });
     res.json({ updated: updated.count });
+  }),
+);
+
+// ---- Work records (Career Passport employment history) ----------------------
+// Workers add their own past jobs as SELF-DECLARED records, then request
+// employer verification (blueprint §5 lifecycle: worker_draft ->
+// employer_requested -> employer_verified). Verified records are
+// verifier-managed and never writable by the worker.
+
+const workRecordSchema = z.object({
+  body: z.object({
+    role: z.string().min(1).max(120),
+    company: z.string().min(1).max(120),
+    workplace: z.string().max(120).optional(),
+    startDate: z.string().regex(/^\d{4}-\d{2}(-\d{2})?$/, 'Use YYYY-MM or YYYY-MM-DD'),
+    endDate: z
+      .string()
+      .regex(/^\d{4}-\d{2}(-\d{2})?$/, 'Use YYYY-MM or YYYY-MM-DD')
+      .nullable()
+      .optional(),
+  }),
+});
+
+const toDate = (v: string): Date =>
+  v.length === 7 ? new Date(`${v}-01`) : new Date(v);
+
+// POST /api/v1/worker/me/work-records — add a self-declared past job
+router.post(
+  '/me/work-records',
+  requireWorker,
+  validate(workRecordSchema),
+  asyncHandler(async (req: AuthRequest, res: Response) => {
+    const workerId = (req as AuthRequest & { workerProfileId: string })
+      .workerProfileId;
+    const { role, company, workplace, startDate, endDate } = (req as any).body;
+
+    const record = await prisma.workRecord.create({
+      data: {
+        workerId,
+        role,
+        company,
+        workplace: workplace ?? null,
+        startDate: toDate(startDate),
+        endDate: endDate ? toDate(endDate) : null,
+        verified: false,
+        provenance: 'self_declared',
+      },
+    });
+
+    res.status(201).json({ record });
+  }),
+);
+
+// DELETE /api/v1/worker/me/work-records/:id — remove own unverified record
+router.delete(
+  '/me/work-records/:id',
+  requireWorker,
+  asyncHandler(async (req: AuthRequest, res: Response) => {
+    const workerId = (req as AuthRequest & { workerProfileId: string })
+      .workerProfileId;
+    const record = await prisma.workRecord.findUnique({
+      where: { id: req.params.id },
+    });
+    if (!record || record.workerId !== workerId) {
+      return res.status(404).json({ error: 'Record not found' });
+    }
+    if (record.verified) {
+      return res.status(403).json({
+        error: 'Verified records cannot be deleted. Contact support to dispute.',
+      });
+    }
+    await prisma.workRecord.delete({ where: { id: record.id } });
+    res.json({ deleted: true });
+  }),
+);
+
+// POST /api/v1/worker/me/work-records/:id/request-verification
+router.post(
+  '/me/work-records/:id/request-verification',
+  requireWorker,
+  asyncHandler(async (req: AuthRequest, res: Response) => {
+    const workerId = (req as AuthRequest & { workerProfileId: string })
+      .workerProfileId;
+    const record = await prisma.workRecord.findUnique({
+      where: { id: req.params.id },
+    });
+    if (!record || record.workerId !== workerId) {
+      return res.status(404).json({ error: 'Record not found' });
+    }
+    if (record.verified) {
+      return res.status(400).json({ error: 'This record is already verified' });
+    }
+
+    const updated = await prisma.workRecord.update({
+      where: { id: record.id },
+      data: { provenance: 'verification_requested' },
+    });
+
+    if (req.user) {
+      await prisma.notification.create({
+        data: {
+          userId: req.user.id,
+          type: 'verification_requested',
+          title: 'Verification requested',
+          body: `${updated.company} · ${updated.role}`,
+        },
+      });
+    }
+
+    res.json({ record: updated });
+  }),
+);
+
+// ---- POST /api/v1/worker/me/onboarding/complete (AUTH) ----------------------
+// Marks the worker's onboarding done so the app gate can move them from the
+// preferences step into the four tabs.
+
+router.post(
+  '/me/onboarding/complete',
+  requireWorker,
+  asyncHandler(async (req: AuthRequest, res: Response) => {
+    const user = await prisma.user.update({
+      where: { id: req.user!.id },
+      data: { onboardingStep: 1, onboardingCompletedAt: new Date() },
+      select: {
+        id: true,
+        email: true,
+        phone: true,
+        name: true,
+        role: true,
+        onboardingStep: true,
+        onboardingCompletedAt: true,
+      },
+    });
+    res.json({ user });
   }),
 );
 

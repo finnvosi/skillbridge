@@ -59,6 +59,10 @@ export const API_ENDPOINTS = {
     updatePassport: '/worker/me/passport',
     notifications: '/worker/me/notifications',
     notificationRead: (id: string) => `/worker/me/notifications/${id}/read`,
+    workRecords: '/worker/me/work-records',
+    workRecord: (id: string) => `/worker/me/work-records/${id}`,
+    requestVerification: (id: string) => `/worker/me/work-records/${id}/request-verification`,
+    onboardingComplete: '/worker/me/onboarding/complete',
   },
 } as const;
 

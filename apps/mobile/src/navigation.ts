@@ -14,6 +14,7 @@ export type MainTabParamList = {
 export type RootStackParamList = {
   Welcome: undefined;
   Consent: undefined;
+  Onboarding: undefined;
   PhoneSignIn: undefined;
   OtpVerify: { phone: string; demoCode?: string };
   Login: undefined;
@@ -24,5 +25,6 @@ export type RootStackParamList = {
   ApplyReview: { jobId: string };
   Report: { category?: ReportCategory };
   NotificationCenter: undefined;
+  AddWorkRecord: undefined;
   ProfileEdit: { passport: DemoPassport } | undefined;
 };

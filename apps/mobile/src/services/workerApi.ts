@@ -17,6 +17,7 @@ import {
   ShiftType,
   VerificationLevel,
   WorkRecord,
+  WorkRecordStatus,
   PassportSkill,
 } from '../types';
 
@@ -150,20 +151,27 @@ function mapApplication(a: ApiApplication): DemoApplication {
 }
 
 function mapPassport(p: ApiPassport): DemoPassport {
-  const workRecords: WorkRecord[] = p.workRecords.map((r) => ({
-    id: r.id,
-    company: r.company,
-    workplace: r.workplace ?? '',
-    role: r.role,
-    startYear: new Date(r.startDate).getFullYear(),
-    endYear: r.endDate ? new Date(r.endDate).getFullYear() : null,
-    skills: [],
-    verifiedBy: r.verified ? r.company : 'Pending verification',
-    verifiedAt: '',
-    status: r.verified ? 'employer_verified' : ('pending' as any),
-  }));
+  const workRecords: WorkRecord[] = (p.workRecords ?? []).map((r) => {
+    const status: WorkRecordStatus = r.verified
+      ? 'employer_verified'
+      : r.provenance === 'verification_requested'
+        ? 'verification_requested'
+        : 'self_declared';
+    return {
+      id: r.id,
+      company: r.company,
+      workplace: r.workplace ?? '',
+      role: r.role,
+      startYear: new Date(r.startDate).getFullYear(),
+      endYear: r.endDate ? new Date(r.endDate).getFullYear() : null,
+      skills: [],
+      verifiedBy: r.verified ? r.company : '',
+      verifiedAt: '',
+      status,
+    };
+  });
 
-  const skills: PassportSkill[] = p.skills.map((s) => ({
+  const skills: PassportSkill[] = (p.skills ?? []).map((s) => ({
     name: s,
     // The lean API does not yet distinguish verified vs unverified skills;
     // default to false so we never over-claim verification.
@@ -181,7 +189,7 @@ function mapPassport(p: ApiPassport): DemoPassport {
     identityDate: '',
     workRecords,
     skills,
-    languages: p.languages,
+    languages: p.languages ?? [],
     safetyQualifications: [],
     shareEnabled: false,
     demo: true,
@@ -253,7 +261,7 @@ export async function updatePassport(
   token?: string | null,
 ): Promise<DemoPassport | null> {
   try {
-    const p = await apiRequest<ApiPassport>(
+    const res = await apiRequest<{ passport?: ApiPassport } & ApiPassport>(
       API_ENDPOINTS.worker.updatePassport,
       {
         method: 'PATCH',
@@ -261,7 +269,11 @@ export async function updatePassport(
         ...(token ? { token } : {}),
       },
     );
-    return mapPassport(p);
+    // The endpoint returns flat fields (same shape as GET /me/passport). If a
+    // future version wraps the payload in a `passport` key, unwrap it so this
+    // client keeps working.
+    const p = (res as any).passport ?? res;
+    return mapPassport(p as ApiPassport);
   } catch {
     return null;
   }
@@ -296,4 +308,68 @@ export async function markNotificationRead(
     method: 'POST',
     ...(token ? { token } : {}),
   });
+}
+
+// ---- Work records (Career Passport employment history) -----------------------
+
+export interface WorkRecordEditable {
+  role: string;
+  company: string;
+  workplace?: string;
+  startDate: string; // YYYY-MM
+  endDate?: string | null;
+}
+
+export async function addWorkRecord(
+  body: WorkRecordEditable,
+  token?: string | null,
+): Promise<ApiWorkRecord> {
+  const data = await apiRequest<{ record: ApiWorkRecord }>(
+    API_ENDPOINTS.worker.workRecords,
+    {
+      method: 'POST',
+      body,
+      ...(token ? { token } : {}),
+    },
+  );
+  return data.record;
+}
+
+export async function deleteWorkRecord(
+  id: string,
+  token?: string | null,
+): Promise<void> {
+  await apiRequest(API_ENDPOINTS.worker.workRecord(id), {
+    method: 'DELETE',
+    ...(token ? { token } : {}),
+  });
+}
+
+export async function requestWorkRecordVerification(
+  id: string,
+  token?: string | null,
+): Promise<ApiWorkRecord> {
+  const data = await apiRequest<{ record: ApiWorkRecord }>(
+    API_ENDPOINTS.worker.requestVerification(id),
+    {
+      method: 'POST',
+      ...(token ? { token } : {}),
+    },
+  );
+  return data.record;
+}
+
+export async function completeOnboarding(
+  token?: string | null,
+): Promise<{ id: string; onboardingCompleted: boolean }> {
+  const data = await apiRequest<{
+    user: { id: string; onboardingStep: number; onboardingCompletedAt: string | null };
+  }>(API_ENDPOINTS.worker.onboardingComplete, {
+    method: 'POST',
+    ...(token ? { token } : {}),
+  });
+  return {
+    id: data.user.id,
+    onboardingCompleted: Boolean(data.user.onboardingCompletedAt),
+  };
 }

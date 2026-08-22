@@ -80,3 +80,59 @@ export function optionalAuth(
 
   next();
 }
+
+/**
+ * SEC-1 remediation for the worker vertical slice.
+ *
+ * Authenticates the request (JWT) and resolves the caller's WorkerProfile from
+ * the authenticated user — never from a URL/body `workerId`. Handlers must use
+ * `req.workerProfile`, which is guaranteed present or the request is rejected.
+ *
+ * A valid token without a linked WorkerProfile (e.g. a student/employer token)
+ * is rejected with 403, because only a worker identity may access worker data.
+ */
+export async function requireWorker(
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) {
+  // Reuse the same Bearer-token check as `authenticate`.
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) {
+    return res.status(401).json({ error: 'Access token required' });
+  }
+
+  let userId: string;
+  try {
+    const decoded = jwt.verify(token, jwtConfig.secret) as {
+      id: string;
+      email: string;
+      role: string;
+    };
+    userId = decoded.id;
+  } catch (error) {
+    return res.status(403).json({ error: 'Invalid or expired token' });
+  }
+
+  try {
+    const { prisma } = await import('../db/prisma');
+    const profile = await prisma.workerProfile.findUnique({
+      where: { userId },
+    });
+
+    if (!profile) {
+      return res.status(403).json({
+        error: 'No worker profile linked to this account',
+      });
+    }
+
+    // Attach the resolved profile so handlers never re-derive identity.
+    (req as AuthRequest & { workerProfileId: string }).workerProfileId =
+      profile.id;
+    next();
+  } catch (error) {
+    return res.status(500).json({ error: 'Failed to resolve worker profile' });
+  }
+}

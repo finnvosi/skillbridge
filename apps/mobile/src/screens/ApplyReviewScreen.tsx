@@ -10,7 +10,8 @@ import { useT } from '../hooks/useT';
 import { useAppStore } from '../store/useAppStore';
 import { submitApplication as submitApplicationApi } from '../services/workerApi';
 import { ApiError } from '../services/api';
-import { USE_REMOTE_API, DEMO_WORKER_ID } from '../config';
+import { USE_REMOTE_API } from '../config';
+import { useAuthStore } from '../store/auth';
 import { Icon, IconName } from '../components/Icon';
 import { Card, Button, DemoTag, SectionLabel, StatusPill } from '../components/ui';
 import { BackBar } from '../components/BackBar';
@@ -29,6 +30,7 @@ export default function ApplyReviewScreen({
   const passport = useAppStore((s) => s.passport);
   const submitApplication = useAppStore((s) => s.submitApplication);
   const hasApplied = useAppStore((s) => s.hasAppliedToJob(job.id));
+  const token = useAuthStore((s) => s.token);
   const [hideCert, setHideCert] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [alreadyApplied, setAlreadyApplied] = useState(false);
@@ -67,9 +69,9 @@ export default function ApplyReviewScreen({
       setTimeout(finish, 500);
       return;
     }
-    // Real submit: POST to the worker API. We don't block the UI on it; if it
-    // fails we still surface the local record and move on.
-    submitApplicationApi(job.id, DEMO_WORKER_ID, displayedShared.length > 0)
+    // Real submit: POST to the worker API. Worker identity is derived from the
+    // JWT server-side (SEC-1 fix) — we only forward the token, never a workerId.
+    submitApplicationApi(job.id, displayedShared.length > 0, token)
       .then(finish)
       .catch((err) => {
         // The API guards against double-submit (409 "Already applied").

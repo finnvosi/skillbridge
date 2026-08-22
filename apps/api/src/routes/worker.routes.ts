@@ -2,12 +2,20 @@ import { Router, Request, Response } from 'express';
 import { z } from 'zod';
 import { prisma } from '../db/prisma';
 import { asyncHandler, validate } from '../middleware/validation';
+import { requireWorker, AuthRequest } from '../middleware/auth';
 
 // ===========================================================================
 // Worker vertical slice API
-// Cambodia-first blue-collar worker app. Unauthenticated for the local demo
-// slice (the mobile app has no auth yet). Replace `workerId` headers/params
-// with real auth once the worker identity flow lands.
+// Cambodia-first blue-collar worker app.
+//
+// SEC-1 remediation: the worker's identity is derived from the authenticated
+// JWT via `requireWorker`, which resolves the caller's WorkerProfile server-side.
+// No endpoint accepts a client-supplied `workerId` anymore — this closes the
+// IDOR / impersonation gap that the unauthenticated slice had.
+//
+// Browsing jobs (/jobs, /jobs/:id) remains PUBLIC by design: anyone may view
+// available work. Reading a worker's own passport/applications and applying
+// require authentication.
 // ===========================================================================
 
 const router = Router();
@@ -23,15 +31,10 @@ const listJobsQuery = z.object({
 
 const applySchema = z.object({
   body: z.object({
-    workerId: z.string().min(1),
     jobId: z.string().min(1),
     // Optional: what the worker chooses to share from their passport.
     shareWorkRecords: z.boolean().default(false),
   }),
-});
-
-const workerIdParam = z.object({
-  params: z.object({ workerId: z.string().min(1) }),
 });
 
 function shiftEnum(s: string) {
@@ -40,7 +43,7 @@ function shiftEnum(s: string) {
     : undefined;
 }
 
-// ---- GET /api/v1/worker/jobs ----------------------------------------------
+// ---- GET /api/v1/worker/jobs (PUBLIC) --------------------------------------
 
 router.get(
   '/jobs',
@@ -89,7 +92,7 @@ router.get(
   }),
 );
 
-// ---- GET /api/v1/worker/jobs/:id -------------------------------------------
+// ---- GET /api/v1/worker/jobs/:id (PUBLIC) ----------------------------------
 
 router.get(
   '/jobs/:id',
@@ -127,18 +130,18 @@ router.get(
   }),
 );
 
-// ---- POST /api/v1/worker/applications --------------------------------------
+// ---- POST /api/v1/worker/applications (AUTH) -------------------------------
+// Worker identity is taken from the resolved profile, never the request body.
 
 router.post(
   '/applications',
+  requireWorker,
   validate(applySchema),
-  asyncHandler(async (req: Request, res: Response) => {
-    const { workerId, jobId, shareWorkRecords } = (req as any).body;
-    const worker = await prisma.workerProfile.findUnique({
-      where: { id: workerId },
-    });
-    if (!worker)
-      return res.status(404).json({ error: 'Worker not found' });
+  asyncHandler(async (req: AuthRequest, res: Response) => {
+    const workerId = (req as AuthRequest & { workerProfileId: string })
+      .workerProfileId;
+    const { jobId, shareWorkRecords } = (req as any).body;
+
     const job = await prisma.job.findUnique({ where: { id: jobId } });
     if (!job) return res.status(404).json({ error: 'Job not found' });
 
@@ -164,13 +167,14 @@ router.post(
   }),
 );
 
-// ---- GET /api/v1/worker/workers/:workerId/applications ---------------------
+// ---- GET /api/v1/worker/me/applications (AUTH) -----------------------------
 
 router.get(
-  '/workers/:workerId/applications',
-  validate(workerIdParam),
-  asyncHandler(async (req: Request, res: Response) => {
-    const { workerId } = (req as any).params;
+  '/me/applications',
+  requireWorker,
+  asyncHandler(async (req: AuthRequest, res: Response) => {
+    const workerId = (req as AuthRequest & { workerProfileId: string })
+      .workerProfileId;
     const applications = await prisma.workerApplication.findMany({
       where: { workerId },
       include: { job: { include: { company: true } } },
@@ -195,13 +199,14 @@ router.get(
   }),
 );
 
-// ---- GET /api/v1/worker/workers/:workerId/passport -------------------------
+// ---- GET /api/v1/worker/me/passport (AUTH) --------------------------------
 
 router.get(
-  '/workers/:workerId/passport',
-  validate(workerIdParam),
-  asyncHandler(async (req: Request, res: Response) => {
-    const { workerId } = (req as any).params;
+  '/me/passport',
+  requireWorker,
+  asyncHandler(async (req: AuthRequest, res: Response) => {
+    const workerId = (req as AuthRequest & { workerProfileId: string })
+      .workerProfileId;
     const worker = await prisma.workerProfile.findUnique({
       where: { id: workerId },
       include: { workRecords: true },

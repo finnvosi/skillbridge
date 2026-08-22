@@ -13,9 +13,6 @@ export const API_URL = `${API_BASE_URL}/api/v1`;
 export const USE_REMOTE_API =
   (process.env.EXPO_PUBLIC_USE_REMOTE_API as string | undefined) !== 'false';
 
-// Stable demo worker id (seeded with this id in scripts/seed-worker.ts).
-export const DEMO_WORKER_ID = 'demo-worker-1';
-
 export const API_ENDPOINTS = {
   auth: {
     register: '/auth/register',
@@ -49,8 +46,11 @@ export const API_ENDPOINTS = {
   worker: {
     jobs: '/worker/jobs',
     job: (id: string) => `/worker/jobs/${id}`,
+    // Protected endpoints are identity-derived from the JWT (SEC-1 fix), so no
+    // client-supplied workerId is sent. These resolve the caller's own profile.
     apply: '/worker/applications',
-    applications: (workerId: string) => `/worker/workers/${workerId}/applications`,
-    passport: (workerId: string) => `/worker/workers/${workerId}/passport`,
+    applications: '/worker/me/applications',
+    passport: '/worker/me/passport',
   },
 } as const;
+

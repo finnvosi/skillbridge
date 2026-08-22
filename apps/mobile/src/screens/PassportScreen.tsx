@@ -12,18 +12,20 @@ import { Header } from '../components/Header';
 import { Card, StatusPill, DemoTag, SectionLabel } from '../components/ui';
 import { fetchPassport } from '../services/workerApi';
 import { USE_REMOTE_API } from '../config';
+import { useAuthStore } from '../store/auth';
 import { DemoPassport } from '../types';
 import { AppText } from './../components/ui';
 export default function PassportScreen() {
   const { t, formatDate } = useT();
   const storePassport = useAppStore((s) => s.passport);
   const setShareEnabled = useAppStore((s) => s.setShareEnabled);
+  const token = useAuthStore((s) => s.token);
   const [remotePassport, setRemotePassport] = useState<DemoPassport | null>(null);
 
   useEffect(() => {
-    if (!USE_REMOTE_API) return;
+    if (!USE_REMOTE_API || !token) return;
     let alive = true;
-    fetchPassport()
+    fetchPassport(token)
       .then((data) => {
         if (alive && data) setRemotePassport(data);
       })
@@ -33,7 +35,7 @@ export default function PassportScreen() {
     return () => {
       alive = false;
     };
-  }, []);
+  }, [token]);
 
   const passport = remotePassport ?? storePassport;
 

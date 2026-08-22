@@ -28,10 +28,10 @@ const registerSchema = z.object({
   body: z.object({
     email: z.string().email(),
     password: z.string().min(8),
-    // SkillBridge's public marketplace has exactly two self-serve account
-    // types. Admins are provisioned privately; legacy worker/factory roles are
-    // intentionally unavailable here.
-    role: z.enum(['student', 'employer']),
+    // SkillBridge's public marketplace account types. `worker` is the
+    // Cambodia-first blue-collar worker app identity. Admins are provisioned
+    // privately; the legacy `factory` role is intentionally unavailable here.
+    role: z.enum(['student', 'employer', 'worker']),
     name: z.string().min(2),
   }),
 });
@@ -90,6 +90,8 @@ router.post(
 
     const passwordHash = await bcrypt.hash(password, 12);
 
+    // Workers need their profile created after we know the user id (the
+    // WorkerProfile.phone is unique and we can't predict the user id upfront).
     const user = await prisma.user.create({
       data: {
         email,
@@ -101,6 +103,16 @@ router.post(
         ...(role === 'employer' ? { employer: { create: { companyName: name } } } : {}),
       },
     });
+
+    if (role === 'worker') {
+      await prisma.workerProfile.create({
+        data: {
+          userId: user.id,
+          // Placeholder phone; the worker sets their real number in the app.
+          phone: `worker_${user.id}`,
+        },
+      });
+    }
 
     const { token, refreshToken } = signTokens(user);
 

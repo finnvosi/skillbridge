@@ -84,6 +84,7 @@ model User {
   employer  Employer?
   factory   Factory?
   worker    Worker?
+  workerProfile WorkerProfile?
   applicationStatusHistory ApplicationStatusHistory[]
   certificateVerificationHistory CertificateVerificationHistory[]
   notifications Notification[]
@@ -473,6 +474,7 @@ model Job {
 
 model WorkerProfile {
   id              String   @id @default(cuid())
+  userId          String?  @unique
   phone           String   @unique
   fullName        String?
   preferredArea   String?
@@ -483,10 +485,12 @@ model WorkerProfile {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
+  user        User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
   applications WorkerApplication[]
   workRecords WorkRecord[]
 
   @@index([phone])
+  @@index([userId])
 }
 
 model WorkerApplication {

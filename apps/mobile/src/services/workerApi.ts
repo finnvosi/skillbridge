@@ -8,7 +8,7 @@
 // defaults — we never invent verification evidence or skill-match detail. The
 // UI is expected to gracefully skip empty arrays (skillMatches, evidence, etc.).
 import { apiRequest } from './api';
-import { API_ENDPOINTS, DEMO_WORKER_ID } from '../config';
+import { API_ENDPOINTS } from '../config';
 import {
   DemoJob,
   DemoApplication,
@@ -204,16 +204,20 @@ export async function fetchJob(id: string): Promise<DemoJob | null> {
   }
 }
 
-export async function fetchApplications(workerId = DEMO_WORKER_ID): Promise<DemoApplication[]> {
+export async function fetchApplications(token?: string | null): Promise<DemoApplication[]> {
   const data = await apiRequest<{ applications: ApiApplication[] }>(
-    API_ENDPOINTS.worker.applications(workerId),
+    API_ENDPOINTS.worker.applications,
+    token ? { method: 'GET', token } : { method: 'GET' },
   );
   return (data.applications ?? []).map(mapApplication);
 }
 
-export async function fetchPassport(workerId = DEMO_WORKER_ID): Promise<DemoPassport | null> {
+export async function fetchPassport(token?: string | null): Promise<DemoPassport | null> {
   try {
-    const p = await apiRequest<ApiPassport>(API_ENDPOINTS.worker.passport(workerId));
+    const p = await apiRequest<ApiPassport>(
+      API_ENDPOINTS.worker.passport,
+      token ? { method: 'GET', token } : { method: 'GET' },
+    );
     return mapPassport(p);
   } catch {
     return null;
@@ -222,14 +226,15 @@ export async function fetchPassport(workerId = DEMO_WORKER_ID): Promise<DemoPass
 
 export async function submitApplication(
   jobId: string,
-  workerId = DEMO_WORKER_ID,
   shareWorkRecords = false,
+  token?: string | null,
 ): Promise<{ applicationId: string; status: string }> {
   const data = await apiRequest<{ applicationId: string; status: string }>(
     API_ENDPOINTS.worker.apply,
     {
       method: 'POST',
-      body: { workerId, jobId, shareWorkRecords },
+      body: { jobId, shareWorkRecords },
+      ...(token ? { token } : {}),
     },
   );
   return data;

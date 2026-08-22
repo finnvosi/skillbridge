@@ -12,6 +12,9 @@ export type MainTabParamList = {
 
 export type RootStackParamList = {
   Welcome: undefined;
+  Login: undefined;
+  Register: undefined;
+  WrongAccount: undefined;
   Main: { screen?: keyof MainTabParamList } | undefined;
   JobDetail: { jobId: string };
   ApplyReview: { jobId: string };

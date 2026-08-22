@@ -46,6 +46,13 @@ export const colors = {
   demo: '#6B6780',
   demoSoft: '#EFEBF5',
   white: '#FFFFFF',
+
+  // Backward-compatible aliases used by shared auth screens
+  // (LoginScreen/RegisterScreen). Map to the canonical worker tokens.
+  textPrimary: '#33304A', // = ink
+  textSecondary: '#6B6780', // = muted
+  separator: '#E0DAEA', // = border
+  primaryLight: '#EFEBF5', // = primarySoft
 } as const;
 
 export const typography = {

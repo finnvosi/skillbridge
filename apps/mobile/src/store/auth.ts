@@ -29,7 +29,7 @@ interface AuthState {
     email: string,
     password: string,
     name: string,
-    role: 'student' | 'employer'
+    role: 'student' | 'employer' | 'worker'
   ) => Promise<void>;
   logout: () => Promise<void>;
   fetchMe: () => Promise<void>;

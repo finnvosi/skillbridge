@@ -12,7 +12,7 @@ import {
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Button, Input } from '@skillbridge/ui';
 import { useAuthStore } from '../../store/auth';
-import type { RootStackParamList } from '../../App';
+import type { RootStackParamList } from '../../navigation';
 import { colors, spacing, typography, radius } from '../../theme';
 
 import { AppText } from './../../components/ui';
@@ -27,7 +27,7 @@ export default function RegisterScreen({ navigation }: Props) {
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
   const [confirmPassword, setConfirmPassword] = React.useState('');
-  const [role, setRole] = React.useState<'student' | 'employer'>('student');
+  const [role, setRole] = React.useState<'student' | 'employer' | 'worker'>('worker');
   const { register, error, clearError, loading } = useAuthStore();
 
   React.useEffect(() => {
@@ -92,14 +92,14 @@ export default function RegisterScreen({ navigation }: Props) {
           <View style={styles.roleBlock}>
             <AppText style={styles.roleLabel}>I am a</AppText>
             <View style={styles.roleOptions}>
-              {(['student', 'employer'] as const).map((r) => (
+              {(['student', 'employer', 'worker'] as const).map((r) => (
                 <TouchableOpacity
                   key={r}
                   style={[styles.roleOption, role === r && styles.roleOptionActive]}
                   onPress={() => setRole(r)}
                 >
                   <AppText style={[styles.roleOptionText, role === r && styles.roleOptionTextActive]}>
-                    {r === 'student' ? 'Student' : 'Employer'}
+                    {r === 'student' ? 'Student' : r === 'employer' ? 'Employer' : 'Worker'}
                   </AppText>
                 </TouchableOpacity>
               ))}

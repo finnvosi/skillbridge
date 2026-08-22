@@ -8,6 +8,7 @@ import { useT } from '../hooks/useT';
 import { Header } from '../components/Header';
 import { Card, Button, DemoTag } from '../components/ui';
 import { Icon, IconName } from '../components/Icon';
+import { useAuthStore } from '../store/auth';
 
 import { AppText } from './../components/ui';
 const CATEGORIES: { cat: ReportCategory; icon: IconName; key: string }[] = [
@@ -20,6 +21,7 @@ const CATEGORIES: { cat: ReportCategory; icon: IconName; key: string }[] = [
 
 export default function HelpScreen({ onReport }: { onReport: (cat?: ReportCategory) => void }) {
   const { t } = useT();
+  const logout = useAuthStore((s) => s.logout);
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <Header right={<DemoTag onDark />} />
@@ -58,6 +60,15 @@ export default function HelpScreen({ onReport }: { onReport: (cat?: ReportCatego
           </Button>
           <AppText style={styles.noApply}>{t('help.noApplyNeeded')}</AppText>
         </View>
+
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => logout()}
+          style={({ pressed }) => [styles.logout, pressed && styles.logoutPressed]}
+        >
+          <Icon name="arrowRight" size={18} color={colors.muted} />
+          <AppText style={styles.logoutText}>{t('auth.logout')}</AppText>
+        </Pressable>
         <View style={{ height: spacing.xxxl }} />
       </ScrollView>
     </SafeAreaView>
@@ -90,4 +101,18 @@ const styles = StyleSheet.create({
   catText: { flex: 1, fontSize: typography.size.base, fontWeight: typography.weight.medium as any, color: colors.ink },
   cta: { gap: spacing.sm, marginTop: spacing.sm },
   noApply: { fontSize: typography.size.sm, color: colors.muted, textAlign: 'center', lineHeight: typography.size.sm * typography.lineHeight.relaxed },
+  logout: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    paddingVertical: spacing.md,
+    marginTop: spacing.sm,
+    backgroundColor: colors.surface,
+  },
+  logoutPressed: { backgroundColor: colors.surfaceMuted },
+  logoutText: { fontSize: typography.size.base, color: colors.muted, fontWeight: typography.weight.medium as any },
 });

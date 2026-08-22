@@ -21,6 +21,10 @@ const km: Dict = {
   'tab.applications': 'ពាក្យសុំ',
   'tab.passport': 'លិខិតឆ្លង',
   'tab.help': 'ជំនួយ',
+  'auth.wrongAccountTitle': 'គណនីនេះមិនមែនជាអ្នកកម្មករ',
+  'auth.wrongAccountBody': 'កម្មវិធី SkillBridge សម្រាប់អ្នកកម្មករតម្រូវឱ្យចូលដោយគណនីអ្នកកម្មករ។ សូមចាកចេញ រួចចូលឡើងវិញជាមួយគណនីអ្នកកម្មករ។',
+  'auth.signOut': 'ចាកចេញ',
+  'auth.logout': 'ចាកចេញ',
 
   'jobs.title': 'ការងារដែលបានផ្ទៀងផ្ទាត់',
   'jobs.subtitle': 'ការងាររោងចក្រដែលបានពិនិត្យរួច',
@@ -175,6 +179,10 @@ const en: Dict = {
   'tab.applications': 'Applications',
   'tab.passport': 'Passport',
   'tab.help': 'Help',
+  'auth.wrongAccountTitle': 'This is not a worker account',
+  'auth.wrongAccountBody': 'The SkillBridge worker app requires a worker account. Please sign out and log in with a worker account.',
+  'auth.signOut': 'Sign out',
+  'auth.logout': 'Log out',
 
   'jobs.title': 'Verified jobs',
   'jobs.subtitle': 'Reviewed factory jobs only',

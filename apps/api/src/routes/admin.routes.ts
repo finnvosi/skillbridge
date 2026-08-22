@@ -309,6 +309,94 @@ router.put(
   })
 );
 
+// ---- Worker application status (admin) --------------------------------------
+// Advances a worker application's status and fires the in-app notification so
+// the worker tracker + notification center reflect real decisions (blueprint:
+// status tracking + push/in-app updates). Valid statuses mirror the
+// WorkerApplicationStatus enum.
+
+const WORKER_STATUS_COPY: Record<string, { title: string; body: (job: string, company: string) => string }> = {
+  submitted: {
+    title: 'Application submitted',
+    body: (job, company) => `Applied to ${job} at ${company}`,
+  },
+  reviewing: {
+    title: 'Application under review',
+    body: (job, company) => `${company} is reviewing your application for ${job}.`,
+  },
+  shortlisted: {
+    title: "You've been shortlisted",
+    body: (job, company) => `Good news — ${company} shortlisted you for ${job}.`,
+  },
+  interview: {
+    title: 'Interview scheduled',
+    body: (job, company) => `${company} wants to interview you for ${job}.`,
+  },
+  hired: {
+    title: 'You were hired',
+    body: (job, company) => `Congratulations — ${company} hired you for ${job}.`,
+  },
+  rejected: {
+    title: 'Application not accepted',
+    body: (job, company) => `${company} did not accept your application for ${job}.`,
+  },
+  withdrawn: {
+    title: 'Application withdrawn',
+    body: (job, company) => `Your application for ${job} at ${company} was withdrawn.`,
+  },
+};
+
+router.patch(
+  '/worker-applications/:id/status',
+  asyncHandler(async (req: AuthRequest, res: Response) => {
+    const { status } = req.body as { status: string };
+    if (!WORKER_STATUS_COPY[status]) {
+      return res.status(400).json({
+        error: `Status must be one of: ${Object.keys(WORKER_STATUS_COPY).join(', ')}`,
+      });
+    }
+
+    const existing = await prisma.workerApplication.findUnique({
+      where: { id: req.params.id },
+      include: {
+        worker: { select: { userId: true } },
+        job: { include: { company: true } },
+      },
+    });
+    if (!existing) {
+      return res.status(404).json({ error: 'Worker application not found' });
+    }
+
+    const updated = await prisma.workerApplication.update({
+      where: { id: existing.id },
+      data: { status: status as any },
+    });
+
+    // Notify the worker if their profile is linked to a User account.
+    const workerUserId = existing.worker.userId;
+    if (workerUserId) {
+      const copy = WORKER_STATUS_COPY[status];
+      await prisma.notification.create({
+        data: {
+          userId: workerUserId,
+          type: 'application_status_changed',
+          title: copy.title,
+          body: copy.body(existing.job.title, existing.job.company.name),
+        },
+      });
+    }
+
+    res.json({
+      message: `Worker application ${status}`,
+      application: {
+        id: updated.id,
+        status: updated.status,
+        notified: Boolean(workerUserId),
+      },
+    });
+  })
+);
+
 // List user reports
 router.get(
   '/reports',

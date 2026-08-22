@@ -14,7 +14,7 @@ import { JobCard } from '../components/JobCard';
 import { Icon } from '../components/Icon';
 import { DemoTag } from '../components/ui';
 import { AppText } from './../components/ui';
-import { fetchJobs } from '../services/workerApi';
+import { fetchJobs, fetchBlockedJobIds } from '../services/workerApi';
 import { USE_REMOTE_API } from '../config';
 type Filter = 'none' | 'near' | 'day' | 'salary';
 
@@ -30,6 +30,7 @@ export default function JobsScreen({
   const [filter, setFilter] = useState<Filter>('none');
   const [jobs, setJobs] = useState<DemoJob[]>(DEMO_JOBS);
   const [loading, setLoading] = useState(false);
+  const [blockedIds, setBlockedIds] = useState<string[]>([]);
 
   useEffect(() => {
     if (!USE_REMOTE_API) return;
@@ -50,9 +51,24 @@ export default function JobsScreen({
     };
   }, []);
 
+  // Hide jobs the worker blocked (blueprint: in-app report and block).
+  useEffect(() => {
+    if (!USE_REMOTE_API) return;
+    let alive = true;
+    fetchBlockedJobIds()
+      .then((ids) => {
+        if (alive) setBlockedIds(ids);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, []);
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return jobs.filter((j) => {
+      if (blockedIds.includes(j.id)) return false;
       if (filter === 'near' && j.distanceKm > 10) return false;
       if (filter === 'day' && j.shift !== 'day') return false;
       if (filter === 'salary' && j.payPerMonth < 220) return false;
@@ -62,7 +78,7 @@ export default function JobsScreen({
       }
       return true;
     });
-  }, [query, filter]);
+  }, [query, filter, blockedIds, jobs]);
 
   const filters: { key: Filter; label: string }[] = [
     { key: 'near', label: t('jobs.filterNear') },

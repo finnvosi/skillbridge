@@ -19,7 +19,13 @@ const CATEGORIES: { cat: ReportCategory; icon: IconName; key: string }[] = [
   { cat: 'other', icon: 'list', key: 'help.cat.other' },
 ];
 
-export default function HelpScreen({ onReport }: { onReport: (cat?: ReportCategory) => void }) {
+export default function HelpScreen({
+  onReport,
+  onSafetyCenter,
+}: {
+  onReport: (cat?: ReportCategory) => void;
+  onSafetyCenter?: () => void;
+}) {
   const { t } = useT();
   const logout = useAuthStore((s) => s.logout);
   return (
@@ -60,6 +66,20 @@ export default function HelpScreen({ onReport }: { onReport: (cat?: ReportCatego
           </Button>
           <AppText style={styles.noApply}>{t('help.noApplyNeeded')}</AppText>
         </View>
+
+        {onSafetyCenter ? (
+          <Pressable
+            accessibilityRole="button"
+            onPress={onSafetyCenter}
+            style={({ pressed }) => [styles.cat, pressed && styles.catPressed]}
+          >
+            <View style={[styles.catIcon, { backgroundColor: colors.primarySoft }]}>
+              <Icon name="shieldCheck" size={20} color={colors.primary} />
+            </View>
+            <AppText style={styles.catText}>{t('safety.entry')}</AppText>
+            <Icon name="chevronRight" size={18} color={colors.muted} />
+          </Pressable>
+        ) : null}
 
         <Pressable
           accessibilityRole="button"

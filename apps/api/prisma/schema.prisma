@@ -65,6 +65,7 @@ enum NotificationType {
   certificate_verified
   certificate_rejected
   verification_requested
+  report_status_changed
 }
 
 model User {
@@ -491,6 +492,8 @@ model WorkerProfile {
   applications WorkerApplication[]
   workRecords WorkRecord[]
   passportShares PassportShare[]
+  reports Report[]
+  blocks Block[]
 
   @@index([phone])
   @@index([userId])
@@ -564,4 +567,52 @@ model PassportShare {
 
   @@index([workerId])
   @@index([token])
+}
+
+// Worker safety reporting (blueprint §4, §7): reports are worker-scoped,
+// never shown to the recruiter, and carry a worker-facing support status.
+enum ReportCategory {
+  payment_requested
+  false_information
+  recruiter_identity
+  unsafe_contact
+  other
+}
+
+enum ReportStatus {
+  submitted
+  under_review
+  resolved
+}
+
+model Report {
+  id          String         @id @default(cuid())
+  workerId    String
+  category    ReportCategory
+  description String
+  evidence    String?
+  status      ReportStatus   @default(submitted)
+  adminNote   String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  resolvedAt  DateTime?
+
+  worker WorkerProfile @relation(fields: [workerId], references: [id], onDelete: Cascade)
+
+  @@index([workerId])
+  @@index([status])
+}
+
+// Worker-initiated blocks: a blocked job is hidden from the worker's feed
+// (blueprint: "In-app report and block").
+model Block {
+  id        String   @id @default(cuid())
+  workerId  String
+  jobId     String
+  createdAt DateTime @default(now())
+
+  worker WorkerProfile @relation(fields: [workerId], references: [id], onDelete: Cascade)
+
+  @@unique([workerId, jobId])
+  @@index([workerId])
 }

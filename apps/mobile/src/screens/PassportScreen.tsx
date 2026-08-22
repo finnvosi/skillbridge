@@ -9,15 +9,8 @@ import { useAppStore } from '../store/useAppStore';
 import { Icon, IconName } from '../components/Icon';
 import { Header } from '../components/Header';
 import { Card, StatusPill, DemoTag, SectionLabel, Button } from '../components/ui';
-import {
-  fetchPassport,
-  requestWorkRecordVerification,
-  deleteWorkRecord,
-  createPassportShare,
-  listPassportShares,
-  revokePassportShare,
-  PassportShare,
-} from '../services/workerApi';
+import { fetchPassport, requestWorkRecordVerification, deleteWorkRecord, createPassportShare, listPassportShares, revokePassportShare, PassportShare } from '../services/workerApi';
+import QRCode from 'react-native-qrcode-svg';
 import { ApiError } from '../services/api';
 import { USE_REMOTE_API } from '../config';
 import { useAuthStore } from '../store/auth';
@@ -366,28 +359,34 @@ export default function PassportScreen({
                 {t('passport.shareCreate')}
               </Button>
               {activeShares.length > 0 ? (
-                activeShares.map((s) => (
-                  <View key={s.id} style={styles.shareRow}>
-                    <View style={{ flex: 1 }}>
-                      <AppText style={styles.shareUrl} numberOfLines={1}>
-                        {s.url}
-                      </AppText>
-                      <AppText style={styles.shareExpiry}>
-                        {t('passport.shareExpires', { date: formatDate(s.expiresAt) })}
-                      </AppText>
-                    </View>
-                    <Pressable
-                      accessibilityRole="button"
-                      onPress={() => handleRevoke(s.id)}
-                      style={({ pressed }) => [styles.actionBtn, pressed && { opacity: 0.8 }]}
-                    >
-                      <Icon name="close" size={15} color={colors.danger} />
-                      <AppText style={[styles.actionBtnText, { color: colors.danger }]}>
-                        {t('passport.revoke')}
-                      </AppText>
-                    </Pressable>
+                <>
+                  {/* QR presentation: a recruiter can scan the newest link. */}
+                  <View style={styles.qrWrap}>
+                    <QRCode value={activeShares[0].url} size={140} backgroundColor="#FFFFFF" color="#33304A" />
                   </View>
-                ))
+                  {activeShares.map((s) => (
+                    <View key={s.id} style={styles.shareRow}>
+                      <View style={{ flex: 1 }}>
+                        <AppText style={styles.shareUrl} numberOfLines={1}>
+                          {s.url}
+                        </AppText>
+                        <AppText style={styles.shareExpiry}>
+                          {t('passport.shareExpires', { date: formatDate(s.expiresAt) })}
+                        </AppText>
+                      </View>
+                      <Pressable
+                        accessibilityRole="button"
+                        onPress={() => handleRevoke(s.id)}
+                        style={({ pressed }) => [styles.actionBtn, pressed && { opacity: 0.8 }]}
+                      >
+                        <Icon name="close" size={15} color={colors.danger} />
+                        <AppText style={[styles.actionBtnText, { color: colors.danger }]}>
+                          {t('passport.revoke')}
+                        </AppText>
+                      </Pressable>
+                    </View>
+                  ))}
+                </>
               ) : (
                 <AppText style={styles.shareHint}>{t('passport.shareEmpty')}</AppText>
               )}
@@ -462,6 +461,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: colors.border,
   },
+  qrWrap: { alignItems: 'center', paddingVertical: spacing.md },
   shareUrl: { fontSize: typography.size.sm, color: colors.primary, fontWeight: typography.weight.medium },
   shareExpiry: { fontSize: typography.size.xs, color: colors.muted, marginTop: 2 },
   shareHint: { fontSize: typography.size.sm, color: colors.muted },

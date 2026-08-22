@@ -11,7 +11,7 @@ import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Pressable, Text, StyleSheet, View, ActivityIndicator } from 'react-native';
+import { Pressable, Text, StyleSheet, View, ActivityIndicator, Alert } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ScrollView } from 'react-native';
@@ -39,8 +39,10 @@ import JobDetailScreen from './screens/JobDetailScreen';
 import ApplyReviewScreen from './screens/ApplyReviewScreen';
 import ReportScreen from './screens/ReportScreen';
 import NotificationCenterScreen from './screens/NotificationCenterScreen';
+import SafetyCenterScreen from './screens/SafetyCenterScreen';
 import AddWorkRecordScreen from './screens/AddWorkRecordScreen';
 import ProfileEditScreen from './screens/ProfileEditScreen';
+import { blockJob } from './services/workerApi';
 import { DEMO_JOBS } from './data/fixtures';
 import { DemoApplication, DemoJob } from './types';
 import { fetchJob } from './services/workerApi';
@@ -129,9 +131,55 @@ function MainTabs({ navigation, route }: any) {
         name="Help"
         options={{ title: t('tab.help'), tabBarIcon: ({ focused }) => <TabBarIcon name="flag" focused={focused} /> }}
       >
-        {() => <HelpScreen onReport={(cat) => navigation.navigate('Report', { category: cat })} />}
+        {() => (
+          <HelpScreen
+            onReport={(cat) => navigation.navigate('Report', { category: cat })}
+            onSafetyCenter={() => navigation.navigate('SafetyCenter')}
+          />
+        )}
       </Tab.Screen>
     </Tab.Navigator>
+  );
+}
+
+// Job detail with a working "block this job" action (blueprint: report + block).
+function JobDetailWithBlock({
+  job,
+  navigation,
+}: {
+  job: DemoJob;
+  navigation: any;
+}) {
+  const { t } = useT();
+  const token = useAuthStore((s) => s.token);
+
+  const handleBlock = () => {
+    Alert.alert(t('job.blockJob'), t('job.blockConfirm'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: t('job.blockJob'),
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await blockJob(job.id, token);
+            Alert.alert(t('job.blocked'), t('job.blockedSub'));
+            navigation.goBack();
+          } catch (error) {
+            Alert.alert(t('common.error'), t('onboarding.saveError'));
+          }
+        },
+      },
+    ]);
+  };
+
+  return (
+    <JobDetailScreen
+      job={job}
+      onBack={() => navigation.goBack()}
+      onApply={() => navigation.navigate('ApplyReview', { jobId: job.id })}
+      onReport={() => navigation.navigate('Report')}
+      onBlock={handleBlock}
+    />
   );
 }
 
@@ -264,14 +312,7 @@ export default function App() {
             <Stack.Screen name="JobDetail">
               {({ navigation, route }) => (
                 <JobLoader jobId={route.params.jobId}>
-                  {(job) => (
-                    <JobDetailScreen
-                      job={job}
-                      onBack={() => navigation.goBack()}
-                      onApply={() => navigation.navigate('ApplyReview', { jobId: job.id })}
-                      onReport={() => navigation.navigate('Report')}
-                    />
-                  )}
+                  {(job) => <JobDetailWithBlock job={job} navigation={navigation} />}
                 </JobLoader>
               )}
             </Stack.Screen>
@@ -312,6 +353,11 @@ export default function App() {
             <Stack.Screen name="NotificationCenter">
               {({ navigation }) => (
                 <NotificationCenterScreen onBack={() => navigation.goBack()} />
+              )}
+            </Stack.Screen>
+            <Stack.Screen name="SafetyCenter">
+              {({ navigation }) => (
+                <SafetyCenterScreen onBack={() => navigation.goBack()} />
               )}
             </Stack.Screen>
             <Stack.Screen name="AddWorkRecord">

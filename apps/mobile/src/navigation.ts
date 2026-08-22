@@ -25,6 +25,7 @@ export type RootStackParamList = {
   ApplyReview: { jobId: string };
   Report: { category?: ReportCategory };
   NotificationCenter: undefined;
+  SafetyCenter: undefined;
   AddWorkRecord: undefined;
   ProfileEdit: { passport: DemoPassport } | undefined;
 };

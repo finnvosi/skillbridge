@@ -117,3 +117,5 @@ export type ReportCategory =
   | 'recruiter_identity'
   | 'unsafe_contact'
   | 'other';
+
+export type ReportStatus = 'submitted' | 'under_review' | 'resolved';

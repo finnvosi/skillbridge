@@ -1,15 +1,19 @@
 // Report a concern — category, what happened, optional evidence.
-// Confirmation states clearly: not shown to the recruiter, and the prototype
-// stores no production report (local demo only).
+// When the API is reachable the report is stored with a worker-facing support
+// status (tracked in Help → My reports); otherwise it stays a local demo.
 import React, { useState } from 'react';
-import { View, Text, TextInput, Pressable, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, TextInput, Pressable, ScrollView, StyleSheet, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors, typography, spacing, radius, TAP_MIN } from '../theme';
 import { ReportCategory } from '../types';
 import { useT } from '../hooks/useT';
+import { useAuthStore } from '../store/auth';
 import { Icon, IconName } from '../components/Icon';
 import { Card, Button, DemoTag, StatusPill } from '../components/ui';
 import { BackBar } from '../components/BackBar';
+import { submitReport } from '../services/workerApi';
+import { ApiError } from '../services/api';
+import { USE_REMOTE_API } from '../config';
 
 import { AppText } from './../components/ui';
 const CATS: { cat: ReportCategory; icon: IconName; key: string }[] = [
@@ -30,10 +34,40 @@ export default function ReportScreen({
   onDone: () => void;
 }) {
   const { t } = useT();
+  const token = useAuthStore((s) => s.token);
   const [category, setCategory] = useState<ReportCategory | undefined>(initialCategory);
   const [what, setWhat] = useState('');
   const [evidence, setEvidence] = useState('');
+  const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
+  // True when the report actually reached the API (vs local demo fallback).
+  const [realSubmission, setRealSubmission] = useState(false);
+
+  const handleSend = async () => {
+    if (!category || !what.trim()) return;
+    if (!USE_REMOTE_API || !token) {
+      // Local demo fallback.
+      setRealSubmission(false);
+      setSent(true);
+      return;
+    }
+    setSending(true);
+    try {
+      await submitReport(
+        { category, description: what.trim(), evidence: evidence.trim() || undefined },
+        token,
+      );
+      setRealSubmission(true);
+      setSent(true);
+    } catch (error) {
+      Alert.alert(
+        t('common.error'),
+        error instanceof ApiError ? error.message : t('onboarding.saveError'),
+      );
+    } finally {
+      setSending(false);
+    }
+  };
 
   if (sent) {
     return (
@@ -51,10 +85,14 @@ export default function ReportScreen({
             </View>
             <View style={[styles.confirmRow, { marginTop: spacing.sm }]}>
               <Icon name="info" size={18} color={colors.muted} />
-              <AppText style={styles.confirmText}>{t('report.demo')}</AppText>
+              <AppText style={styles.confirmText}>
+                {realSubmission ? t('report.trackStatus') : t('report.demo')}
+              </AppText>
             </View>
           </Card>
-          <AppText style={styles.confirmSub}>{t('report.confirmSub')}</AppText>
+          <AppText style={styles.confirmSub}>
+            {realSubmission ? t('report.confirmSubReal') : t('report.confirmSub')}
+          </AppText>
           <View style={styles.confirmCta}>
             <Button variant="primary" icon="check" fullWidth onPress={onDone}>
               {t('report.done')}
@@ -128,7 +166,7 @@ export default function ReportScreen({
         </Card>
 
         <View style={styles.cta}>
-          <Button variant="danger" icon="flag" fullWidth disabled={!canSend} onPress={() => setSent(true)}>
+          <Button variant="danger" icon="flag" fullWidth disabled={!canSend || sending} loading={sending} onPress={handleSend}>
             {t('report.send')}
           </Button>
           <StatusPill icon="lock" label={t('report.notShown')} tone="neutral" />

@@ -397,13 +397,84 @@ router.patch(
   })
 );
 
-// List user reports
+// ---- Worker safety reports (admin) ------------------------------------------
+// List worker reports and advance their support status. The worker is notified
+// on status change; reports are never shown to the recruiter.
+
 router.get(
   '/reports',
   asyncHandler(async (_req: AuthRequest, res: Response) => {
-    // Mock data - in production this would query a Report model
-    const reports: any[] = [];
-    res.json({ reports });
+    const reports = await prisma.report.findMany({
+      include: { worker: { select: { phone: true } } },
+      orderBy: { createdAt: 'desc' },
+      take: 100,
+    });
+    res.json({
+      reports: reports.map((r) => ({
+        id: r.id,
+        category: r.category,
+        description: r.description,
+        evidence: r.evidence,
+        status: r.status,
+        adminNote: r.adminNote,
+        createdAt: r.createdAt,
+        workerPhone: r.worker.phone,
+      })),
+    });
+  })
+);
+
+router.patch(
+  '/reports/:id/status',
+  asyncHandler(async (req: AuthRequest, res: Response) => {
+    const { status, note } = req.body as { status?: string; note?: string };
+    if (status !== 'under_review' && status !== 'resolved') {
+      return res.status(400).json({
+        error: 'Status must be under_review or resolved',
+      });
+    }
+
+    const report = await prisma.report.findUnique({
+      where: { id: req.params.id },
+      include: { worker: true },
+    });
+    if (!report) return res.status(404).json({ error: 'Report not found' });
+
+    const updated = await prisma.report.update({
+      where: { id: report.id },
+      data: {
+        status,
+        adminNote: note?.trim() || null,
+        resolvedAt: status === 'resolved' ? new Date() : null,
+      },
+    });
+
+    // Notify the worker of the support status (only if profile links to a User).
+    if (report.worker.userId) {
+      await prisma.notification.create({
+        data: {
+          userId: report.worker.userId,
+          type: 'report_status_changed',
+          title:
+            status === 'resolved'
+              ? 'Report resolved'
+              : 'Report under review',
+          body:
+            status === 'resolved'
+              ? 'Your report was reviewed and action has been taken.'
+              : 'Your report is being reviewed by our team.',
+        },
+      });
+    }
+
+    res.json({
+      report: {
+        id: updated.id,
+        status: updated.status,
+        adminNote: updated.adminNote,
+        resolvedAt: updated.resolvedAt,
+      },
+    });
   })
 );
 

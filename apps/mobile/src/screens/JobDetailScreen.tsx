@@ -1,7 +1,7 @@
 // Job detail — title, pay/shift/location, what we verified and cannot guarantee,
 // match reasons, and the two actions: Apply with Passport, Report a concern.
 import React from 'react';
-import { View, Text, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, Pressable, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors, typography, spacing, radius, shadow } from '../theme';
 import { DemoJob } from '../types';
@@ -31,11 +31,13 @@ export default function JobDetailScreen({
   job,
   onApply,
   onReport,
+  onBlock,
   onBack,
 }: {
   job: DemoJob;
   onApply: () => void;
   onReport: () => void;
+  onBlock?: () => void;
   onBack: () => void;
 }) {
   const { t, formatDate } = useT();
@@ -164,6 +166,16 @@ export default function JobDetailScreen({
           <Button variant="ghost" icon="flag" fullWidth onPress={onReport}>
             {t('job.reportConcern')}
           </Button>
+          {onBlock ? (
+            <Pressable
+              accessibilityRole="button"
+              onPress={onBlock}
+              style={({ pressed }) => [styles.blockLink, pressed && { opacity: 0.7 }]}
+            >
+              <Icon name="close" size={15} color={colors.muted} />
+              <AppText style={styles.blockLinkText}>{t('job.blockJob')}</AppText>
+            </Pressable>
+          ) : null}
         </View>
         <View style={{ height: spacing.xl }} />
       </ScrollView>
@@ -209,6 +221,15 @@ function Cond({ icon, label, on }: { icon: IconName; label: string; on: boolean 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   scroll: { padding: spacing.lg, gap: spacing.lg },
+  blockLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xs,
+    minHeight: 40,
+    marginTop: spacing.xs,
+  },
+  blockLinkText: { fontSize: typography.size.sm, color: colors.muted },
   head: { gap: spacing.sm },
   headTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   checked: { fontSize: typography.size.xs, color: colors.muted },

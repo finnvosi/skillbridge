@@ -9,6 +9,7 @@ import { DemoJob, DemoApplication } from '../types';
 import { useT } from '../hooks/useT';
 import { useAppStore } from '../store/useAppStore';
 import { submitApplication as submitApplicationApi } from '../services/workerApi';
+import { ApiError } from '../services/api';
 import { USE_REMOTE_API, DEMO_WORKER_ID } from '../config';
 import { Icon, IconName } from '../components/Icon';
 import { Card, Button, DemoTag, SectionLabel, StatusPill } from '../components/ui';
@@ -30,6 +31,7 @@ export default function ApplyReviewScreen({
   const hasApplied = useAppStore((s) => s.hasAppliedToJob(job.id));
   const [hideCert, setHideCert] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [alreadyApplied, setAlreadyApplied] = useState(false);
 
   const sharedFields = [
     `${passport.fullName}`,
@@ -69,7 +71,14 @@ export default function ApplyReviewScreen({
     // fails we still surface the local record and move on.
     submitApplicationApi(job.id, DEMO_WORKER_ID, displayedShared.length > 0)
       .then(finish)
-      .catch(finish);
+      .catch((err) => {
+        // The API guards against double-submit (409 "Already applied").
+        // Surface that honestly instead of swallowing it as a silent success.
+        if (err instanceof ApiError && err.status === 409) {
+          setAlreadyApplied(true);
+        }
+        finish();
+      });
   };
 
   return (
@@ -122,6 +131,12 @@ export default function ApplyReviewScreen({
         </Card>
 
         <View style={styles.cta}>
+          {alreadyApplied ? (
+            <View style={styles.conflictNote}>
+              <Icon name="shieldCheck" size={15} color={colors.warning} />
+              <AppText style={styles.conflictNoteText}>{t('apply.alreadyApplied')}</AppText>
+            </View>
+          ) : null}
           <Button variant="primary" icon="shieldCheck" fullWidth loading={submitting} onPress={handleSubmit}>
             {hasApplied ? t('apply.done') : t('apply.submit')}
           </Button>
@@ -160,6 +175,8 @@ const styles = StyleSheet.create({
   noPayTitle: { fontSize: typography.size.base, fontWeight: typography.weight.semibold as any },
   copySmall: { fontSize: typography.size.sm, color: colors.muted, marginTop: spacing.xs, lineHeight: typography.size.sm * typography.lineHeight.relaxed },
   cta: { marginTop: spacing.sm },
+  conflictNote: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, marginBottom: spacing.sm, paddingVertical: spacing.sm, paddingHorizontal: spacing.md, backgroundColor: colors.warningSoft, borderRadius: radius.sm, borderWidth: 1, borderColor: colors.warning },
+  conflictNoteText: { fontSize: typography.size.sm, color: colors.warningInk, flex: 1, lineHeight: typography.size.sm * typography.lineHeight.relaxed },
   hiddenNote: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, paddingVertical: spacing.sm, paddingHorizontal: spacing.md, backgroundColor: colors.surfaceMuted, borderRadius: radius.sm, borderWidth: 1, borderColor: colors.border },
   hiddenNoteText: { fontSize: typography.size.sm, color: colors.muted, flex: 1, lineHeight: typography.size.sm * typography.lineHeight.relaxed },
 });

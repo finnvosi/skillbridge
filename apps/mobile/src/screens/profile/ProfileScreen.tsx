@@ -123,7 +123,7 @@ export default function ProfileScreen() {
         <Badge
           label={user?.role || ''}
           color={isStudent ? colors.student : colors.employer}
-          backgroundColor={isStudent ? colors.primaryLight : '#EDEAFD'}
+          backgroundColor={isStudent ? colors.primaryLight : colors.primarySoft}
         />
       </View>
 

@@ -27,10 +27,10 @@ const TYPE_LABELS: Record<string, string> = {
   full_time: 'Full-time',
 };
 const TYPE_COLORS: Record<string, string> = {
-  internship: '#E3F2FD',
-  part_time: '#F3E5F5',
-  freelance: '#E8F5E9',
-  full_time: '#FFF3E0',
+  internship: colors.primarySoft,
+  part_time: colors.surfaceMuted,
+  freelance: colors.successSoft,
+  full_time: colors.warningSoft,
 };
 
 type ApiProject = {

@@ -124,7 +124,7 @@ type ApiAnalytics = {
       <View style={styles.statsRow}>
         <StatCard label="Active opportunities" value={projects.length} bgColor={colors.primaryLight} />
         <StatCard label="Total applicants" value={applications.length} bgColor={colors.primaryLight} />
-        <StatCard label="Needs review" value={pendingCount} bgColor="#FEF3C7" />
+        <StatCard label="Needs review" value={pendingCount} bgColor={colors.warningSoft} />
         <StatCard
           label="Match strength"
           value={analytics?.talentScore ?? 0}
@@ -266,7 +266,7 @@ function StatCard({
   bgColor?: string;
 }) {
   return (
-    <Card style={[styles.statCard, { backgroundColor: bgColor ?? colors.surfaceSecondary }]}>
+    <Card style={[styles.statCard, { backgroundColor: bgColor ?? colors.surfaceMuted }]}>
       <AppText style={styles.statValue}>
         {value}
         {suffix}

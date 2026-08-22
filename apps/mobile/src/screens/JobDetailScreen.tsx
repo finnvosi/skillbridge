@@ -3,7 +3,7 @@
 import React from 'react';
 import { View, Text, ScrollView, Pressable, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors, typography, spacing, radius, shadow } from '../theme';
+import { colors, typography, spacing, radius, shadow, TAP_MIN } from '../theme';
 import { DemoJob } from '../types';
 import { useT } from '../hooks/useT';
 import { Icon, IconName } from '../components/Icon';
@@ -161,7 +161,7 @@ export default function JobDetailScreen({
         </Card>
 
         <View style={styles.cta}>
-          <Button variant="primary" icon="shieldCheck" fullWidth onPress={onApply}>
+          <Button variant="accent" icon="shieldCheck" fullWidth onPress={onApply}>
             {t('job.applyWithPassport')}
           </Button>
           <Button variant="ghost" icon="flag" fullWidth onPress={onReport}>
@@ -227,7 +227,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: spacing.xs,
-    minHeight: 40,
+    minHeight: TAP_MIN,
     marginTop: spacing.xs,
   },
   blockLinkText: { fontSize: typography.size.sm, color: colors.muted },

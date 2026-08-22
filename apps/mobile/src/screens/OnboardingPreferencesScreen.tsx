@@ -210,7 +210,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
     borderRadius: radius.pill,
-    minHeight: 40,
+    minHeight: TAP_MIN,
   },
   chipActive: { backgroundColor: colors.primary },
   chipInactive: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border },

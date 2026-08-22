@@ -2,7 +2,7 @@
 // Solid steel-navy bar gives the product a confident, consistent anchor.
 import React from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
-import { colors, typography, spacing } from '../theme';
+import { colors, typography, spacing, TAP_MIN } from '../theme';
 import { useAppStore } from '../store/useAppStore';
 import { useT } from '../hooks/useT';
 import { Icon } from './Icon';
@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.35)',
     backgroundColor: 'rgba(255,255,255,0.10)',
-    minHeight: 36,
+    minHeight: TAP_MIN,
   },
   langText: {
     fontSize: typography.size.sm,

@@ -39,7 +39,7 @@ export function AppText({ weight = 'regular', style, ...rest }: AppTextProps) {
 
 /* ----------------------------- Button ----------------------------- */
 
-type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
+type ButtonVariant = 'primary' | 'accent' | 'secondary' | 'ghost' | 'danger';
 
 interface ButtonProps {
   children: React.ReactNode;
@@ -67,6 +67,9 @@ export function Button({
   // white-on-#E7ECF1 (primary), which was effectively invisible.
   const palette = {
     primary: { bg: colors.primary, fg: colors.white, disabledBg: colors.primarySoft, disabledFg: colors.muted },
+    // Happy Gold — reserved for the single "apply" moment per the Connected
+    // Calm system. Never use for ordinary actions.
+    accent: { bg: colors.accent, fg: colors.white, disabledBg: colors.accentSoft, disabledFg: colors.muted },
     secondary: { bg: colors.surface, fg: colors.ink, disabledBg: colors.surfaceMuted, disabledFg: colors.mutedLight },
     ghost: { bg: 'transparent', fg: colors.primary, disabledBg: 'transparent', disabledFg: colors.mutedLight },
     danger: { bg: colors.danger, fg: colors.white, disabledBg: colors.dangerSoft, disabledFg: colors.muted },

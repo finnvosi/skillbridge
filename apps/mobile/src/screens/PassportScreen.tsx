@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, ScrollView, Pressable, StyleSheet, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors, typography, spacing, radius } from '../theme';
+import { colors, typography, spacing, radius, TAP_MIN } from '../theme';
 import { useT } from '../hooks/useT';
 import { useAppStore } from '../store/useAppStore';
 import { Icon, IconName } from '../components/Icon';
@@ -432,7 +432,7 @@ const styles = StyleSheet.create({
   recordRole: { fontSize: typography.size.md, fontWeight: typography.weight.semibold, color: colors.ink },
   recordCompany: { fontSize: typography.size.sm, color: colors.muted },
   recordActions: { flexDirection: 'row', alignItems: 'center', gap: spacing.lg, marginTop: spacing.xs },
-  actionBtn: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, minHeight: 40, paddingVertical: spacing.xs, paddingRight: spacing.sm },
+  actionBtn: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, minHeight: TAP_MIN, paddingVertical: spacing.xs, paddingRight: spacing.sm },
   actionBtnText: { fontSize: typography.size.sm, color: colors.primary, fontWeight: typography.weight.semibold },
   addBtn: { marginTop: spacing.sm },
   recordMeta: { fontSize: typography.size.sm, color: colors.ink, marginTop: spacing.xs },
@@ -480,7 +480,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.35)',
     backgroundColor: 'rgba(255,255,255,0.10)',
-    minHeight: 36,
+    minHeight: TAP_MIN,
   },
   editBtnText: {
     fontSize: typography.size.sm,

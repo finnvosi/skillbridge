@@ -15,7 +15,7 @@ import { Card, Badge } from '@skillbridge/ui';
 import { apiRequest, errMessage, ApiError } from '../../services/api';
 import { API_ENDPOINTS } from '../../config';
 import { useAuthStore } from '../../store/auth';
-import { colors, spacing, typography, radius } from '../../theme';
+import { colors, spacing, typography, radius, TAP_MIN } from '../../theme';
 
 import { AppText } from './../../components/ui';
 // Lightweight debounce for search input
@@ -194,8 +194,8 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.separator,
   },
   searchInput: {
-    height: 40,
-    backgroundColor: colors.surfaceSecondary,
+    height: TAP_MIN,
+    backgroundColor: colors.surfaceMuted,
     borderRadius: radius.md,
     paddingHorizontal: spacing.md,
     fontSize: typography.size.base,

@@ -17,6 +17,7 @@ import analyticsRoutes from './routes/analytics.routes';
 import studentsRoutes from './routes/students.routes';
 import workerRoutes from './routes/worker.routes';
 import otpRoutes from './routes/otp.routes';
+import publicRoutes from './routes/public.routes';
 
 
 // Initialize Express app
@@ -68,6 +69,7 @@ app.get('/health', (req, res) => {
 // API routes
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/auth/otp', otpRoutes);
+app.use('/api/v1/public', publicRoutes);
 app.use('/api/v1/users', usersRoutes);
 app.use('/api/v1/projects', projectsRoutes);
 app.use('/api/v1/certificates', certificatesRoutes);

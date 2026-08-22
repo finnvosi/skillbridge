@@ -490,6 +490,7 @@ model WorkerProfile {
   user        User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
   applications WorkerApplication[]
   workRecords WorkRecord[]
+  passportShares PassportShare[]
 
   @@index([phone])
   @@index([userId])
@@ -546,4 +547,21 @@ model PhoneOtp {
 
   @@index([phone, createdAt])
   @@index([phone, expiresAt])
+}
+
+// Career Passport sharing (blueprint §5): expiring, revocable links so workers
+// control what employers see. The public view exposes only shared fields —
+// never phone, documents, or government identifiers.
+model PassportShare {
+  id        String    @id @default(cuid())
+  workerId  String
+  token     String    @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  worker WorkerProfile @relation(fields: [workerId], references: [id], onDelete: Cascade)
+
+  @@index([workerId])
+  @@index([token])
 }

@@ -1,4 +1,5 @@
 import { Router, Request, Response } from 'express';
+import * as crypto from 'crypto';
 import { z } from 'zod';
 import { prisma } from '../db/prisma';
 import { asyncHandler, validate } from '../middleware/validation';
@@ -482,6 +483,99 @@ router.post(
       },
     });
     res.json({ user });
+  }),
+);
+
+// ---- Career Passport sharing (blueprint §5) --------------------------------
+// Expiring, revocable links. The worker creates a share, gets a URL, and can
+// revoke it at any time. The public view (public.routes.ts) exposes only
+// shared fields — never phone, documents, or identity data.
+
+const shareSchema = z.object({
+  body: z.object({
+    expiresInHours: z.number().int().min(1).max(168).optional(),
+  }),
+});
+
+const DEFAULT_SHARE_HOURS = 24;
+
+function shareUrl(req: Request, token: string): string {
+  const base =
+    process.env.PUBLIC_BASE_URL || `${req.protocol}://${req.get('host')}`;
+  return `${base}/api/v1/public/passport/${token}`;
+}
+
+// POST /api/v1/worker/me/passport/shares — create a share
+router.post(
+  '/me/passport/shares',
+  requireWorker,
+  validate(shareSchema),
+  asyncHandler(async (req: AuthRequest, res: Response) => {
+    const workerId = (req as AuthRequest & { workerProfileId: string })
+      .workerProfileId;
+    const hours = (req.body as { expiresInHours?: number }).expiresInHours ?? DEFAULT_SHARE_HOURS;
+    const token = crypto.randomBytes(24).toString('hex');
+    const share = await prisma.passportShare.create({
+      data: {
+        workerId,
+        token,
+        expiresAt: new Date(Date.now() + hours * 3600_000),
+      },
+    });
+    res.status(201).json({
+      share: {
+        id: share.id,
+        token: share.token,
+        expiresAt: share.expiresAt,
+        revokedAt: share.revokedAt,
+        url: shareUrl(req, share.token),
+      },
+    });
+  }),
+);
+
+// GET /api/v1/worker/me/passport/shares — list shares (active + revoked)
+router.get(
+  '/me/passport/shares',
+  requireWorker,
+  asyncHandler(async (req: AuthRequest, res: Response) => {
+    const workerId = (req as AuthRequest & { workerProfileId: string })
+      .workerProfileId;
+    const shares = await prisma.passportShare.findMany({
+      where: { workerId },
+      orderBy: { createdAt: 'desc' },
+      take: 25,
+    });
+    res.json({
+      shares: shares.map((s) => ({
+        id: s.id,
+        token: s.token,
+        expiresAt: s.expiresAt,
+        revokedAt: s.revokedAt,
+        url: shareUrl(req, s.token),
+      })),
+    });
+  }),
+);
+
+// DELETE /api/v1/worker/me/passport/shares/:id — revoke a share
+router.delete(
+  '/me/passport/shares/:id',
+  requireWorker,
+  asyncHandler(async (req: AuthRequest, res: Response) => {
+    const workerId = (req as AuthRequest & { workerProfileId: string })
+      .workerProfileId;
+    const share = await prisma.passportShare.findUnique({
+      where: { id: req.params.id },
+    });
+    if (!share || share.workerId !== workerId) {
+      return res.status(404).json({ error: 'Share not found' });
+    }
+    const updated = await prisma.passportShare.update({
+      where: { id: share.id },
+      data: { revokedAt: share.revokedAt ?? new Date() },
+    });
+    res.json({ share: { id: updated.id, revokedAt: updated.revokedAt } });
   }),
 );
 

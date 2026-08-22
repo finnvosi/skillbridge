@@ -1,7 +1,7 @@
 // Career Passport — identity, skills, work history with verification states,
 // and a local demo share toggle.
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, ScrollView, Switch, Pressable, StyleSheet, Alert } from 'react-native';
+import { View, Text, ScrollView, Pressable, StyleSheet, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors, typography, spacing, radius } from '../theme';
 import { useT } from '../hooks/useT';
@@ -9,7 +9,15 @@ import { useAppStore } from '../store/useAppStore';
 import { Icon, IconName } from '../components/Icon';
 import { Header } from '../components/Header';
 import { Card, StatusPill, DemoTag, SectionLabel, Button } from '../components/ui';
-import { fetchPassport, requestWorkRecordVerification, deleteWorkRecord } from '../services/workerApi';
+import {
+  fetchPassport,
+  requestWorkRecordVerification,
+  deleteWorkRecord,
+  createPassportShare,
+  listPassportShares,
+  revokePassportShare,
+  PassportShare,
+} from '../services/workerApi';
 import { ApiError } from '../services/api';
 import { USE_REMOTE_API } from '../config';
 import { useAuthStore } from '../store/auth';
@@ -24,7 +32,6 @@ export default function PassportScreen({
 }) {
   const { t, formatDate } = useT();
   const storePassport = useAppStore((s) => s.passport);
-  const setShareEnabled = useAppStore((s) => s.setShareEnabled);
   const setPassport = useAppStore((s) => s.setPassport);
   const token = useAuthStore((s) => s.token);
   const [remotePassport, setRemotePassport] = useState<DemoPassport | null>(null);
@@ -93,6 +100,66 @@ export default function PassportScreen({
         onPress: () => runAction(r.id, () => deleteWorkRecord(r.id, token), 'workrecord.deleted'),
       },
     ]);
+
+  // ---- Passport sharing (expiring, revocable links) -------------------------
+  const [shares, setShares] = useState<PassportShare[]>([]);
+  const [sharing, setSharing] = useState(false);
+
+  useEffect(() => {
+    if (!USE_REMOTE_API || !token) return;
+    let alive = true;
+    listPassportShares(token)
+      .then((data) => {
+        if (alive) setShares(data);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [token]);
+
+  const loadShares = useCallback(async () => {
+    if (!USE_REMOTE_API || !token) return;
+    const data = await listPassportShares(token);
+    setShares(data);
+  }, [token]);
+
+  const handleCreateShare = async () => {
+    setSharing(true);
+    try {
+      await createPassportShare(24, token);
+      await loadShares().catch(() => {});
+    } catch (error) {
+      Alert.alert(
+        t('common.error'),
+        error instanceof ApiError ? error.message : t('onboarding.saveError'),
+      );
+    } finally {
+      setSharing(false);
+    }
+  };
+
+  const handleRevoke = (shareId: string) =>
+    Alert.alert(t('passport.revoke'), t('passport.revokeConfirm'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: t('passport.revoke'),
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await revokePassportShare(shareId, token);
+            await loadShares().catch(() => {});
+          } catch (error) {
+            Alert.alert(
+              t('common.error'),
+              error instanceof ApiError ? error.message : t('onboarding.saveError'),
+            );
+          }
+        },
+      },
+    ]);
+
+  const activeShares = shares.filter((s) => !s.revokedAt);
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
@@ -282,28 +349,60 @@ export default function PassportScreen({
           )}
         </Card>
 
-        {/* Share toggle */}
-        <Card style={styles.shareCard}>
-          <View style={{ flex: 1 }}>
-            <AppText style={styles.shareTitle}>{t('passport.share')}</AppText>
-            <AppText style={[styles.shareState, { color: passport.shareEnabled ? colors.success : colors.muted }]}>
-              {passport.shareEnabled ? t('passport.shareOn') : t('passport.shareOff')}
-            </AppText>
-          </View>
-          <Switch
-            value={passport.shareEnabled}
-            onValueChange={setShareEnabled}
-            trackColor={{ true: colors.success, false: colors.border }}
-            thumbColor={colors.white}
-            accessibilityLabel={t('passport.share')}
-          />
+        {/* Share your Passport — real expiring, revocable links */}
+        <Card style={styles.card}>
+          <SectionLabel>{t('passport.share')}</SectionLabel>
+          {USE_REMOTE_API && token ? (
+            <>
+              <Button
+                variant="secondary"
+                icon="share"
+                fullWidth
+                loading={sharing}
+                disabled={sharing}
+                onPress={handleCreateShare}
+                style={styles.addBtn}
+              >
+                {t('passport.shareCreate')}
+              </Button>
+              {activeShares.length > 0 ? (
+                activeShares.map((s) => (
+                  <View key={s.id} style={styles.shareRow}>
+                    <View style={{ flex: 1 }}>
+                      <AppText style={styles.shareUrl} numberOfLines={1}>
+                        {s.url}
+                      </AppText>
+                      <AppText style={styles.shareExpiry}>
+                        {t('passport.shareExpires', { date: formatDate(s.expiresAt) })}
+                      </AppText>
+                    </View>
+                    <Pressable
+                      accessibilityRole="button"
+                      onPress={() => handleRevoke(s.id)}
+                      style={({ pressed }) => [styles.actionBtn, pressed && { opacity: 0.8 }]}
+                    >
+                      <Icon name="close" size={15} color={colors.danger} />
+                      <AppText style={[styles.actionBtnText, { color: colors.danger }]}>
+                        {t('passport.revoke')}
+                      </AppText>
+                    </Pressable>
+                  </View>
+                ))
+              ) : (
+                <AppText style={styles.shareHint}>{t('passport.shareEmpty')}</AppText>
+              )}
+              <View style={styles.shareNote}>
+                <Icon name="info" size={15} color={colors.muted} />
+                <AppText style={styles.shareNoteText}>{t('passport.shareReal')}</AppText>
+              </View>
+            </>
+          ) : (
+            <View style={styles.emptyBox}>
+              <Icon name="info" size={16} color={colors.muted} />
+              <AppText style={[styles.emptyText, { color: colors.muted }]}>{t('passport.shareDemo')}</AppText>
+            </View>
+          )}
         </Card>
-        {passport.shareEnabled ? (
-          <View style={[styles.shareDemoNote, { backgroundColor: colors.successSoft }]}>
-            <Icon name="info" size={15} color={colors.success} />
-            <AppText style={styles.shareDemoText}>{t('passport.shareDemo')}</AppText>
-          </View>
-        ) : null}
 
         <View style={[styles.demoNote, { backgroundColor: colors.demoSoft }]}>
           <Icon name="info" size={16} color={colors.muted} />
@@ -355,11 +454,19 @@ const styles = StyleSheet.create({
   langText: { fontSize: typography.size.sm, color: colors.ink },
   safetyChip: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, paddingVertical: spacing.sm, paddingHorizontal: spacing.md, borderRadius: radius.pill, backgroundColor: colors.successSoft, borderWidth: 1, borderColor: colors.success },
   safetyText: { fontSize: typography.size.sm, color: colors.ink },
-  shareCard: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
-  shareTitle: { fontSize: typography.size.md, fontWeight: typography.weight.semibold as any, color: colors.ink },
-  shareState: { fontSize: typography.size.sm, marginTop: 2 },
-  shareDemoNote: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.xs, padding: spacing.md, borderRadius: radius.sm, borderWidth: 1, borderColor: colors.success },
-  shareDemoText: { flex: 1, fontSize: typography.size.sm, color: colors.ink, lineHeight: typography.size.sm * typography.lineHeight.relaxed },
+  shareRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    paddingVertical: spacing.sm,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+  },
+  shareUrl: { fontSize: typography.size.sm, color: colors.primary, fontWeight: typography.weight.medium },
+  shareExpiry: { fontSize: typography.size.xs, color: colors.muted, marginTop: 2 },
+  shareHint: { fontSize: typography.size.sm, color: colors.muted },
+  shareNote: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.xs, padding: spacing.md, borderRadius: radius.sm, backgroundColor: colors.demoSoft },
+  shareNoteText: { flex: 1, fontSize: typography.size.sm, color: colors.muted, lineHeight: typography.size.sm * typography.lineHeight.relaxed },
   demoNote: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm, padding: spacing.md, borderRadius: radius.sm },
   demoNoteText: { flex: 1, fontSize: typography.size.sm, color: colors.muted, lineHeight: typography.size.sm * typography.lineHeight.relaxed },
   headerRight: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },

@@ -373,3 +373,48 @@ export async function completeOnboarding(
     onboardingCompleted: Boolean(data.user.onboardingCompletedAt),
   };
 }
+
+// ---- Career Passport sharing -------------------------------------------------
+
+export interface PassportShare {
+  id: string;
+  token: string;
+  expiresAt: string;
+  revokedAt: string | null;
+  url: string;
+}
+
+export async function createPassportShare(
+  expiresInHours = 24,
+  token?: string | null,
+): Promise<PassportShare> {
+  const data = await apiRequest<{ share: PassportShare }>(
+    API_ENDPOINTS.worker.passportShares,
+    {
+      method: 'POST',
+      body: { expiresInHours },
+      ...(token ? { token } : {}),
+    },
+  );
+  return data.share;
+}
+
+export async function listPassportShares(
+  token?: string | null,
+): Promise<PassportShare[]> {
+  const data = await apiRequest<{ shares: PassportShare[] }>(
+    API_ENDPOINTS.worker.passportShares,
+    token ? { method: 'GET', token } : { method: 'GET' },
+  );
+  return data.shares ?? [];
+}
+
+export async function revokePassportShare(
+  id: string,
+  token?: string | null,
+): Promise<void> {
+  await apiRequest(API_ENDPOINTS.worker.passportShare(id), {
+    method: 'DELETE',
+    ...(token ? { token } : {}),
+  });
+}

@@ -165,18 +165,19 @@ and that counts as **fail with help** for the target.
 | T4 | Decide whether your skills match | សម្រេចថាតើជំនាញរបស់អ្នកត្រូវនឹងការងារដែរឬទេ | Reads the match reason; states match/mismatch |
 | T5 | Apply and identify what information will be shared | ដាក់ពាក្យ ហើយស្គាល់ព័ត៌មានណាខ្លះត្រូវចែករំលែក | States ≥1 shared field before submitting |
 | T6 | Report a recruiter who asks for money | រាយការណ៍អ្នកជ្រើសរើសដែលសុំលុយ | Reaches report confirmation; no accidental share |
-| T7 | Add a past job and request employer verification | បន្ថែមការងារមុន ហើយស្នើសុំការផ្ទៀងផ្ទាត់ | **Prototype-gap:** see readiness note below |
-| T8 | Share and revoke the Career Passport | ចែករំលែក និងដកហូតលិខិតឆ្លងអាជីព | Shares then revokes; explains what changed |
+| T7 | Add a past job and request employer verification | បន្ថែមការងារមុន ហើយស្នើសុំការផ្ទៀងផ្ទាត់ | Adds a self-declared record; requests verification; sees the pending state |
+| T8 | Share and revoke the Career Passport | ចែករំលែក និងដកហូតលិខិតឆ្លងអាជីព | Creates a share link; opens it (public view); revokes it; confirms the link no longer works |
 
 ### Prototype readiness map (be honest in the report)
 
 | Task | Supported by current prototype? | Note |
 |---|---|---|
 | T1–T6 | ✅ Yes | Fixture/API-driven; works in demo mode |
-| T7 | ⚠️ Partial | "Add past job" and "request verification" are **not built** — the Passport shows verified records but has no add/request flow. Run T7 as a **concept test** (describe the flow, ask if they'd use it) and mark as *concept*, not *task* |
-| T8 | ⚠️ Partial | Share toggle exists (simulated); **revoke** is the same toggle off — verify the participant understands revoke; QR/expiring-link sharing is not built |
+| T7 | ✅ Yes | Add past job (self-declared) + request verification → `verification_requested` state + notification (API-backed; requires the API to be reachable) |
+| T8 | ✅ Yes | Expiring (24h), revocable share links via `POST/GET/DELETE /worker/me/passport/shares`; public view at `/api/v1/public/passport/:token` (HTML for recruiters, JSON for machines) exposing only shared fields — never phone or identity data. **QR presentation is not built** (link-based only); note any facilitator expectation of a QR code in the report |
 
-Do not count T7/T8 as full passes until the missing flows ship.
+All eight tasks are now testable end-to-end when the API is reachable. If the
+field session runs offline, run T7/T8 as concept tests instead.
 
 ### Validation targets (blueprint §16)
 

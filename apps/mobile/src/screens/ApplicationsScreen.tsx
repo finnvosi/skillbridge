@@ -12,6 +12,7 @@ import { Header } from '../components/Header';
 import { Card, StatusPill, DemoTag, EmptyState } from '../components/ui';
 import { fetchApplications } from '../services/workerApi';
 import { USE_REMOTE_API } from '../config';
+import { useAuthStore } from '../store/auth';
 
 import { AppText } from './../components/ui';
 const STATUS_ORDER: ApplicationStatus[] = ['submitted', 'under_review', 'interview', 'accepted'];
@@ -43,12 +44,13 @@ const STATUS_TONE: Record<ApplicationStatus, 'info' | 'warning' | 'success' | 'd
 export default function ApplicationsScreen({ onOpenJob }: { onOpenJob?: (jobId: string) => void }) {
   const { t, formatDate } = useT();
   const storeApps = useAppStore((s) => s.applications);
+  const token = useAuthStore((s) => s.token);
   const [remoteApps, setRemoteApps] = useState<DemoApplication[] | null>(null);
 
   useEffect(() => {
-    if (!USE_REMOTE_API) return;
+    if (!USE_REMOTE_API || !token) return;
     let alive = true;
-    fetchApplications()
+    fetchApplications(token)
       .then((data) => {
         if (alive) setRemoteApps(data);
       })
@@ -58,7 +60,7 @@ export default function ApplicationsScreen({ onOpenJob }: { onOpenJob?: (jobId: 
     return () => {
       alive = false;
     };
-  }, []);
+  }, [token]);
 
   const applications = remoteApps ?? storeApps;
   // Re-render periodically so the status tracker advances while the tab is open.

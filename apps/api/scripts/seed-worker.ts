@@ -2,6 +2,7 @@
 // Idempotent: clears worker-slice rows first, then re-creates. Run:
 //   pnpm --filter api exec ts-node-dev --transpile-only scripts/seed-worker.ts
 import { prisma } from '../src/db/prisma';
+import * as bcrypt from 'bcryptjs';
 
 async function main() {
   console.log('Clearing worker-slice tables...');
@@ -131,12 +132,30 @@ async function main() {
   }
 
   console.log('Seeding demo worker + passport...');
+
+  // Backfill a real, login-able User for the demo worker FIRST so the profile
+  // can link to it via the foreign key. Password: "skillbridge123".
+  const DEMO_WORKER_PASSWORD = 'skillbridge123';
+  const demoPasswordHash = await bcrypt.hash(DEMO_WORKER_PASSWORD, 12);
+  await prisma.user.upsert({
+    where: { id: 'demo-worker-user' },
+    update: { passwordHash: demoPasswordHash },
+    create: {
+      id: 'demo-worker-user',
+      email: 'worker@skillbridge.demo',
+      passwordHash: demoPasswordHash,
+      role: 'worker',
+      name: 'Sokha Chan',
+    },
+  });
+
   const worker = await prisma.workerProfile.upsert({
-    where: { phone: '+85512345678' },
-    update: {},
+    where: { phone: '+855****5678' },
+    update: { userId: 'demo-worker-user' },
     create: {
       id: 'demo-worker-1',
-      phone: '+85512345678',
+      userId: 'demo-worker-user',
+      phone: '+855****5678',
       fullName: 'Sokha Chan',
       preferredArea: 'Phnom Penh',
       availability: 'Immediate',

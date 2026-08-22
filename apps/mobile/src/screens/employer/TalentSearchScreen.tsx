@@ -17,6 +17,7 @@ import { API_ENDPOINTS } from '../../config';
 import { useAuthStore } from '../../store/auth';
 import { colors, spacing, typography, radius } from '../../theme';
 
+import { AppText } from './../../components/ui';
 // Lightweight debounce for search input
 function useDebounce<T>(value: T, delay: number): T {
   const [debounced, setDebounced] = React.useState(value);
@@ -132,9 +133,9 @@ export default function TalentSearchScreen({ navigation }: Props) {
         }
       >
         {filtered.length === 0 ? (
-          <Text style={styles.empty}>
+          <AppText style={styles.empty}>
             {search ? 'No students match your search.' : 'No talent available yet.'}
-          </Text>
+          </AppText>
         ) : (
           filtered.map((s) => {
             const initials = s.name
@@ -148,14 +149,14 @@ export default function TalentSearchScreen({ navigation }: Props) {
                 <Card style={styles.card}>
                   <View style={styles.cardHeader}>
                     <View style={[styles.avatar, { backgroundColor: colors.primary }]}>
-                      <Text style={styles.avatarText}>{initials}</Text>
+                      <AppText style={styles.avatarText}>{initials}</AppText>
                     </View>
                     <View style={styles.cardInfo}>
-                      <Text style={styles.cardName}>{s.name}</Text>
-                      <Text style={styles.cardSub}>
+                      <AppText style={styles.cardName}>{s.name}</AppText>
+                      <AppText style={styles.cardSub}>
                         {s.university || 'No university'}
                         {s.major ? ` · ${s.major}` : ''}
-                      </Text>
+                      </AppText>
                       <View style={styles.skillRow}>
                         {s.skills.slice(0, 3).map((sk) => (
                           <Badge key={sk} label={sk} color={colors.primary} backgroundColor={colors.primaryLight} />
@@ -167,9 +168,9 @@ export default function TalentSearchScreen({ navigation }: Props) {
                     </View>
                   </View>
                   <View style={styles.cardFooter}>
-                    <Text style={styles.cardMeta}>
+                    <AppText style={styles.cardMeta}>
                       🎓 {s.verifiedCertCount} verified · 💼 {s.applicationCount} applied
-                    </Text>
+                    </AppText>
                   </View>
                 </Card>
               </TouchableOpacity>

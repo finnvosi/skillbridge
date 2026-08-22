@@ -17,6 +17,12 @@
   "exclude": [
     "node_modules",
     "dist",
-    "babel.config.js"
+    "babel.config.js",
+    "src/screens/auth",
+    "src/screens/home",
+    "src/screens/profile",
+    "src/screens/projects",
+    "src/screens/employer",
+    "src/components/CertificateSection.tsx"
   ]
 }

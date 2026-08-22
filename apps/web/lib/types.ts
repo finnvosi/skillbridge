@@ -70,6 +70,7 @@ export interface Application {
       id: string;
       title: string;
       verified: boolean;
+      verificationStatus: "pending" | "verified" | "rejected";
       verifiedAt?: string | null;
     }>;
     user?: { name: string; email: string };

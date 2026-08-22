@@ -15,6 +15,7 @@ import { useAuthStore } from '../../store/auth';
 import type { RootStackParamList } from '../../App';
 import { colors, spacing, typography, radius } from '../../theme';
 
+import { AppText } from './../../components/ui';
 type LoginScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Login'>;
 
 interface Props {
@@ -48,8 +49,8 @@ export default function LoginScreen({ navigation }: Props) {
     >
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
         <View style={styles.brand}>
-          <Text style={styles.logo}>SkillBridge</Text>
-          <Text style={styles.tagline}>Bridge your skills to real work.</Text>
+          <AppText style={styles.logo}>SkillBridge</AppText>
+          <AppText style={styles.tagline}>Bridge your skills to real work.</AppText>
         </View>
 
         <View style={styles.form}>
@@ -83,9 +84,9 @@ export default function LoginScreen({ navigation }: Props) {
           style={styles.linkRow}
           onPress={() => navigation.navigate('Register')}
         >
-          <Text style={styles.linkText}>
-            New here? <Text style={styles.linkAccent}>Create an account</Text>
-          </Text>
+          <AppText style={styles.linkText}>
+            New here? <AppText style={styles.linkAccent}>Create an account</AppText>
+          </AppText>
         </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>

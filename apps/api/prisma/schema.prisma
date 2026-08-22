@@ -62,6 +62,8 @@ enum CertificateVerificationStatus {
 
 enum NotificationType {
   application_status_changed
+  certificate_verified
+  certificate_rejected
 }
 
 model User {
@@ -83,6 +85,7 @@ model User {
   factory   Factory?
   worker    Worker?
   applicationStatusHistory ApplicationStatusHistory[]
+  certificateVerificationHistory CertificateVerificationHistory[]
   notifications Notification[]
 
   @@index([role])
@@ -300,10 +303,30 @@ model Certificate {
   updatedAt   DateTime @updatedAt
 
   student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  history CertificateVerificationHistory[]
 
   @@index([studentId])
   @@index([verified])
   @@index([verificationStatus])
+}
+
+// Immutable audit trail for every admin certificate verification decision.
+// Writes happen only inside the admin decision flow; existing rows are never
+// updated or deleted so reviewers cannot rewrite history.
+model CertificateVerificationHistory {
+  id             String                      @id @default(cuid())
+  certificateId  String
+  certificate     Certificate @relation(fields: [certificateId], references: [id], onDelete: Cascade)
+  actorId        String?
+  actor          User?       @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  previousStatus CertificateVerificationStatus
+  newStatus      CertificateVerificationStatus
+  candidateReason String?
+  internalNote   String?
+  createdAt      DateTime @default(now())
+
+  @@index([certificateId, createdAt])
+  @@index([actorId])
 }
 
 model PortfolioItem {
@@ -365,4 +388,140 @@ model CareerRecommendation {
   student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
   @@index([studentId])
+}
+
+// ===========================================================================
+// WORKER VERTICAL SLICE
+// Domain for the Cambodia-first blue-collar worker app (SkillBridge Worker).
+// Kept separate from the Student/Certificate model so the two products can
+// coexist in one database without coupling. Coarse verificationLevel enum
+// drives the trust UI; actual verification is a later operational workflow.
+// ===========================================================================
+
+enum VerificationLevel {
+  none
+  job_checked
+  company_checked
+  identity_checked
+}
+
+enum ShiftType {
+  day
+  night
+  rotating
+  flexible
+}
+
+enum EmploymentType {
+  full_time
+  contract
+  seasonal
+}
+
+enum WorkerApplicationStatus {
+  submitted
+  reviewing
+  shortlisted
+  interview
+  hired
+  rejected
+  withdrawn
+}
+
+model Company {
+  id          String           @id @default(cuid())
+  name        String
+  location    String?
+  verified    Boolean          @default(false)
+  verificationLevel VerificationLevel @default(none)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  jobs Job[]
+
+  @@index([verified])
+}
+
+model Job {
+  id               String           @id @default(cuid())
+  companyId        String
+  title            String
+  summary          String?
+  payPerMonth      Int
+  currency         String           @default("USD")
+  shift            ShiftType       @default(day)
+  employmentType   EmploymentType  @default(full_time)
+  location         String?
+  distanceKm       Int              @default(0)
+  skillsRequired   String[]         @default([])
+  matchReason      String?
+  // Worker-facing job conditions (real, verified where possible).
+  accommodation    Boolean          @default(false)
+  transportProvided Boolean         @default(false)
+  overtimePaid     Boolean          @default(false)
+  verificationLevel VerificationLevel @default(none)
+  lastCheckedDate  DateTime         @default(now())
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  company     Company                  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  applications WorkerApplication[]
+
+  @@index([companyId])
+  @@index([verificationLevel])
+}
+
+model WorkerProfile {
+  id              String   @id @default(cuid())
+  phone           String   @unique
+  fullName        String?
+  preferredArea   String?
+  availability    String?
+  skills          String[] @default([])
+  languages       String[] @default([])
+  identityVerified Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  applications WorkerApplication[]
+  workRecords WorkRecord[]
+
+  @@index([phone])
+}
+
+model WorkerApplication {
+  id          String                 @id @default(cuid())
+  workerId    String
+  jobId       String
+  status      WorkerApplicationStatus @default(submitted)
+  createdAt   DateTime               @default(now())
+  updatedAt   DateTime               @updatedAt
+
+  worker WorkerProfile @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  job    Job    @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@unique([workerId, jobId])
+  @@index([workerId])
+  @@index([jobId])
+  @@index([status])
+}
+
+// Career Passport work record — company-verified past employment.
+model WorkRecord {
+  id          String   @id @default(cuid())
+  workerId    String
+  role        String
+  company     String
+  workplace   String?
+  startDate   DateTime
+  endDate     DateTime?
+  verified    Boolean  @default(false)
+  provenance  String?  // e.g. "company_verified" | "self_declared"
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  worker WorkerProfile @relation(fields: [workerId], references: [id], onDelete: Cascade)
+
+  @@index([workerId])
+  @@index([verified])
 }

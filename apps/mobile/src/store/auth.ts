@@ -34,6 +34,7 @@ interface AuthState {
   logout: () => Promise<void>;
   fetchMe: () => Promise<void>;
   updateUser: (userData: Partial<ApiUser>) => void;
+  markInitialized: () => void;
   clearError: () => void;
 }
 
@@ -143,6 +144,7 @@ export const useAuthStore = create<AuthState>()(
         }));
       },
 
+      markInitialized: () => set({ initialized: true }),
       clearError: () => set({ error: null }),
     }),
     {
@@ -152,8 +154,10 @@ export const useAuthStore = create<AuthState>()(
         user: state.user,
         token: state.token,
         refreshToken: state.refreshToken,
-        initialized: state.initialized,
       }),
+      onRehydrateStorage: () => (state) => {
+        state?.markInitialized();
+      },
     }
   )
 );

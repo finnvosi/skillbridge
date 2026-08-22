@@ -16,6 +16,7 @@ import { API_ENDPOINTS } from '../../config';
 import { useAuthStore } from '../../store/auth';
 import { colors, spacing, typography, radius } from '../../theme';
 
+import { AppText } from './../../components/ui';
 interface TeamMember {
   id: string;
   name: string;
@@ -124,8 +125,8 @@ export default function TeamScreen() {
         <RefreshControl refreshing={refreshing} onRefresh={load} tintColor={colors.primary} />
       }
     >
-      <Text style={styles.title}>Team</Text>
-      <Text style={styles.subtitle}>Invite teammates to collaborate on hiring.</Text>
+      <AppText style={styles.title}>Team</AppText>
+      <AppText style={styles.subtitle}>Invite teammates to collaborate on hiring.</AppText>
 
       {/* Invite form */}
       <Card style={styles.form}>
@@ -158,14 +159,14 @@ export default function TeamScreen() {
                 },
               ]}
             >
-              <Text
+              <AppText
                 style={[
                   styles.roleText,
                   { color: role === r ? colors.background : colors.textPrimary },
                 ]}
               >
                 {ROLE_LABELS[r]}
-              </Text>
+              </AppText>
             </TouchableOpacity>
           ))}
         </View>
@@ -178,44 +179,44 @@ export default function TeamScreen() {
       <View style={styles.memberList}>
         <View style={styles.memberItem}>
           <View style={[styles.avatar, { backgroundColor: colors.primary }]}>
-            <Text style={styles.avatarText}>ME</Text>
+            <AppText style={styles.avatarText}>ME</AppText>
           </View>
           <View>
-            <Text style={styles.memberName}>You</Text>
-            <Text style={styles.memberSub}>Account owner</Text>
+            <AppText style={styles.memberName}>You</AppText>
+            <AppText style={styles.memberSub}>Account owner</AppText>
           </View>
           <Badge label="OWNER" color={colors.primary} backgroundColor={colors.primaryLight} />
         </View>
 
         {members.length === 0 ? (
-          <Text style={styles.empty}>No teammates yet. Invite your first recruiters or hiring managers.</Text>
+          <AppText style={styles.empty}>No teammates yet. Invite your first recruiters or hiring managers.</AppText>
         ) : (
           members.map((m) => (
             <View key={m.id} style={styles.memberItem}>
               <View style={[styles.avatar, { backgroundColor: colors.primary + '20' }]}>
-                <Text style={[styles.avatarText, { color: colors.primary }]}>
+                <AppText style={[styles.avatarText, { color: colors.primary }]}>
                   {m.name
                     .split(' ')
                     .map((n) => n[0])
                     .join('')
                     .slice(0, 2)
                     .toUpperCase()}
-                </Text>
+                </AppText>
               </View>
               <View style={styles.memberInfo}>
-                <Text style={styles.memberName}>{m.name}</Text>
-                <Text style={styles.memberSub}>{m.email}</Text>
+                <AppText style={styles.memberName}>{m.name}</AppText>
+                <AppText style={styles.memberSub}>{m.email}</AppText>
                 <Badge label={ROLE_LABELS[m.role]} color={colors.textSecondary} backgroundColor="#F3F4F6" />
-                <Text style={styles.memberStatus}>
+                <AppText style={styles.memberStatus}>
                   {m.status === 'active' ? '🟢 Active' : '⏳ Invited'}
-                </Text>
+                </AppText>
               </View>
               <TouchableOpacity
                 activeOpacity={0.7}
                 onPress={() => remove(m.id, m.name)}
                 style={styles.removeBtn}
               >
-                <Text style={styles.removeText}>Remove</Text>
+                <AppText style={styles.removeText}>Remove</AppText>
               </TouchableOpacity>
             </View>
           ))

@@ -2,6 +2,7 @@ import React from 'react';
 import {
   TextInput,
   TextInputProps,
+  Text,
   View,
   StyleSheet,
 } from 'react-native';

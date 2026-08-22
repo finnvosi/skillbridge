@@ -15,6 +15,7 @@ import { useAuthStore } from '../../store/auth';
 import type { RootStackParamList } from '../../App';
 import { colors, spacing, typography, radius } from '../../theme';
 
+import { AppText } from './../../components/ui';
 type RegisterScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Register'>;
 
 interface Props {
@@ -59,8 +60,8 @@ export default function RegisterScreen({ navigation }: Props) {
     >
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
         <View style={styles.brand}>
-          <Text style={styles.logo}>Create account</Text>
-          <Text style={styles.tagline}>Join SkillBridge in a few taps.</Text>
+          <AppText style={styles.logo}>Create account</AppText>
+          <AppText style={styles.tagline}>Join SkillBridge in a few taps.</AppText>
         </View>
 
         <View style={styles.form}>
@@ -89,7 +90,7 @@ export default function RegisterScreen({ navigation }: Props) {
           />
 
           <View style={styles.roleBlock}>
-            <Text style={styles.roleLabel}>I am a</Text>
+            <AppText style={styles.roleLabel}>I am a</AppText>
             <View style={styles.roleOptions}>
               {(['student', 'employer'] as const).map((r) => (
                 <TouchableOpacity
@@ -97,9 +98,9 @@ export default function RegisterScreen({ navigation }: Props) {
                   style={[styles.roleOption, role === r && styles.roleOptionActive]}
                   onPress={() => setRole(r)}
                 >
-                  <Text style={[styles.roleOptionText, role === r && styles.roleOptionTextActive]}>
+                  <AppText style={[styles.roleOptionText, role === r && styles.roleOptionTextActive]}>
                     {r === 'student' ? 'Student' : 'Employer'}
-                  </Text>
+                  </AppText>
                 </TouchableOpacity>
               ))}
             </View>
@@ -111,9 +112,9 @@ export default function RegisterScreen({ navigation }: Props) {
         </View>
 
         <TouchableOpacity style={styles.linkRow} onPress={() => navigation.navigate('Login')}>
-          <Text style={styles.linkText}>
-            Already have an account? <Text style={styles.linkAccent}>Sign in</Text>
-          </Text>
+          <AppText style={styles.linkText}>
+            Already have an account? <AppText style={styles.linkAccent}>Sign in</AppText>
+          </AppText>
         </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>

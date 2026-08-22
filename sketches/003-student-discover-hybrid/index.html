@@ -1,0 +1,533 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SkillBridge — Discover · Hybrid Editorial/Glass</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;600;700;800;900&family=Jost:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --indigo: #3c096c;
+        --orchid: #7b2cbf;
+        --orchid-2: #9d4edd;
+        --sky: #38bdf8;
+        --titanium: #f3f3f1;
+        --ink: #111111;
+        --surface: #ffffff;
+        --hair: #ececea;
+        --gray-500: #6b7280;
+        --gray-600: #4b5563;
+        --gray-700: #374151;
+        --r-sm: 6px;
+        --r-md: 8px;
+        --r-lg: 12px;
+        --r-xl: 16px;
+        --r-2xl: 22px;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html {
+        -webkit-font-smoothing: antialiased;
+        scroll-behavior: smooth;
+      }
+      body {
+        font-family: "Jost", system-ui, sans-serif;
+        background: var(--titanium);
+        color: var(--ink);
+        display: flex;
+        justify-content: center;
+        padding: 24px 12px;
+      }
+
+      /* device frame (9:16-ish phone, IG/social friendly) */
+      .device {
+        width: 100%;
+        max-width: 402px;
+        background: var(--ink);
+        border-radius: 34px;
+        overflow: hidden;
+        box-shadow: 0 30px 80px -20px rgba(17, 17, 17, 0.55);
+        position: relative;
+      }
+
+      /* ===== HERO: full-bleed B&W doc photo ===== */
+      .hero {
+        position: relative;
+        height: 300px;
+        overflow: hidden;
+        background: #0c0c0c;
+      }
+      /* honest placeholder: duotone grain frame + drop slot — replace <img> with your B&W factory photo */
+      .hero .photo {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        filter: grayscale(1) contrast(1.08);
+      }
+      .hero .photofallback {
+        position: absolute;
+        inset: 0;
+        background:
+          radial-gradient(
+            120% 80% at 50% 120%,
+            rgba(123, 44, 191, 0.32),
+            transparent 60%
+          ),
+          repeating-linear-gradient(
+            0deg,
+            #1a1a1a,
+            #1a1a1a 2px,
+            #161616 2px,
+            #161616 4px
+          ),
+          #141414;
+      }
+      .hero .grain {
+        position: absolute;
+        inset: 0;
+        opacity: 0.5;
+        mix-blend-mode: overlay;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+      }
+      .hero .scrim {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          180deg,
+          rgba(0, 0, 0, 0.3) 0%,
+          rgba(0, 0, 0, 0) 32%,
+          rgba(0, 0, 0, 0.78) 100%
+        );
+      }
+      .hero .topbar {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 18px;
+        z-index: 3;
+      }
+      .brand {
+        font-family: "Urbanist";
+        font-weight: 900;
+        letter-spacing: -0.03em;
+        font-size: 17px;
+        color: #fff;
+      }
+      .brand b {
+        color: var(--orchid-2);
+      }
+      .pill-loc {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 11px;
+        color: #fff;
+        background: rgba(255, 255, 255, 0.14);
+        backdrop-filter: blur(8px);
+        padding: 6px 11px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+      }
+      .hero .copy {
+        position: absolute;
+        left: 18px;
+        right: 18px;
+        bottom: 18px;
+        z-index: 3;
+      }
+      .kicker {
+        font-family: ui-monospace, monospace;
+        font-size: 10px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--sky);
+      }
+      .hero h1 {
+        font-family: "Urbanist";
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        line-height: 0.94;
+        font-size: 31px;
+        color: #fff;
+        margin-top: 8px;
+        text-wrap: balance;
+      }
+      .hero p.sub {
+        font-size: 12.5px;
+        color: #d8d8d8;
+        margin-top: 7px;
+        font-weight: 400;
+      }
+
+      /* ===== GLASS SHEET body ===== */
+      .sheet {
+        position: relative;
+        margin-top: -22px;
+        background: var(--surface);
+        border-radius: 26px 26px 0 0;
+        padding: 20px 16px calc(96px);
+        min-height: 420px;
+        z-index: 4;
+      }
+      .sheet::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: 26px 26px 0 0;
+        box-shadow: 0 -1px 0 rgba(255, 255, 255, 0.6) inset;
+        pointer-events: none;
+      }
+
+      /* editorial hairline section label */
+      .label {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 4px 2px 14px;
+      }
+      .label .ln {
+        flex: 1;
+        height: 1px;
+        background: var(--hair);
+      }
+      .label span {
+        font-family: ui-monospace, monospace;
+        font-size: 10px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--gray-500);
+      }
+
+      /* glass feature (Apple Feature Block analogue) */
+      .glass {
+        position: relative;
+        border-radius: var(--r-xl);
+        padding: 15px;
+        overflow: hidden;
+        background: linear-gradient(
+          135deg,
+          rgba(60, 9, 108, 0.92),
+          rgba(123, 44, 191, 0.86)
+        );
+        color: #fff;
+        box-shadow: 0 14px 30px -12px rgba(60, 9, 108, 0.5);
+      }
+      .glass::after {
+        content: "";
+        position: absolute;
+        right: -30px;
+        top: -30px;
+        width: 140px;
+        height: 140px;
+        border-radius: 50%;
+        background: radial-gradient(
+          circle,
+          rgba(56, 189, 248, 0.45),
+          transparent 70%
+        );
+      }
+      .glass .tag {
+        font-family: ui-monospace, monospace;
+        font-size: 9px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: #cdb4ff;
+      }
+      .glass h3 {
+        font-family: "Urbanist";
+        font-weight: 800;
+        font-size: 18px;
+        margin-top: 7px;
+        letter-spacing: -0.01em;
+      }
+      .glass p {
+        font-size: 12.5px;
+        color: #e9ddff;
+        margin-top: 5px;
+        line-height: 1.45;
+      }
+      .glass .cta {
+        margin-top: 11px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #fff;
+        color: var(--indigo);
+        font-weight: 600;
+        font-size: 13px;
+        padding: 9px 16px;
+        border-radius: 999px;
+      }
+
+      /* glass job cards */
+      .jobs {
+        display: flex;
+        flex-direction: column;
+        gap: 11px;
+        margin-top: 6px;
+      }
+      .job {
+        position: relative;
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        padding: 13px;
+        border-radius: var(--r-lg);
+        background: rgba(255, 255, 255, 0.7);
+        border: 1px solid var(--hair);
+        backdrop-filter: blur(10px) saturate(140%);
+        -webkit-backdrop-filter: blur(10px) saturate(140%);
+        box-shadow: 0 6px 18px -12px rgba(17, 17, 17, 0.18);
+        transition:
+          transform 0.16s ease,
+          border-color 0.16s ease;
+      }
+      .job:hover {
+        transform: translateY(-2px);
+        border-color: rgba(123, 44, 191, 0.4);
+      }
+      .job .thumb {
+        width: 46px;
+        height: 46px;
+        border-radius: var(--r-md);
+        flex: none;
+        background: repeating-linear-gradient(
+          45deg,
+          #e9d8fd,
+          #e9d8fd 3px,
+          #fff 3px,
+          #fff 6px
+        );
+      }
+      .job .b {
+        flex: 1;
+        min-width: 0;
+      }
+      .job h3 {
+        font-family: "Urbanist";
+        font-weight: 700;
+        font-size: 14.5px;
+        letter-spacing: -0.01em;
+      }
+      .job .meta {
+        font-size: 11.5px;
+        color: var(--gray-600);
+        margin-top: 2px;
+      }
+      .job .pay {
+        font-family: "Urbanist";
+        font-weight: 800;
+        font-size: 14px;
+        color: var(--indigo);
+        margin-top: 5px;
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        margin-top: 6px;
+        font-size: 9.5px;
+        font-weight: 600;
+        color: var(--orchid);
+        background: rgba(123, 44, 191, 0.08);
+        border: 1px solid rgba(123, 44, 191, 0.3);
+        padding: 3px 7px;
+        border-radius: 999px;
+        letter-spacing: 0.02em;
+      }
+
+      /* worker onboarding nudge (persistent) */
+      .nudge {
+        margin-top: 16px;
+        border: 1px dashed rgba(123, 44, 191, 0.5);
+        border-radius: var(--r-md);
+        padding: 13px 14px;
+        background: rgba(123, 44, 191, 0.04);
+      }
+      .nudge b {
+        font-family: "Urbanist";
+        font-size: 13px;
+        color: var(--ink);
+      }
+      .nudge p {
+        font-size: 12px;
+        color: var(--gray-700);
+        margin-top: 3px;
+        line-height: 1.4;
+      }
+      .bar {
+        height: 6px;
+        border-radius: 999px;
+        background: var(--hair);
+        margin-top: 9px;
+        overflow: hidden;
+      }
+      .bar i {
+        display: block;
+        height: 100%;
+        width: 60%;
+        background: linear-gradient(90deg, var(--indigo), var(--orchid));
+      }
+
+      /* fixed gradient bottom CTA (the Stitch pattern you approved) */
+      .cta-bar {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        padding: 14px 16px calc(14px + env(safe-area-inset-bottom));
+        background: linear-gradient(
+          180deg,
+          rgba(243, 243, 241, 0),
+          var(--titanium) 38%
+        );
+        display: flex;
+        gap: 10px;
+        z-index: 6;
+      }
+      .cta-bar .primary {
+        flex: 1;
+        background: linear-gradient(135deg, var(--indigo), var(--orchid));
+        color: #fff;
+        font-family: "Urbanist";
+        font-weight: 800;
+        font-size: 15px;
+        border: none;
+        border-radius: 999px;
+        padding: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        box-shadow: 0 10px 24px -8px rgba(60, 9, 108, 0.55);
+      }
+      .cta-bar .ghost {
+        flex: none;
+        width: 52px;
+        background: var(--surface);
+        border: 1px solid var(--hair);
+        border-radius: 999px;
+        display: grid;
+        place-items: center;
+        color: var(--indigo);
+        font-size: 20px;
+      }
+
+      /* Khmer line */
+      .kh {
+        font-family: "Jost";
+        font-size: 11px;
+        color: var(--gray-500);
+        margin-top: 2px;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          animation: none !important;
+          transition: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="device" aria-label="SkillBridge student discover">
+      <!-- HERO: drop your B&W factory photo as <img class="photo"> here; fallback shown until then -->
+      <section class="hero">
+        <div class="photofallback"></div>
+        <!-- <img class="photo" src="YOUR_BW_FACTORY_PHOTO.jpg" alt="Factory worker operating a sewing machine"> -->
+        <div class="grain"></div>
+        <div class="scrim"></div>
+        <div class="topbar">
+          <div class="brand">Skill<b>Bridge</b></div>
+          <div class="pill-loc">📍 Phnom Penh</div>
+        </div>
+        <div class="copy">
+          <div class="kicker">Verified · near you</div>
+          <h1>Work close to home.</h1>
+          <p class="sub">
+            Real factory jobs, checked and verified — so you stay near your
+            family.
+          </p>
+          <div class="kh">ការងារនៅជិតផ្ទះ · ផ្ទៀងផ្ទាល់</div>
+        </div>
+      </section>
+
+      <!-- GLASS SHEET -->
+      <div class="sheet">
+        <div class="label">
+          <span>This week's verified employer</span>
+          <div class="ln"></div>
+        </div>
+        <article class="glass">
+          <div class="tag">Featured · Angkor Garment Co.</div>
+          <h3>Stable work, 4km from you</h3>
+          <p>
+            Free transport. Training provided. Stay in your district with your
+            family.
+          </p>
+          <a class="cta" href="#">View position →</a>
+        </article>
+
+        <div class="label" style="margin-top: 20px">
+          <span>Jobs matched to you</span>
+          <div class="ln"></div>
+        </div>
+        <section class="jobs" aria-label="Job matches">
+          <a class="job" href="#">
+            <div class="thumb"></div>
+            <div class="b">
+              <h3>Machine Operator</h3>
+              <div class="meta">Phnom Penh · 3.2 km · Full-time</div>
+              <div class="pay">$220–$260 / month</div>
+              <span class="badge">✔ Verified employer</span>
+            </div>
+          </a>
+          <a class="job" href="#">
+            <div class="thumb"></div>
+            <div class="b">
+              <h3>Quality Inspector</h3>
+              <div class="meta">Takmao · 6 km · Training provided</div>
+              <div class="pay">$240–$300 / month</div>
+              <span class="badge">✔ Verified employer</span>
+            </div>
+          </a>
+          <a class="job" href="#">
+            <div class="thumb"></div>
+            <div class="b">
+              <h3>Warehouse Packer</h3>
+              <div class="meta">Phnom Penh · 1.8 km · No experience</div>
+              <div class="pay">$200–$230 / month</div>
+              <span class="badge">✔ Verified employer</span>
+            </div>
+          </a>
+        </section>
+
+        <div class="nudge">
+          <b>Your profile is 60% complete</b>
+          <p>Add one skill to unlock 3× more matched jobs near you.</p>
+          <div class="bar"><i></i></div>
+        </div>
+      </div>
+
+      <!-- FIXED GRADIENT BOTTOM CTA -->
+      <div class="cta-bar">
+        <button class="primary">Apply to matched jobs</button>
+        <button class="ghost" aria-label="Filter">⚙</button>
+      </div>
+    </main>
+  </body>
+</html>

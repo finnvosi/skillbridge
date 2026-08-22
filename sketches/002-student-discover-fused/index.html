@@ -1,0 +1,570 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SkillBridge — Discover (Student) · Fused Concept</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;600;700;800;900&family=Jost:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --indigo: #3c096c;
+        --orchid: #7b2cbf;
+        --sky: #38bdf8;
+        --titanium: #f3f3f1;
+        --ink: #111111;
+        --surface: #ffffff;
+        --hair: #ececea;
+        --gray-500: #6b7280;
+        --gray-600: #4b5563;
+        --gray-700: #374151;
+        --radius-sm: 6px;
+        --radius-md: 8px;
+        --radius-lg: 12px;
+        --radius-xl: 16px;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html {
+        -webkit-font-smoothing: antialiased;
+      }
+      body {
+        font-family: "Jost", system-ui, sans-serif;
+        background: var(--titanium);
+        color: var(--ink);
+        display: flex;
+        justify-content: center;
+        padding: 24px 12px;
+      }
+      .device {
+        width: 100%;
+        max-width: 420px;
+        background: var(--surface);
+        border: 1px solid var(--hair);
+        border-radius: var(--radius-xl);
+        overflow: hidden;
+        box-shadow:
+          0 18px 40px -12px rgba(17, 17, 17, 0.14),
+          0 6px 16px -6px rgba(60, 9, 108, 0.08);
+      }
+      /* ---- top bar ---- */
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 18px;
+        border-bottom: 1px solid var(--hair);
+      }
+      .brand {
+        font-family: "Urbanist";
+        font-weight: 900;
+        letter-spacing: -0.03em;
+        font-size: 18px;
+      }
+      .brand span {
+        color: var(--orchid);
+      }
+      .loc {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 12px;
+        color: var(--gray-600);
+      }
+      .avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 999px;
+        background: var(--indigo);
+        color: #fff;
+        display: grid;
+        place-items: center;
+        font-family: "Urbanist";
+        font-weight: 700;
+        font-size: 13px;
+      }
+      /* ---- hero ---- */
+      .hero {
+        padding: 22px 18px 18px;
+        border-bottom: 1px solid var(--hair);
+      }
+      .kicker {
+        font-family: ui-monospace, monospace;
+        font-size: 10px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--orchid);
+      }
+      h1 {
+        font-family: "Urbanist";
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        line-height: 0.95;
+        font-size: 34px;
+        margin-top: 10px;
+      }
+      .kh {
+        font-size: 13px;
+        color: var(--gray-500);
+        margin-top: 6px;
+        font-weight: 500;
+      }
+      .reveal span {
+        display: inline-block;
+        opacity: 0;
+        transform: translateY(14px);
+      }
+      .stats {
+        display: flex;
+        gap: 10px;
+        margin-top: 18px;
+      }
+      .stat {
+        flex: 1;
+        border: 1px solid var(--hair);
+        border-radius: var(--radius-md);
+        padding: 10px 12px;
+        background: var(--titanium);
+      }
+      .stat b {
+        font-family: "Urbanist";
+        font-weight: 800;
+        font-size: 20px;
+        display: block;
+        font-variant-numeric: tabular-nums;
+      }
+      .stat small {
+        font-size: 10.5px;
+        color: var(--gray-600);
+        line-height: 1.2;
+        display: block;
+        margin-top: 2px;
+      }
+      /* ---- filter tabs (expandable) ---- */
+      .filters {
+        padding: 14px 18px 6px;
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .tab {
+        font-family: "Jost";
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--gray-700);
+        border: 1px solid var(--hair);
+        background: var(--surface);
+        padding: 9px 14px;
+        border-radius: 999px;
+        cursor: pointer;
+        transition: all 0.18s ease;
+        min-height: 40px;
+      }
+      .tab:hover {
+        border-color: var(--orchid);
+        color: var(--orchid);
+      }
+      .tab[aria-pressed="true"] {
+        background: var(--indigo);
+        color: #fff;
+        border-color: var(--indigo);
+      }
+      .tab:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(123, 44, 191, 0.45);
+      }
+      .subfilter {
+        width: 100%;
+        padding: 0 18px;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.25s ease;
+      }
+      .subfilter.open {
+        max-height: 60px;
+        padding: 8px 18px 4px;
+      }
+      .subfilter select {
+        width: 100%;
+        font-family: "Jost";
+        font-size: 13px;
+        padding: 9px 10px;
+        border: 1px solid var(--hair);
+        border-radius: var(--radius-sm);
+        background: var(--surface);
+        min-height: 40px;
+      }
+      /* ---- job list ---- */
+      .list {
+        padding: 8px 14px 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .job {
+        border: 1px solid var(--hair);
+        border-radius: var(--radius-lg);
+        padding: 14px;
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+        background: var(--surface);
+        transition:
+          transform 0.18s ease,
+          box-shadow 0.18s ease;
+        cursor: pointer;
+      }
+      .job:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px -8px rgba(17, 17, 17, 0.12);
+      }
+      .job:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(123, 44, 191, 0.45);
+      }
+      .thumb {
+        width: 48px;
+        height: 48px;
+        border-radius: var(--radius-md);
+        background: repeating-linear-gradient(
+          45deg,
+          #e9d8fd,
+          #e9d8fd 4px,
+          #fff 4px,
+          #fff 8px
+        );
+        flex: none;
+      }
+      .job .body {
+        flex: 1;
+        min-width: 0;
+      }
+      .job h3 {
+        font-family: "Urbanist";
+        font-weight: 700;
+        font-size: 15px;
+        letter-spacing: -0.01em;
+      }
+      .job .meta {
+        font-size: 12px;
+        color: var(--gray-600);
+        margin-top: 3px;
+      }
+      .job .pay {
+        font-family: "Urbanist";
+        font-weight: 800;
+        font-size: 15px;
+        color: var(--indigo);
+        margin-top: 6px;
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 10px;
+        font-weight: 600;
+        color: var(--orchid);
+        border: 1px solid rgba(123, 44, 191, 0.35);
+        background: rgba(123, 44, 191, 0.06);
+        padding: 3px 7px;
+        border-radius: 999px;
+        margin-top: 7px;
+        letter-spacing: 0.02em;
+      }
+      /* feature block (Apple Feature Block analog) */
+      .feature {
+        margin: 4px 14px 14px;
+        border: 1px solid var(--indigo);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        background: var(--ink);
+        color: #fff;
+      }
+      .feature .img {
+        height: 96px;
+        background: repeating-linear-gradient(
+          135deg,
+          #2d2d2d,
+          #2d2d2d 6px,
+          #1f1f1f 6px,
+          #1f1f1f 12px
+        );
+      }
+      .feature .pad {
+        padding: 14px;
+      }
+      .feature .tag {
+        font-family: ui-monospace, monospace;
+        font-size: 9px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--sky);
+      }
+      .feature h3 {
+        font-family: "Urbanist";
+        font-weight: 800;
+        font-size: 17px;
+        margin-top: 6px;
+      }
+      .feature p {
+        font-size: 12.5px;
+        color: #cfcfcf;
+        margin-top: 5px;
+        line-height: 1.45;
+      }
+      .feature .cta {
+        margin-top: 10px;
+        display: inline-block;
+        background: #fff;
+        color: var(--ink);
+        font-weight: 600;
+        font-size: 13px;
+        padding: 9px 16px;
+        border-radius: 999px;
+      }
+      /* profile nudge */
+      .nudge {
+        margin: 0 14px 16px;
+        border: 1px dashed var(--orchid);
+        border-radius: var(--radius-md);
+        padding: 12px 14px;
+        background: rgba(123, 44, 191, 0.04);
+      }
+      .nudge b {
+        font-family: "Urbanist";
+        font-size: 13px;
+      }
+      .nudge p {
+        font-size: 12px;
+        color: var(--gray-700);
+        margin-top: 3px;
+      }
+      .bar {
+        height: 6px;
+        border-radius: 999px;
+        background: var(--hair);
+        margin-top: 8px;
+        overflow: hidden;
+      }
+      .bar i {
+        display: block;
+        height: 100%;
+        width: 60%;
+        background: var(--orchid);
+      }
+      /* empty state */
+      .empty {
+        padding: 30px 18px;
+        text-align: center;
+        color: var(--gray-500);
+        font-size: 13px;
+      }
+      .empty b {
+        font-family: "Urbanist";
+        color: var(--ink);
+        display: block;
+        font-size: 15px;
+        margin-bottom: 4px;
+      }
+      .foot {
+        padding: 14px 18px;
+        border-top: 1px solid var(--hair);
+        font-size: 11px;
+        color: var(--gray-500);
+        text-align: center;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          animation: none !important;
+          transition: none !important;
+        }
+        .reveal span {
+          opacity: 1 !important;
+          transform: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="device" aria-label="SkillBridge student discover">
+      <!-- top bar -->
+      <header class="topbar">
+        <div class="brand">Skill<span>Bridge</span></div>
+        <div class="loc" aria-label="Location">
+          <svg
+            width="12"
+            height="12"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0118 0z" />
+            <circle cx="12" cy="10" r="3" />
+          </svg>
+          Phnom Penh
+        </div>
+        <div class="avatar" aria-hidden="true">S</div>
+      </header>
+
+      <!-- hero -->
+      <section class="hero">
+        <div class="kicker">Verified · near you</div>
+        <h1 class="reveal" id="headline">
+          <span>Jobs</span> <span>near</span> <span>you</span> <span>—</span>
+          <span>verified.</span>
+        </h1>
+        <div class="kh">ការងារនៅជិតអ្នក · ផ្ទៀងផ្ទាល់</div>
+        <div class="stats">
+          <div class="stat">
+            <b data-count="1240">0</b><small>verified jobs</small>
+          </div>
+          <div class="stat">
+            <b data-count="310">0</b><small>factories</small>
+          </div>
+          <div class="stat">
+            <b data-count="94" data-suffix="%">0</b><small>hired locally</small>
+          </div>
+        </div>
+      </section>
+
+      <!-- expandable filter tabs -->
+      <div class="filters" role="group" aria-label="Filters">
+        <button class="tab" aria-pressed="true" data-tab>All</button>
+        <button class="tab" aria-pressed="false" data-tab>Factory</button>
+        <button class="tab" aria-pressed="false" data-tab>With training</button>
+        <button class="tab" aria-pressed="false" data-tab id="distTab">
+          Walking distance
+        </button>
+      </div>
+      <div class="subfilter" id="sub">
+        <select aria-label="Skill level">
+          <option>No experience needed</option>
+          <option>Some experience</option>
+          <option>Skilled</option>
+        </select>
+      </div>
+
+      <!-- feature block -->
+      <article class="feature">
+        <div class="img" aria-hidden="true"></div>
+        <div class="pad">
+          <div class="tag">Verified employer · this week</div>
+          <h3>Angkor Garment Co.</h3>
+          <p>
+            Stable factory work, 4km from your district. Free transport. Stay
+            near your family.
+          </p>
+          <a class="cta" href="#" role="button">View position</a>
+        </div>
+      </article>
+
+      <!-- job list -->
+      <section class="list" aria-label="Job matches">
+        <a class="job" href="#" tabindex="0">
+          <div class="thumb" aria-hidden="true"></div>
+          <div class="body">
+            <h3>Machine Operator</h3>
+            <div class="meta">Phnom Penh · 3.2 km · Full-time</div>
+            <div class="pay">$220–$260 / month</div>
+            <span class="badge">✔ Verified employer</span>
+          </div>
+        </a>
+        <a class="job" href="#" tabindex="0">
+          <div class="thumb" aria-hidden="true"></div>
+          <div class="body">
+            <h3>Quality Inspector</h3>
+            <div class="meta">Takmao · 6 km · Training provided</div>
+            <div class="pay">$240–$300 / month</div>
+            <span class="badge">✔ Verified employer</span>
+          </div>
+        </a>
+        <a class="job" href="#" tabindex="0">
+          <div class="thumb" aria-hidden="true"></div>
+          <div class="body">
+            <h3>Warehouse Packer</h3>
+            <div class="meta">Phnom Penh · 1.8 km · No experience</div>
+            <div class="pay">$200–$230 / month</div>
+            <span class="badge">✔ Verified employer</span>
+          </div>
+        </a>
+      </section>
+
+      <!-- profile nudge (worker onboarding) -->
+      <div class="nudge">
+        <b>Your profile is 60% complete</b>
+        <p>Add one skill to unlock 3× more matched jobs near you.</p>
+        <div class="bar" aria-hidden="true"><i></i></div>
+      </div>
+
+      <!-- empty-state example (kept for reference, hidden by default) -->
+      <div class="empty" hidden>
+        <b>No jobs match yet</b>
+        Try a wider filter — or finish your profile to see trained roles.
+      </div>
+
+      <footer class="foot">
+        នៅជាមួយគ្រួសារ · Stay near your family · SkillBridge Cambodia
+      </footer>
+    </main>
+
+    <script>
+      // text reveal
+      const spans = [...document.querySelectorAll("#headline span")];
+      if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        spans.forEach((s, i) =>
+          setTimeout(
+            () => {
+              s.style.transition = "opacity .5s ease, transform .5s ease";
+              s.style.opacity = 1;
+              s.style.transform = "none";
+            },
+            120 * i + 120,
+          ),
+        );
+      } else {
+        spans.forEach((s) => {
+          s.style.opacity = 1;
+          s.style.transform = "none";
+        });
+      }
+
+      // count-up
+      document.querySelectorAll("[data-count]").forEach((el) => {
+        const target = +el.dataset.count,
+          suf = el.dataset.suffix || "";
+        if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
+          el.textContent = target.toLocaleString() + suf;
+          return;
+        }
+        let n = 0;
+        const step = Math.max(1, Math.round(target / 40));
+        const t = setInterval(() => {
+          n += step;
+          if (n >= target) {
+            n = target;
+            clearInterval(t);
+          }
+          el.textContent = n.toLocaleString() + suf;
+        }, 28);
+      });
+
+      // expandable tab + subfilter
+      const tabs = [...document.querySelectorAll("[data-tab]")];
+      const sub = document.getElementById("sub");
+      tabs.forEach((btn) =>
+        btn.addEventListener("click", () => {
+          tabs.forEach((b) => b.setAttribute("aria-pressed", b === btn));
+          sub.classList.toggle("open", btn.id === "distTab");
+        }),
+      );
+    </script>
+  </body>
+</html>

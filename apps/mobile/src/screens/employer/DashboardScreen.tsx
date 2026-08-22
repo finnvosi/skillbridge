@@ -16,6 +16,7 @@ import { API_ENDPOINTS } from '../../config';
 import { useAuthStore } from '../../store/auth';
 import { colors, spacing, typography, radius } from '../../theme';
 
+import { AppText } from './../../components/ui';
 type RootStackParamList = {
   Login: undefined;
   Register: undefined;
@@ -100,8 +101,8 @@ export default function EmployerDashboardScreen({ navigation }: Props) {
     >
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.greeting}>Dashboard</Text>
-        <Text style={styles.subtitle}>Welcome back, {user?.name?.split(' ')[0] || 'employer'}</Text>
+        <AppText style={styles.greeting}>Dashboard</AppText>
+        <AppText style={styles.subtitle}>Welcome back, {user?.name?.split(' ')[0] || 'employer'}</AppText>
       </View>
 
       {/* Stats row */}
@@ -120,7 +121,7 @@ export default function EmployerDashboardScreen({ navigation }: Props) {
       {/* Hiring funnel */}
       {analytics && (
         <Card style={styles.card}>
-          <Text style={styles.sectionTitle}>Hiring funnel</Text>
+          <AppText style={styles.sectionTitle}>Hiring funnel</AppText>
           <View style={styles.funnel}>
             {FUNNEL_STEPS.map((step, i) => {
               const val = analytics.funnel?.[step.key] ?? 0;
@@ -129,8 +130,8 @@ export default function EmployerDashboardScreen({ navigation }: Props) {
               return (
                 <View key={step.label} style={styles.funnelStep}>
                   <View style={styles.funnelLabelRow}>
-                    <Text style={styles.funnelLabel}>{step.label}</Text>
-                    <Text style={styles.funnelValue}>{val}</Text>
+                    <AppText style={styles.funnelLabel}>{step.label}</AppText>
+                    <AppText style={styles.funnelValue}>{val}</AppText>
                   </View>
                   <View style={[styles.funnelBar, { backgroundColor: '#E5E7EB' }]}>
                     <View
@@ -155,8 +156,8 @@ export default function EmployerDashboardScreen({ navigation }: Props) {
           </View>
           {analytics.acceptanceRate !== undefined && (
             <View style={styles.acceptanceRow}>
-              <Text style={styles.acceptanceLabel}>Acceptance rate</Text>
-              <Text style={styles.acceptanceValue}>{analytics.acceptanceRate}%</Text>
+              <AppText style={styles.acceptanceLabel}>Acceptance rate</AppText>
+              <AppText style={styles.acceptanceValue}>{analytics.acceptanceRate}%</AppText>
             </View>
           )}
         </Card>
@@ -165,7 +166,7 @@ export default function EmployerDashboardScreen({ navigation }: Props) {
       {/* Candidates needing review */}
       <Card style={styles.card}>
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Needs your review</Text>
+          <AppText style={styles.sectionTitle}>Needs your review</AppText>
           <Button
             variant="secondary"
             size="sm"
@@ -176,7 +177,7 @@ export default function EmployerDashboardScreen({ navigation }: Props) {
         </View>
 
         {pendingCount === 0 ? (
-          <Text style={styles.empty}>No pending applications. 🎉</Text>
+          <AppText style={styles.empty}>No pending applications. 🎉</AppText>
         ) : (
           <View style={styles.candidates}>
             {applications
@@ -185,22 +186,22 @@ export default function EmployerDashboardScreen({ navigation }: Props) {
               .map((app) => (
                 <View key={app.id} style={styles.candidateRow}>
                   <View style={styles.candidateAvatar}>
-                    <Text style={styles.candidateInitials}>
+                    <AppText style={styles.candidateInitials}>
                       {(app.student?.user?.name || 'CA')
                         .split(' ')
                         .map((n: string) => n[0])
                         .join('')
                         .slice(0, 2)
                         .toUpperCase()}
-                    </Text>
+                    </AppText>
                   </View>
                   <View style={styles.candidateInfo}>
-                    <Text style={styles.candidateName}>
+                    <AppText style={styles.candidateName}>
                       {app.student?.user?.name || 'Unnamed candidate'}
-                    </Text>
-                    <Text style={styles.candidateSub}>
+                    </AppText>
+                    <AppText style={styles.candidateSub}>
                       {app.project?.title || 'Unknown project'} · {app.status}
-                    </Text>
+                    </AppText>
                   </View>
                   <Badge
                     label={app.status}
@@ -251,11 +252,11 @@ function StatCard({
 }) {
   return (
     <Card style={[styles.statCard, { backgroundColor: bgColor ?? colors.surfaceSecondary }]}>
-      <Text style={styles.statValue}>
+      <AppText style={styles.statValue}>
         {value}
         {suffix}
-      </Text>
-      <Text style={styles.statLabel}>{label}</Text>
+      </AppText>
+      <AppText style={styles.statLabel}>{label}</AppText>
     </Card>
   );
 }

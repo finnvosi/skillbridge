@@ -144,19 +144,61 @@ router.patch(
       return res.status(400).json({ error: 'A rejection reason is required' });
     }
 
-    const existing = await prisma.certificate.findUnique({ where: { id: req.params.id } });
+    const existing = await prisma.certificate.findUnique({
+      where: { id: req.params.id },
+      include: { student: { select: { userId: true } } },
+    });
     if (!existing) return res.status(404).json({ error: 'Certificate not found' });
 
-    const certificate = await prisma.certificate.update({
-      where: { id: existing.id },
-      data: {
-        verificationStatus: status as any,
-        verified: status === 'verified',
-        verifiedAt: status === 'verified' ? new Date() : null,
-        verifiedBy: req.user!.id,
-        verificationNote: verificationNote?.trim() || null,
-        rejectionReason: status === 'rejected' ? rejectionReason!.trim() : null,
-      },
+    const previousStatus = existing.verificationStatus;
+
+    const certificate = await prisma.$transaction(async (tx) => {
+      const updated = await tx.certificate.update({
+        where: { id: existing.id },
+        data: {
+          verificationStatus: status as any,
+          verified: status === 'verified',
+          verifiedAt: status === 'verified' ? new Date() : null,
+          verifiedBy: req.user!.id,
+          verificationNote: verificationNote?.trim() || null,
+          rejectionReason: status === 'rejected' ? rejectionReason!.trim() : null,
+        },
+      });
+
+      // Immutable audit row. `internalNote` is admin-only and must never be
+      // surfaced to the student; `candidateReason` is the public rejection note.
+      await tx.certificateVerificationHistory.create({
+        data: {
+          certificateId: updated.id,
+          actorId: req.user!.id,
+          previousStatus,
+          newStatus: status as any,
+          candidateReason:
+            status === 'rejected' ? rejectionReason!.trim() : null,
+          internalNote: verificationNote?.trim() || null,
+        },
+      });
+
+      // Notify the student. Copy is candidate-safe: only the decision and, on
+      // rejection, the candidate-facing reason. No internal verificationNote.
+      await tx.notification.create({
+        data: {
+          userId: existing.student.userId,
+          type: status === 'verified' ? 'certificate_verified' : 'certificate_rejected',
+          title:
+            status === 'verified'
+              ? 'Certificate verified'
+              : 'Certificate rejected',
+          body:
+            status === 'verified'
+              ? `Your certificate "${existing.title}" has been verified.`
+              : `Your certificate "${existing.title}" was rejected${
+                  rejectionReason ? `: ${rejectionReason.trim()}` : ''
+                }.`,
+        },
+      });
+
+      return updated;
     });
 
     res.json({

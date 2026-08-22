@@ -1,0 +1,516 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SkillBridge — Student Dashboard · Reverse Hiring</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;600;700;800;900&family=Jost:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --indigo: #3c096c;
+        --orchid: #7b2cbf;
+        --orchid-2: #9d4edd;
+        --sky: #38bdf8;
+        --titanium: #f3f3f1;
+        --ink: #111111;
+        --surface: #ffffff;
+        --hair: #ececea;
+        --gray-500: #6b7280;
+        --gray-600: #4b5563;
+        --gray-700: #374151;
+        --r-sm: 6px;
+        --r-md: 8px;
+        --r-lg: 12px;
+        --r-xl: 16px;
+        --r-2xl: 22px;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html {
+        -webkit-font-smoothing: antialiased;
+      }
+      body {
+        font-family: "Jost", system-ui, sans-serif;
+        background: var(--titanium);
+        color: var(--ink);
+        display: flex;
+        justify-content: center;
+        padding: 24px 12px;
+      }
+
+      .device {
+        width: 100%;
+        max-width: 402px;
+        background: var(--surface);
+        border-radius: 34px;
+        overflow: hidden;
+        box-shadow: 0 30px 80px -20px rgba(17, 17, 17, 0.45);
+        position: relative;
+        min-height: 760px;
+      }
+
+      /* === top bar with correct logo tile === */
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 18px 18px 14px;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .logo-tile {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, var(--indigo), var(--orchid));
+        display: grid;
+        place-items: center;
+        flex: none;
+      }
+      .logo-tile img {
+        width: 20px;
+        height: 20px;
+        filter: brightness(0) invert(1);
+      }
+      .brand b {
+        font-family: "Urbanist";
+        font-weight: 900;
+        letter-spacing: -0.03em;
+        font-size: 16px;
+      }
+      .brand b em {
+        font-style: normal;
+        color: var(--orchid);
+      }
+      .avatar {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        background: var(--indigo);
+        color: #fff;
+        display: grid;
+        place-items: center;
+        font-family: "Urbanist";
+        font-weight: 700;
+        font-size: 13px;
+      }
+
+      /* === hero: reverse-hiring status, not a job feed === */
+      .hero {
+        margin: 0 14px 4px;
+        border-radius: var(--r-2xl);
+        padding: 20px 18px;
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(
+          135deg,
+          var(--indigo) 0%,
+          var(--orchid) 100%
+        );
+        color: #fff;
+      }
+      .hero::after {
+        content: "";
+        position: absolute;
+        right: -40px;
+        top: -40px;
+        width: 170px;
+        height: 170px;
+        border-radius: 50%;
+        background: radial-gradient(
+          circle,
+          rgba(56, 189, 248, 0.45),
+          transparent 70%
+        );
+      }
+      .hero .kick {
+        font-family: ui-monospace, monospace;
+        font-size: 10px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: #cdb4ff;
+      }
+      .hero h1 {
+        font-family: "Urbanist";
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        font-size: 23px;
+        line-height: 1.05;
+        margin-top: 7px;
+      }
+      .hero h1 .big {
+        display: block;
+        font-size: 30px;
+        color: #fff;
+      }
+      .hero p {
+        font-size: 12.5px;
+        color: #eadcff;
+        margin-top: 7px;
+        line-height: 1.45;
+      }
+      /* employer interest chips */
+      .interest {
+        display: flex;
+        gap: 7px;
+        margin-top: 14px;
+        flex-wrap: wrap;
+        position: relative;
+        z-index: 2;
+      }
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(255, 255, 255, 0.16);
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        border-radius: 999px;
+        padding: 6px 11px;
+        font-size: 11.5px;
+        font-weight: 500;
+      }
+      .chip .dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--sky);
+      }
+
+      /* === progress section === */
+      .section {
+        padding: 18px 16px 6px;
+      }
+      .label {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 12px;
+      }
+      .label .ln {
+        flex: 1;
+        height: 1px;
+        background: var(--hair);
+      }
+      .label span {
+        font-family: ui-monospace, monospace;
+        font-size: 10px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--gray-500);
+      }
+
+      /* progress card (build profile) */
+      .prog {
+        background: var(--surface);
+        border: 1px solid var(--hair);
+        border-radius: var(--r-xl);
+        padding: 15px;
+        box-shadow: 0 6px 18px -12px rgba(17, 17, 17, 0.18);
+      }
+      .prog .row {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+      }
+      .prog .row b {
+        font-family: "Urbanist";
+        font-weight: 800;
+        font-size: 14px;
+      }
+      .prog .row small {
+        font-size: 11px;
+        color: var(--orchid);
+        font-weight: 600;
+      }
+      .bar {
+        height: 8px;
+        border-radius: 999px;
+        background: var(--titanium);
+        margin-top: 11px;
+        overflow: hidden;
+      }
+      .bar i {
+        display: block;
+        height: 100%;
+        width: 62%;
+        background: linear-gradient(90deg, var(--indigo), var(--orchid));
+        border-radius: 999px;
+      }
+      .prog .hint {
+        font-size: 11.5px;
+        color: var(--gray-600);
+        margin-top: 9px;
+      }
+
+      /* skills to learn — glass list */
+      .skills {
+        display: flex;
+        flex-direction: column;
+        gap: 9px;
+      }
+      .skill {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 13px;
+        border-radius: var(--r-lg);
+        background: rgba(255, 255, 255, 0.7);
+        border: 1px solid var(--hair);
+        backdrop-filter: blur(10px) saturate(140%);
+        -webkit-backdrop-filter: blur(10px) saturate(140%);
+        transition:
+          transform 0.16s ease,
+          border-color 0.16s ease;
+      }
+      .skill:hover {
+        transform: translateY(-2px);
+        border-color: rgba(123, 44, 191, 0.4);
+      }
+      .skill .ic {
+        width: 38px;
+        height: 38px;
+        border-radius: 11px;
+        background: rgba(123, 44, 191, 0.1);
+        color: var(--orchid);
+        display: grid;
+        place-items: center;
+        font-size: 17px;
+        flex: none;
+      }
+      .skill .b {
+        flex: 1;
+        min-width: 0;
+      }
+      .skill .b b {
+        font-family: "Urbanist";
+        font-weight: 700;
+        font-size: 13.5px;
+      }
+      .skill .b small {
+        display: block;
+        font-size: 11px;
+        color: var(--gray-600);
+        margin-top: 1px;
+      }
+      .skill .go {
+        font-family: "Urbanist";
+        font-weight: 800;
+        font-size: 12px;
+        color: var(--orchid);
+        white-space: nowrap;
+      }
+
+      /* reverse-hiring: who's watching */
+      .watch {
+        display: flex;
+        gap: 9px;
+        overflow-x: auto;
+        padding-bottom: 4px;
+      }
+      .watch .emp {
+        flex: none;
+        width: 120px;
+        border-radius: var(--r-lg);
+        border: 1px solid var(--hair);
+        padding: 12px;
+        background: var(--surface);
+      }
+      .watch .emp .lg {
+        width: 30px;
+        height: 30px;
+        border-radius: 8px;
+        background: var(--titanium);
+        display: grid;
+        place-items: center;
+        font-family: "Urbanist";
+        font-weight: 900;
+        font-size: 13px;
+        color: var(--indigo);
+      }
+      .watch .emp b {
+        display: block;
+        font-family: "Urbanist";
+        font-weight: 700;
+        font-size: 12.5px;
+        margin-top: 8px;
+      }
+      .watch .emp small {
+        font-size: 10.5px;
+        color: var(--gray-500);
+      }
+
+      /* fixed gradient CTA */
+      .cta-bar {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        padding: 14px 16px calc(14px + env(safe-area-inset-bottom));
+        background: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0),
+          var(--surface) 40%
+        );
+        display: flex;
+        gap: 10px;
+      }
+      .cta-bar .primary {
+        flex: 1;
+        background: linear-gradient(135deg, var(--indigo), var(--orchid));
+        color: #fff;
+        font-family: "Urbanist";
+        font-weight: 800;
+        font-size: 14.5px;
+        border: none;
+        border-radius: 999px;
+        padding: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        box-shadow: 0 10px 24px -8px rgba(60, 9, 108, 0.5);
+      }
+      .cta-bar .ghost {
+        flex: none;
+        width: 50px;
+        background: var(--surface);
+        border: 1px solid var(--hair);
+        border-radius: 999px;
+        display: grid;
+        place-items: center;
+        color: var(--indigo);
+        font-size: 19px;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          animation: none !important;
+          transition: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="device" aria-label="SkillBridge student dashboard">
+      <!-- TOP BAR: correct logo tile -->
+      <header class="topbar">
+        <div class="brand">
+          <div class="logo-tile">
+            <img src="skillbridge-logo.svg" alt="SkillBridge logo" />
+          </div>
+          <b>Skill<em>Bridge</em></b>
+        </div>
+        <div class="avatar" aria-label="Profile">SA</div>
+      </header>
+
+      <!-- HERO: reverse-hiring status -->
+      <section class="hero">
+        <div class="kick">Your reverse-hiring status</div>
+        <h1>
+          3 employers are interested<span class="big">before you apply.</span>
+        </h1>
+        <p>
+          Build your profile and they come to you. Here's where you stand this
+          week.
+        </p>
+        <div class="interest">
+          <span class="chip"
+            ><span class="dot"></span> 3 viewing your profile</span
+          >
+          <span class="chip"><span class="dot"></span> 1 shortlist invite</span>
+        </div>
+      </section>
+
+      <!-- PROGRESS: build profile -->
+      <section class="section">
+        <div class="label">
+          <span>Profile strength</span>
+          <div class="ln"></div>
+        </div>
+        <div class="prog">
+          <div class="row">
+            <b>Make your profile stronger</b><small>+38% to go</small>
+          </div>
+          <div class="bar"><i></i></div>
+          <div class="hint">
+            Add your portfolio link and one project — employers rank this
+            highest.
+          </div>
+        </div>
+      </section>
+
+      <!-- SKILLS TO LEARN -->
+      <section class="section">
+        <div class="label">
+          <span>Skills to learn next</span>
+          <div class="ln"></div>
+        </div>
+        <div class="skills">
+          <a class="skill" href="#">
+            <div class="ic">⚡</div>
+            <div class="b">
+              <b>Data Analysis (Excel + SQL)</b
+              ><small>Matches 12 open roles near you</small>
+            </div>
+            <div class="go">Start →</div>
+          </a>
+          <a class="skill" href="#">
+            <div class="ic">🎯</div>
+            <div class="b">
+              <b>Public Speaking</b
+              ><small>Shortlisted employers ask for this</small>
+            </div>
+            <div class="go">Start →</div>
+          </a>
+          <a class="skill" href="#">
+            <div class="ic">🛠️</div>
+            <div class="b">
+              <b>UI Design Basics</b
+              ><small>Closes your gap for design internships</small>
+            </div>
+            <div class="go">Start →</div>
+          </a>
+        </div>
+      </section>
+
+      <!-- WHO'S WATCHING (reverse hiring) -->
+      <section class="section">
+        <div class="label">
+          <span>Employers viewing you</span>
+          <div class="ln"></div>
+        </div>
+        <div class="watch">
+          <div class="emp">
+            <div class="lg">A</div>
+            <b>Amplify Co.</b><small>Marketing · 2 views</small>
+          </div>
+          <div class="emp">
+            <div class="lg">N</div>
+            <b>Nova Labs</b><small>Design · shortlisted</small>
+          </div>
+          <div class="emp">
+            <div class="lg">K</div>
+            <b>Kiri Group</b><small>Analyst · 1 view</small>
+          </div>
+        </div>
+      </section>
+
+      <!-- FIXED GRADIENT CTA -->
+      <div class="cta-bar">
+        <button class="primary">Complete my profile</button>
+        <button class="ghost" aria-label="Settings">⚙</button>
+      </div>
+    </main>
+  </body>
+</html>

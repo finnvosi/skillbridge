@@ -373,3 +373,116 @@ export async function completeOnboarding(
     onboardingCompleted: Boolean(data.user.onboardingCompletedAt),
   };
 }
+
+// ---- Career Passport sharing -------------------------------------------------
+
+export interface PassportShare {
+  id: string;
+  token: string;
+  expiresAt: string;
+  revokedAt: string | null;
+  url: string;
+}
+
+export async function createPassportShare(
+  expiresInHours = 24,
+  token?: string | null,
+): Promise<PassportShare> {
+  const data = await apiRequest<{ share: PassportShare }>(
+    API_ENDPOINTS.worker.passportShares,
+    {
+      method: 'POST',
+      body: { expiresInHours },
+      ...(token ? { token } : {}),
+    },
+  );
+  return data.share;
+}
+
+export async function listPassportShares(
+  token?: string | null,
+): Promise<PassportShare[]> {
+  const data = await apiRequest<{ shares: PassportShare[] }>(
+    API_ENDPOINTS.worker.passportShares,
+    token ? { method: 'GET', token } : { method: 'GET' },
+  );
+  return data.shares ?? [];
+}
+
+export async function revokePassportShare(
+  id: string,
+  token?: string | null,
+): Promise<void> {
+  await apiRequest(API_ENDPOINTS.worker.passportShare(id), {
+    method: 'DELETE',
+    ...(token ? { token } : {}),
+  });
+}
+
+// ---- Safety reports & blocks -------------------------------------------------
+
+export interface WorkerReport {
+  id: string;
+  category: string;
+  description: string;
+  status: 'submitted' | 'under_review' | 'resolved';
+  adminNote: string | null;
+  createdAt: string;
+  resolvedAt: string | null;
+}
+
+export async function submitReport(
+  body: { category: string; description: string; evidence?: string },
+  token?: string | null,
+): Promise<{ id: string; status: string }> {
+  const data = await apiRequest<{ report: { id: string; status: string } }>(
+    API_ENDPOINTS.worker.reports,
+    {
+      method: 'POST',
+      body,
+      ...(token ? { token } : {}),
+    },
+  );
+  return data.report;
+}
+
+export async function fetchReports(
+  token?: string | null,
+): Promise<WorkerReport[]> {
+  const data = await apiRequest<{ reports: WorkerReport[] }>(
+    API_ENDPOINTS.worker.reports,
+    token ? { method: 'GET', token } : { method: 'GET' },
+  );
+  return data.reports ?? [];
+}
+
+export async function blockJob(
+  jobId: string,
+  token?: string | null,
+): Promise<void> {
+  await apiRequest(API_ENDPOINTS.worker.blocks, {
+    method: 'POST',
+    body: { jobId },
+    ...(token ? { token } : {}),
+  });
+}
+
+export async function unblockJob(
+  jobId: string,
+  token?: string | null,
+): Promise<void> {
+  await apiRequest(API_ENDPOINTS.worker.block(jobId), {
+    method: 'DELETE',
+    ...(token ? { token } : {}),
+  });
+}
+
+export async function fetchBlockedJobIds(
+  token?: string | null,
+): Promise<string[]> {
+  const data = await apiRequest<{ jobIds: string[] }>(
+    API_ENDPOINTS.worker.blocks,
+    token ? { method: 'GET', token } : { method: 'GET' },
+  );
+  return data.jobIds ?? [];
+}

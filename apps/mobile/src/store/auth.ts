@@ -15,6 +15,7 @@ export interface ApiUser {
   phone?: string | null;
   name: string;
   role: 'student' | 'employer' | 'factory' | 'admin' | 'worker';
+  onboardingCompleted?: boolean;
 }
 
 interface AuthState {

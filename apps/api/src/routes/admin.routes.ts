@@ -309,13 +309,172 @@ router.put(
   })
 );
 
-// List user reports
+// ---- Worker application status (admin) --------------------------------------
+// Advances a worker application's status and fires the in-app notification so
+// the worker tracker + notification center reflect real decisions (blueprint:
+// status tracking + push/in-app updates). Valid statuses mirror the
+// WorkerApplicationStatus enum.
+
+const WORKER_STATUS_COPY: Record<string, { title: string; body: (job: string, company: string) => string }> = {
+  submitted: {
+    title: 'Application submitted',
+    body: (job, company) => `Applied to ${job} at ${company}`,
+  },
+  reviewing: {
+    title: 'Application under review',
+    body: (job, company) => `${company} is reviewing your application for ${job}.`,
+  },
+  shortlisted: {
+    title: "You've been shortlisted",
+    body: (job, company) => `Good news — ${company} shortlisted you for ${job}.`,
+  },
+  interview: {
+    title: 'Interview scheduled',
+    body: (job, company) => `${company} wants to interview you for ${job}.`,
+  },
+  hired: {
+    title: 'You were hired',
+    body: (job, company) => `Congratulations — ${company} hired you for ${job}.`,
+  },
+  rejected: {
+    title: 'Application not accepted',
+    body: (job, company) => `${company} did not accept your application for ${job}.`,
+  },
+  withdrawn: {
+    title: 'Application withdrawn',
+    body: (job, company) => `Your application for ${job} at ${company} was withdrawn.`,
+  },
+};
+
+router.patch(
+  '/worker-applications/:id/status',
+  asyncHandler(async (req: AuthRequest, res: Response) => {
+    const { status } = req.body as { status: string };
+    if (!WORKER_STATUS_COPY[status]) {
+      return res.status(400).json({
+        error: `Status must be one of: ${Object.keys(WORKER_STATUS_COPY).join(', ')}`,
+      });
+    }
+
+    const existing = await prisma.workerApplication.findUnique({
+      where: { id: req.params.id },
+      include: {
+        worker: { select: { userId: true } },
+        job: { include: { company: true } },
+      },
+    });
+    if (!existing) {
+      return res.status(404).json({ error: 'Worker application not found' });
+    }
+
+    const updated = await prisma.workerApplication.update({
+      where: { id: existing.id },
+      data: { status: status as any },
+    });
+
+    // Notify the worker if their profile is linked to a User account.
+    const workerUserId = existing.worker.userId;
+    if (workerUserId) {
+      const copy = WORKER_STATUS_COPY[status];
+      await prisma.notification.create({
+        data: {
+          userId: workerUserId,
+          type: 'application_status_changed',
+          title: copy.title,
+          body: copy.body(existing.job.title, existing.job.company.name),
+        },
+      });
+    }
+
+    res.json({
+      message: `Worker application ${status}`,
+      application: {
+        id: updated.id,
+        status: updated.status,
+        notified: Boolean(workerUserId),
+      },
+    });
+  })
+);
+
+// ---- Worker safety reports (admin) ------------------------------------------
+// List worker reports and advance their support status. The worker is notified
+// on status change; reports are never shown to the recruiter.
+
 router.get(
   '/reports',
   asyncHandler(async (_req: AuthRequest, res: Response) => {
-    // Mock data - in production this would query a Report model
-    const reports: any[] = [];
-    res.json({ reports });
+    const reports = await prisma.report.findMany({
+      include: { worker: { select: { phone: true } } },
+      orderBy: { createdAt: 'desc' },
+      take: 100,
+    });
+    res.json({
+      reports: reports.map((r) => ({
+        id: r.id,
+        category: r.category,
+        description: r.description,
+        evidence: r.evidence,
+        status: r.status,
+        adminNote: r.adminNote,
+        createdAt: r.createdAt,
+        workerPhone: r.worker.phone,
+      })),
+    });
+  })
+);
+
+router.patch(
+  '/reports/:id/status',
+  asyncHandler(async (req: AuthRequest, res: Response) => {
+    const { status, note } = req.body as { status?: string; note?: string };
+    if (status !== 'under_review' && status !== 'resolved') {
+      return res.status(400).json({
+        error: 'Status must be under_review or resolved',
+      });
+    }
+
+    const report = await prisma.report.findUnique({
+      where: { id: req.params.id },
+      include: { worker: true },
+    });
+    if (!report) return res.status(404).json({ error: 'Report not found' });
+
+    const updated = await prisma.report.update({
+      where: { id: report.id },
+      data: {
+        status,
+        adminNote: note?.trim() || null,
+        resolvedAt: status === 'resolved' ? new Date() : null,
+      },
+    });
+
+    // Notify the worker of the support status (only if profile links to a User).
+    if (report.worker.userId) {
+      await prisma.notification.create({
+        data: {
+          userId: report.worker.userId,
+          type: 'report_status_changed',
+          title:
+            status === 'resolved'
+              ? 'Report resolved'
+              : 'Report under review',
+          body:
+            status === 'resolved'
+              ? 'Your report was reviewed and action has been taken.'
+              : 'Your report is being reviewed by our team.',
+        },
+      });
+    }
+
+    res.json({
+      report: {
+        id: updated.id,
+        status: updated.status,
+        adminNote: updated.adminNote,
+        resolvedAt: updated.resolvedAt,
+      },
+    });
   })
 );
 

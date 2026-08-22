@@ -1,4 +1,5 @@
 import { Router, Request, Response } from 'express';
+import * as crypto from 'crypto';
 import { z } from 'zod';
 import { prisma } from '../db/prisma';
 import { asyncHandler, validate } from '../middleware/validation';
@@ -482,6 +483,227 @@ router.post(
       },
     });
     res.json({ user });
+  }),
+);
+
+// ---- Career Passport sharing (blueprint §5) --------------------------------
+// Expiring, revocable links. The worker creates a share, gets a URL, and can
+// revoke it at any time. The public view (public.routes.ts) exposes only
+// shared fields — never phone, documents, or identity data.
+
+const shareSchema = z.object({
+  body: z.object({
+    expiresInHours: z.number().int().min(1).max(168).optional(),
+  }),
+});
+
+const DEFAULT_SHARE_HOURS = 24;
+
+function shareUrl(req: Request, token: string): string {
+  const base =
+    process.env.PUBLIC_BASE_URL || `${req.protocol}://${req.get('host')}`;
+  return `${base}/api/v1/public/passport/${token}`;
+}
+
+// POST /api/v1/worker/me/passport/shares — create a share
+router.post(
+  '/me/passport/shares',
+  requireWorker,
+  validate(shareSchema),
+  asyncHandler(async (req: AuthRequest, res: Response) => {
+    const workerId = (req as AuthRequest & { workerProfileId: string })
+      .workerProfileId;
+    const hours = (req.body as { expiresInHours?: number }).expiresInHours ?? DEFAULT_SHARE_HOURS;
+    const token = crypto.randomBytes(24).toString('hex');
+    const share = await prisma.passportShare.create({
+      data: {
+        workerId,
+        token,
+        expiresAt: new Date(Date.now() + hours * 3600_000),
+      },
+    });
+    res.status(201).json({
+      share: {
+        id: share.id,
+        token: share.token,
+        expiresAt: share.expiresAt,
+        revokedAt: share.revokedAt,
+        url: shareUrl(req, share.token),
+      },
+    });
+  }),
+);
+
+// GET /api/v1/worker/me/passport/shares — list shares (active + revoked)
+router.get(
+  '/me/passport/shares',
+  requireWorker,
+  asyncHandler(async (req: AuthRequest, res: Response) => {
+    const workerId = (req as AuthRequest & { workerProfileId: string })
+      .workerProfileId;
+    const shares = await prisma.passportShare.findMany({
+      where: { workerId },
+      orderBy: { createdAt: 'desc' },
+      take: 25,
+    });
+    res.json({
+      shares: shares.map((s) => ({
+        id: s.id,
+        token: s.token,
+        expiresAt: s.expiresAt,
+        revokedAt: s.revokedAt,
+        url: shareUrl(req, s.token),
+      })),
+    });
+  }),
+);
+
+// DELETE /api/v1/worker/me/passport/shares/:id — revoke a share
+router.delete(
+  '/me/passport/shares/:id',
+  requireWorker,
+  asyncHandler(async (req: AuthRequest, res: Response) => {
+    const workerId = (req as AuthRequest & { workerProfileId: string })
+      .workerProfileId;
+    const share = await prisma.passportShare.findUnique({
+      where: { id: req.params.id },
+    });
+    if (!share || share.workerId !== workerId) {
+      return res.status(404).json({ error: 'Share not found' });
+    }
+    const updated = await prisma.passportShare.update({
+      where: { id: share.id },
+      data: { revokedAt: share.revokedAt ?? new Date() },
+    });
+    res.json({ share: { id: updated.id, revokedAt: updated.revokedAt } });
+  }),
+);
+
+// ---- Safety reports (blueprint §4/§7) --------------------------------------
+// Reports are worker-scoped, never shown to the recruiter, and carry a
+// worker-facing support status (submitted -> under_review -> resolved).
+
+const reportSchema = z.object({
+  body: z.object({
+    category: z.enum([
+      'payment_requested',
+      'false_information',
+      'recruiter_identity',
+      'unsafe_contact',
+      'other',
+    ]),
+    description: z.string().min(5).max(2000),
+    evidence: z.string().max(500).optional(),
+  }),
+});
+
+// POST /api/v1/worker/me/reports — file a report
+router.post(
+  '/me/reports',
+  requireWorker,
+  validate(reportSchema),
+  asyncHandler(async (req: AuthRequest, res: Response) => {
+    const workerId = (req as AuthRequest & { workerProfileId: string })
+      .workerProfileId;
+    const { category, description, evidence } = (req as any).body;
+    const report = await prisma.report.create({
+      data: {
+        workerId,
+        category,
+        description: description.trim(),
+        evidence: evidence?.trim() || null,
+      },
+    });
+    res.status(201).json({
+      report: {
+        id: report.id,
+        category: report.category,
+        status: report.status,
+        createdAt: report.createdAt,
+      },
+    });
+  }),
+);
+
+// GET /api/v1/worker/me/reports — support status of my reports
+router.get(
+  '/me/reports',
+  requireWorker,
+  asyncHandler(async (req: AuthRequest, res: Response) => {
+    const workerId = (req as AuthRequest & { workerProfileId: string })
+      .workerProfileId;
+    const reports = await prisma.report.findMany({
+      where: { workerId },
+      orderBy: { createdAt: 'desc' },
+      take: 50,
+    });
+    res.json({
+      reports: reports.map((r) => ({
+        id: r.id,
+        category: r.category,
+        description: r.description,
+        status: r.status,
+        adminNote: r.adminNote,
+        createdAt: r.createdAt,
+        resolvedAt: r.resolvedAt,
+      })),
+    });
+  }),
+);
+
+// ---- Blocks (blueprint: in-app report and block) -----------------------------
+// A blocked job is hidden from the worker's feed (the app filters by jobIds).
+
+const blockSchema = z.object({
+  body: z.object({ jobId: z.string().min(1) }),
+});
+
+// POST /api/v1/worker/me/blocks { jobId }
+router.post(
+  '/me/blocks',
+  requireWorker,
+  validate(blockSchema),
+  asyncHandler(async (req: AuthRequest, res: Response) => {
+    const workerId = (req as AuthRequest & { workerProfileId: string })
+      .workerProfileId;
+    const jobId = (req.body as { jobId: string }).jobId;
+    const job = await prisma.job.findUnique({ where: { id: jobId } });
+    if (!job) return res.status(404).json({ error: 'Job not found' });
+    await prisma.block.upsert({
+      where: { workerId_jobId: { workerId, jobId } },
+      create: { workerId, jobId },
+      update: {},
+    });
+    res.status(201).json({ blocked: true, jobId });
+  }),
+);
+
+// DELETE /api/v1/worker/me/blocks/:jobId — unblock
+router.delete(
+  '/me/blocks/:jobId',
+  requireWorker,
+  asyncHandler(async (req: AuthRequest, res: Response) => {
+    const workerId = (req as AuthRequest & { workerProfileId: string })
+      .workerProfileId;
+    await prisma.block.deleteMany({
+      where: { workerId, jobId: req.params.jobId },
+    });
+    res.json({ blocked: false, jobId: req.params.jobId });
+  }),
+);
+
+// GET /api/v1/worker/me/blocks — blocked job ids (for feed filtering)
+router.get(
+  '/me/blocks',
+  requireWorker,
+  asyncHandler(async (req: AuthRequest, res: Response) => {
+    const workerId = (req as AuthRequest & { workerProfileId: string })
+      .workerProfileId;
+    const blocks = await prisma.block.findMany({
+      where: { workerId },
+      orderBy: { createdAt: 'desc' },
+    });
+    res.json({ jobIds: blocks.map((b) => b.jobId) });
   }),
 );
 

@@ -313,8 +313,14 @@ export function LoadingState({ label }: { label?: string }) {
 
 /* --------------------------- Section ------------------------------ */
 
-export function SectionLabel({ children }: { children: React.ReactNode }) {
-  return <AppText style={styles.sectionLabel}>{children}</AppText>;
+export function SectionLabel({
+  children,
+  style,
+}: {
+  children: React.ReactNode;
+  style?: StyleProp<TextStyle>;
+}) {
+  return <AppText style={[styles.sectionLabel, style]}>{children}</AppText>;
 }
 
 export function Row({ children, style }: { children: React.ReactNode; style?: ViewStyle }) {

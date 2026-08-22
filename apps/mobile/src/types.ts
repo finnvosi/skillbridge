@@ -70,6 +70,11 @@ export interface DemoApplication {
   demo: true;
 }
 
+export type WorkRecordStatus =
+  | 'employer_verified'
+  | 'verification_requested'
+  | 'self_declared';
+
 export interface WorkRecord {
   id: string;
   company: string;
@@ -80,7 +85,7 @@ export interface WorkRecord {
   skills: string[];
   verifiedBy: string; // employer name
   verifiedAt: string; // ISO date
-  status: 'employer_verified';
+  status: WorkRecordStatus;
 }
 
 export interface PassportSkill {
@@ -112,3 +117,5 @@ export type ReportCategory =
   | 'recruiter_identity'
   | 'unsafe_contact'
   | 'other';
+
+export type ReportStatus = 'submitted' | 'under_review' | 'resolved';

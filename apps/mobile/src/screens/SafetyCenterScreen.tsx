@@ -2,13 +2,13 @@
 // jobs they can unblock. Reached from the Help tab (blueprint: report, block,
 // and support-status flow).
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Pressable, ScrollView, StyleSheet, Alert } from 'react-native';
+import { View, ScrollView, StyleSheet, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors, typography, spacing, radius } from '../theme';
 import { useT } from '../hooks/useT';
 import { useAuthStore } from '../store/auth';
 import { BackBar } from '../components/BackBar';
-import { AppText, Card, StatusPill, EmptyState, SectionLabel, Button } from '../components/ui';
+import { AppText, Card, StatusPill, EmptyState, SectionLabel, Button, LoadingState, ErrorState } from '../components/ui';
 import { Icon } from '../components/Icon';
 import {
   fetchReports,
@@ -31,6 +31,13 @@ const STATUS_TONE: Record<string, 'neutral' | 'warning' | 'success'> = {
   under_review: 'warning',
   resolved: 'success',
 };
+const CATEGORY_LABEL: Record<string, string> = {
+  payment_requested: 'help.cat.payment',
+  false_information: 'help.cat.false',
+  recruiter_identity: 'help.cat.identity',
+  unsafe_contact: 'help.cat.unsafe',
+  other: 'help.cat.other',
+};
 
 export default function SafetyCenterScreen({ onBack }: { onBack: () => void }) {
   const { t, formatDate } = useT();
@@ -38,28 +45,39 @@ export default function SafetyCenterScreen({ onBack }: { onBack: () => void }) {
   const [reports, setReports] = useState<WorkerReport[]>([]);
   const [blocked, setBlocked] = useState<{ job: DemoJob }[]>([]);
   const [loading, setLoading] = useState(USE_REMOTE_API);
+  const [errored, setErrored] = useState(false);
 
+  // Fetch + render the worker's safety data. Extracted so the initial effect
+  // and the error retry button share one implementation. State is only updated
+  // after the first await, so the effect path never calls setState
+  // synchronously (keeps react-hooks/set-state-in-effect quiet).
+  const fetchSafetyData = useCallback(async () => {
+    const [rep, ids, jobs] = await Promise.all([
+      fetchReports(token),
+      fetchBlockedJobIds(token),
+      fetchJobs(),
+    ]);
+    setReports(rep);
+    const byId = new Map(jobs.map((j) => [j.id, j]));
+    setBlocked(ids.map((id) => ({ job: byId.get(id)! })).filter((b) => b.job));
+  }, [token]);
+
+  // Retry handler (invoked from a click, not an effect): shows the spinner and
+  // re-fetches.
   const load = useCallback(async () => {
-    if (!USE_REMOTE_API || !token) {
-      setLoading(false);
-      return;
-    }
+    setLoading(true);
     try {
-      const [rep, ids, jobs] = await Promise.all([
-        fetchReports(token),
-        fetchBlockedJobIds(token),
-        fetchJobs(),
-      ]);
-      setReports(rep);
-      const byId = new Map(jobs.map((j) => [j.id, j]));
-      setBlocked(ids.map((id) => ({ job: byId.get(id)! })).filter((b) => b.job));
+      await fetchSafetyData();
+      setErrored(false);
     } catch {
-      // keep empty
+      setErrored(true);
     } finally {
       setLoading(false);
     }
-  }, [token]);
+  }, [fetchSafetyData]);
 
+  // Initial load. Mirrors the fetch inline (post-await setState only) because
+  // calling a named callback that sets state trips set-state-in-effect.
   useEffect(() => {
     if (!USE_REMOTE_API || !token) return;
     let alive = true;
@@ -74,8 +92,9 @@ export default function SafetyCenterScreen({ onBack }: { onBack: () => void }) {
         setReports(rep);
         const byId = new Map(jobs.map((j) => [j.id, j]));
         setBlocked(ids.map((id) => ({ job: byId.get(id)! })).filter((b) => b.job));
+        setErrored(false);
       } catch {
-        // keep empty
+        if (alive) setErrored(true);
       } finally {
         if (alive) setLoading(false);
       }
@@ -102,13 +121,19 @@ export default function SafetyCenterScreen({ onBack }: { onBack: () => void }) {
       <BackBar title={t('safety.title')} onBack={onBack} />
       <ScrollView contentContainerStyle={styles.body}>
         <SectionLabel>{t('safety.myReports')}</SectionLabel>
-        {reports.length === 0 && !loading ? (
+        {loading ? (
+          <LoadingState label={t('common.loading')} />
+        ) : errored ? (
+          <ErrorState title={t('safety.loadError')} onRetry={() => { setLoading(true); load(); }} retryLabel={t('common.retry')} />
+        ) : reports.length === 0 ? (
           <EmptyState icon="flag" title={t('safety.noReports')} subtitle={t('safety.noReportsSub')} />
         ) : (
           reports.map((r) => (
             <Card key={r.id} style={styles.card}>
               <View style={styles.rowTop}>
-                <AppText style={styles.rowTitle}>{t(`help.cat.${r.category}`)}</AppText>
+                <AppText style={styles.rowTitle}>
+                  {t(CATEGORY_LABEL[r.category] ?? 'help.cat.other')}
+                </AppText>
                 <StatusPill
                   icon={STATUS_ICON[r.status]}
                   label={t(`report.status.${r.status}`)}
@@ -128,7 +153,11 @@ export default function SafetyCenterScreen({ onBack }: { onBack: () => void }) {
         )}
 
         <SectionLabel style={styles.sectionSpacer}>{t('safety.blockedJobs')}</SectionLabel>
-        {blocked.length === 0 && !loading ? (
+        {loading ? (
+          <LoadingState label={t('common.loading')} />
+        ) : errored ? (
+          <ErrorState title={t('safety.loadError')} onRetry={() => { setLoading(true); load(); }} retryLabel={t('common.retry')} />
+        ) : blocked.length === 0 ? (
           <EmptyState icon="lock" title={t('safety.noBlocked')} subtitle={t('safety.noBlockedSub')} />
         ) : (
           blocked.map(({ job }) => (

@@ -119,7 +119,10 @@ function mapJob(j: ApiJob): DemoJob {
     accommodation: j.accommodation,
     transportProvided: j.transportProvided,
     overtimePaid: j.overtimePaid,
-    verificationLevel: (j.verificationLevel as VerificationLevel) ?? 'job_checked',
+    // Never fabricate a "checked" badge. The lean API uses a 'none'
+    // verificationLevel for unverified jobs; fall back to 'none' so the UI
+    // renders an honest "Not verified" state instead of faking a check.
+    verificationLevel: (j.verificationLevel as VerificationLevel) ?? 'none',
     lastCheckedDate: j.lastCheckedDate,
     // The following arrays are intentionally empty: the lean API does not yet
     // return verification evidence or skill-by-skill matches. The UI skips them

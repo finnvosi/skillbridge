@@ -11,6 +11,7 @@ import { Card, VerifyBadge, StatusPill, Button, DemoTag, SectionLabel, AppText }
 import { BackBar } from '../components/BackBar';
 
 const VERIFY_LABEL: Record<DemoJob['verificationLevel'], string> = {
+  none: 'jobs.notVerified',
   job_checked: 'jobs.jobChecked',
   company_checked: 'jobs.companyChecked',
   identity_checked: 'jobs.identityChecked',

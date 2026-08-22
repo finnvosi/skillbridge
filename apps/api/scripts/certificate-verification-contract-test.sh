@@ -82,5 +82,82 @@ assert 'verificationNote' not in certificate
 PY
 printf '  ✅ student receives candidate feedback but not internal note\n'; PASS=$((PASS + 1))
 
+# --- NEW: notification privacy + audit trail + employer filtering ----------------
+
+REJECT_REASON="The certificate image is not readable."
+INTERNAL_NOTE="Internal review fixture."
+
+# 1) Student notification: candidate-facing type, no internal fields leaked.
+notifications_json="$(curl -sS "$BASE/api/v1/users/notifications" -H "Authorization: Bearer $student_token")"
+NOTIFICATIONS_JSON="$notifications_json" REJECT_REASON="$REJECT_REASON" python3 - <<'PY'
+import json, os
+payload = json.loads(os.environ['NOTIFICATIONS_JSON'])
+notifs = payload.get('notifications', [])
+rejected = [n for n in notifs if n.get('type') == 'certificate_rejected']
+assert rejected, 'expected a certificate_rejected notification for the student'
+assert len(rejected) == 1, 'expected exactly one rejection notification'
+for forbidden in ('verificationNote', 'internalNote', 'candidateReason', 'rejectionReason', 'fileKey', 'fileUrl'):
+    assert forbidden not in rejected[0], f'notification leaked internal field {forbidden}'
+assert os.environ['REJECT_REASON'] in rejected[0]['body'], 'rejection reason must be in candidate-facing body'
+PY
+printf '  ✅ student notification uses certificate_rejected type and leaks no internal note\n'; PASS=$((PASS + 1))
+
+# 2) Immutable audit row persisted in CertificateVerificationHistory (read via client).
+history_out="$(node "$(dirname "$0")/assert-certificate-history.mjs" "$certificate_id" 2>/dev/null)"
+if printf '%s' "$history_out" | grep -q '"newStatus"'; then
+  INTERNAL_NOTE="$INTERNAL_NOTE" REJECT_REASON="$REJECT_REASON" HISTORY_JSON="$history_out" python3 - <<'PY'
+import json, os
+row = json.loads(os.environ['HISTORY_JSON'])
+assert row.get('newStatus') == 'rejected', 'history newStatus must be rejected'
+assert row.get('internalNote') == os.environ['INTERNAL_NOTE'], 'history must persist internal note'
+assert row.get('candidateReason') == os.environ['REJECT_REASON'], 'history must persist candidate reason'
+assert row.get('previousStatus') in ('pending', 'verified', 'rejected'), 'previousStatus must be set'
+PY
+  printf '  ✅ certificate verification history row created (immutable audit)\n'; PASS=$((PASS + 1))
+else
+  printf '  ❌ certificate verification history row missing (got: %s)\n' "${history_out:0:120}"
+  FAIL=$((FAIL + 1))
+fi
+
+# 3) Employer applicant filtering: only verified cert title/status/date exposed.
+# Upload + approve a SECOND certificate so the student has one verified cert.
+upload2="$(curl -sS -X POST "$BASE/api/v1/certificates" -H "Authorization: Bearer $student_token" -H 'Content-Type: application/json' \
+  -d "{\"title\":\"Verified Skill Certificate\",\"file\":{\"base64\":\"$PDF_BASE64\",\"mimeType\":\"application/pdf\",\"originalName\":\"verified.pdf\"}}")"
+certificate2_id="$(U2="$upload2" python3 -c "import json,os;print(json.loads(os.environ['U2'])['certificate']['id'])")"
+curl -sS -o /dev/null -X PATCH "$BASE/api/v1/admin/certificates/$certificate2_id" \
+  -H "Authorization: Bearer $admin_token" -H 'Content-Type: application/json' \
+  -d "{\"status\":\"verified\"}"
+
+employer_email="verification-employer-${STAMP}@test.skillbridge.kh"
+employer_json="$(curl -sS -X POST "$BASE/api/v1/auth/register" -H 'Content-Type: application/json' \
+  -d "{\"email\":\"$employer_email\",\"password\":\"$PASSWORD\",\"name\":\"Verification Employer\",\"role\":\"employer\"}")"
+employer_token="$(EJ="$employer_json" python3 -c "import json,os;print(json.loads(os.environ['EJ'])['token'])")"
+project_json="$(curl -sS -X POST "$BASE/api/v1/projects" -H "Authorization: Bearer $employer_token" -H 'Content-Type: application/json' \
+  -d "{\"title\":\"Verification Project\",\"description\":\"Verification project used by the certificate filtering contract test.\",\"type\":\"part_time\",\"budget\":100,\"skillsRequired\":[\"testing\"],\"location\":\"Phnom Penh\"}")"
+project_id="$(PJ="$project_json" python3 -c "import json,os;print(json.loads(os.environ['PJ'])['project']['id'])")"
+apply_status="$(curl -sS -o /tmp/certificate-verification-apply.json -w '%{http_code}' -X POST "$BASE/api/v1/projects/$project_id/apply" -H "Authorization: Bearer $student_token" -H 'Content-Type: application/json' -d '{"coverLetter":"hi"}')"
+if [ "$apply_status" != "201" ]; then
+  printf '  ❌ student application fixture failed (status %s): %s\n' "$apply_status" "$(< /tmp/certificate-verification-apply.json)"
+  exit 1
+fi
+apps_json="$(curl -sS "$BASE/api/v1/projects/$project_id/applications" -H "Authorization: Bearer $employer_token")"
+APPS_JSON="$apps_json" python3 - <<'PY'
+import json, os
+payload = json.loads(os.environ['APPS_JSON'])
+apps = payload.get('applications', [])
+assert apps, 'expected the submitted application to appear for the employer'
+certs = apps[0].get('student', {}).get('certificates', [])
+assert certs, 'employer should see the verified certificate'
+for c in certs:
+    for forbidden in ('fileKey', 'fileUrl', 'rejectionReason', 'verificationNote', 'description', 'mimeType', 'fileSize'):
+        assert forbidden not in c, f'employer certificate leaked internal field {forbidden}'
+    assert c.get('verificationStatus') == 'verified', 'employer must only see verified certificates'
+# The rejected certificate must NOT be present for the employer.
+titles = [c['title'] for c in certs]
+assert 'Verified Skill Certificate' in titles, 'verified certificate must be visible to employer'
+assert 'Verification fixture' not in titles, 'rejected certificate must be hidden from employer'
+PY
+printf '  ✅ employer applicant view exposes only verified certificate title/status/date\n'; PASS=$((PASS + 1))
+
 printf '\n== Result: %d passed, %d failed ==\n' "$PASS" "$FAIL"
 [ "$FAIL" -eq 0 ]

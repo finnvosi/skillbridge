@@ -16,6 +16,7 @@ import { Button, Input, Card, Badge } from '@skillbridge/ui';
 import { colors, spacing, typography, radius } from '../../theme';
 import CertificateSection from '../../components/CertificateSection';
 
+import { AppText } from './../../components/ui';
 interface ProfileShape {
   university?: string | null;
   major?: string | null;
@@ -110,9 +111,9 @@ export default function ProfileScreen() {
     <ScrollView style={styles.flex} contentContainerStyle={styles.container}>
       <View style={styles.header}>
         <View style={styles.avatar}>
-          <Text style={styles.avatarText}>{(user?.name || '?').charAt(0).toUpperCase()}</Text>
+          <AppText style={styles.avatarText}>{(user?.name || '?').charAt(0).toUpperCase()}</AppText>
         </View>
-        <Text style={styles.name}>{user?.name}</Text>
+        <AppText style={styles.name}>{user?.name}</AppText>
         <Badge
           label={user?.role || ''}
           color={isStudent ? colors.student : colors.employer}
@@ -121,14 +122,14 @@ export default function ProfileScreen() {
       </View>
 
       <Card style={styles.section}>
-        <Text style={styles.sectionTitle}>Personal</Text>
+        <AppText style={styles.sectionTitle}>Personal</AppText>
         <Input label="Full Name" value={name} onChangeText={setName} />
         <Input label="Email" value={user?.email} editable={false} />
       </Card>
 
       {isStudent ? (
         <Card style={styles.section}>
-          <Text style={styles.sectionTitle}>Education</Text>
+          <AppText style={styles.sectionTitle}>Education</AppText>
           <Input label="University" value={university} onChangeText={setUniversity} placeholder="e.g. RUPP" />
           <Input label="Major" value={major} onChangeText={setMajor} placeholder="e.g. Computer Science" />
           <Input
@@ -141,15 +142,15 @@ export default function ProfileScreen() {
         </Card>
       ) : (
         <Card style={styles.section}>
-          <Text style={styles.sectionTitle}>Company</Text>
+          <AppText style={styles.sectionTitle}>Company</AppText>
           <Input label="Company Name" value={user?.name} editable={false} />
-          <Text style={styles.note}>Employer details are managed from the web portal.</Text>
+          <AppText style={styles.note}>Employer details are managed from the web portal.</AppText>
         </Card>
       )}
 
       {isStudent ? (
         <Card style={styles.section}>
-          <Text style={styles.sectionTitle}>Skills</Text>
+          <AppText style={styles.sectionTitle}>Skills</AppText>
           <View style={styles.skillInputRow}>
             <TextInput
               style={styles.skillInput}
@@ -160,7 +161,7 @@ export default function ProfileScreen() {
               onSubmitEditing={addSkill}
             />
             <TouchableOpacity style={styles.addBtn} onPress={addSkill}>
-              <Text style={styles.addBtnText}>+</Text>
+              <AppText style={styles.addBtnText}>+</AppText>
             </TouchableOpacity>
           </View>
           <View style={styles.skills}>

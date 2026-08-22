@@ -6,6 +6,7 @@ import { useAuthStore } from '../../store/auth';
 import type { RootStackParamList } from '../../App';
 import { colors, spacing, typography, radius } from '../../theme';
 
+import { AppText } from './../../components/ui';
 type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
 
 interface Props {
@@ -29,8 +30,8 @@ export default function HomeScreen({ navigation }: Props) {
   return (
     <ScrollView style={styles.flex} contentContainerStyle={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.greeting}>Hey {user?.name?.split(' ')[0] || 'there'} 👋</Text>
-        <Text style={styles.subtitle}>What do you want to do today?</Text>
+        <AppText style={styles.greeting}>Hey {user?.name?.split(' ')[0] || 'there'} 👋</AppText>
+        <AppText style={styles.subtitle}>What do you want to do today?</AppText>
       </View>
 
       <View style={styles.actions}>
@@ -42,10 +43,10 @@ export default function HomeScreen({ navigation }: Props) {
             style={styles.actionTouch}
           >
             <Card style={styles.actionCard}>
-              <Text style={styles.actionIcon}>{a.icon}</Text>
+              <AppText style={styles.actionIcon}>{a.icon}</AppText>
               <View style={styles.actionText}>
-                <Text style={styles.actionLabel}>{a.label}</Text>
-                <Text style={styles.actionSub}>{a.sub}</Text>
+                <AppText style={styles.actionLabel}>{a.label}</AppText>
+                <AppText style={styles.actionSub}>{a.sub}</AppText>
               </View>
             </Card>
           </TouchableOpacity>
@@ -53,7 +54,7 @@ export default function HomeScreen({ navigation }: Props) {
       </View>
 
       <TouchableOpacity style={styles.logout} onPress={logout}>
-        <Text style={styles.logoutText}>Log out</Text>
+        <AppText style={styles.logoutText}>Log out</AppText>
       </TouchableOpacity>
     </ScrollView>
   );

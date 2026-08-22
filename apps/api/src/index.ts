@@ -15,6 +15,7 @@ import certificatesRoutes from './routes/certificates.routes';
 import adminRoutes from './routes/admin.routes';
 import analyticsRoutes from './routes/analytics.routes';
 import studentsRoutes from './routes/students.routes';
+import workerRoutes from './routes/worker.routes';
 
 
 // Initialize Express app
@@ -71,6 +72,7 @@ app.use('/api/v1/certificates', certificatesRoutes);
 app.use('/api/v1/admin', adminRoutes);
 app.use('/api/v1/analytics', analyticsRoutes);
 app.use('/api/v1/students', studentsRoutes);
+app.use('/api/v1/worker', workerRoutes);
 
 
 // API info endpoint

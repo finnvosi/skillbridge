@@ -1,0 +1,236 @@
+// Worker vertical slice — client for the real SkillBridge API (apps/api).
+//
+// The API returns a lean, honest job/application/passport shape. The mobile UI
+// was designed around richer local fixtures (DemoJob etc.). This module maps
+// the API response onto those existing screen types so the UI does not change.
+//
+// Fields the lean API does not (yet) provide are filled with SAFE, non-faking
+// defaults — we never invent verification evidence or skill-match detail. The
+// UI is expected to gracefully skip empty arrays (skillMatches, evidence, etc.).
+import { apiRequest } from './api';
+import { API_ENDPOINTS, DEMO_WORKER_ID } from '../config';
+import {
+  DemoJob,
+  DemoApplication,
+  DemoPassport,
+  ApplicationStatus,
+  ShiftType,
+  VerificationLevel,
+  WorkRecord,
+  PassportSkill,
+} from '../types';
+
+// ---- API response shapes (subset we consume) -------------------------------
+
+interface ApiJob {
+  id: string;
+  title: string;
+  summary: string | null;
+  company: string;
+  companyVerified: boolean;
+  verificationLevel: VerificationLevel | string;
+  payPerMonth: number;
+  currency: string;
+  shift: ShiftType | string;
+  employmentType: 'full_time' | 'contract' | 'seasonal' | string;
+  location: string | null;
+  distanceKm: number;
+  skillsRequired: string[];
+  matchReason: string | null;
+  accommodation: boolean;
+  transportProvided: boolean;
+  overtimePaid: boolean;
+  lastCheckedDate: string;
+}
+
+interface ApiApplication {
+  id: string;
+  status: string;
+  submittedAt: string;
+  job: {
+    id: string;
+    title: string;
+    company: string;
+    payPerMonth: number;
+    currency: string;
+    location: string | null;
+    distanceKm: number;
+  };
+}
+
+interface ApiWorkRecord {
+  id: string;
+  role: string;
+  company: string;
+  workplace: string | null;
+  startDate: string;
+  endDate: string | null;
+  verified: boolean;
+  provenance: string | null;
+}
+
+interface ApiPassport {
+  id: string;
+  fullName: string | null;
+  phone: string;
+  preferredArea: string | null;
+  availability: string | null;
+  identityVerified: boolean;
+  skills: string[];
+  languages: string[];
+  workRecords: ApiWorkRecord[];
+}
+
+// ---- Status adapter: API enum -> screen ApplicationStatus -------------------
+// API: submitted | reviewing | shortlisted | interview | hired | rejected | withdrawn
+// Screen: submitted | under_review | interview | accepted | declined | withdrawn
+const STATUS_MAP: Record<string, ApplicationStatus> = {
+  submitted: 'submitted',
+  reviewing: 'under_review',
+  shortlisted: 'under_review',
+  interview: 'interview',
+  hired: 'accepted',
+  rejected: 'declined',
+  withdrawn: 'withdrawn',
+};
+
+function mapStatus(apiStatus: string): ApplicationStatus {
+  return STATUS_MAP[apiStatus] ?? 'submitted';
+}
+
+// ---- Mappers -----------------------------------------------------------------
+
+function mapJob(j: ApiJob): DemoJob {
+  return {
+    id: j.id,
+    title: j.title,
+    company: j.company,
+    // Lean API has no legal-name/workplace detail yet — surface the company name
+    // honestly; do NOT fabricate a legal entity name.
+    companyLegalName: j.company,
+    workplace: j.location ?? '',
+    location: j.location ?? '',
+    distanceKm: j.distanceKm,
+    payPerMonth: j.payPerMonth,
+    currency: (j.currency as 'USD' | 'KHR') ?? 'USD',
+    shift: (j.shift as ShiftType) ?? 'day',
+    employmentType: (j.employmentType as DemoJob['employmentType']) ?? 'full_time',
+    accommodation: j.accommodation,
+    transportProvided: j.transportProvided,
+    overtimePaid: j.overtimePaid,
+    verificationLevel: (j.verificationLevel as VerificationLevel) ?? 'job_checked',
+    lastCheckedDate: j.lastCheckedDate,
+    // The following arrays are intentionally empty: the lean API does not yet
+    // return verification evidence or skill-by-skill matches. The UI skips them
+    // when empty, so we never fake a verified badge or a skill match.
+    whatWasChecked: [],
+    cannotGuarantee: [],
+    evidence: [],
+    matchStrength: 'possible',
+    matchReason: j.matchReason ?? '',
+    skillsMatched: 0,
+    skillsTotal: 0,
+    skillMatches: [],
+    missingRequirements: [],
+    summary: j.summary ?? '',
+  };
+}
+
+function mapApplication(a: ApiApplication): DemoApplication {
+  return {
+    id: a.id,
+    jobId: a.job.id,
+    jobTitle: a.job.title,
+    company: a.job.company,
+    status: mapStatus(a.status),
+    submittedAt: a.submittedAt,
+    sharedFields: [],
+    demo: true,
+  };
+}
+
+function mapPassport(p: ApiPassport): DemoPassport {
+  const workRecords: WorkRecord[] = p.workRecords.map((r) => ({
+    id: r.id,
+    company: r.company,
+    workplace: r.workplace ?? '',
+    role: r.role,
+    startYear: new Date(r.startDate).getFullYear(),
+    endYear: r.endDate ? new Date(r.endDate).getFullYear() : null,
+    skills: [],
+    verifiedBy: r.verified ? r.company : 'Pending verification',
+    verifiedAt: '',
+    status: r.verified ? 'employer_verified' : ('pending' as any),
+  }));
+
+  const skills: PassportSkill[] = p.skills.map((s) => ({
+    name: s,
+    // The lean API does not yet distinguish verified vs unverified skills;
+    // default to false so we never over-claim verification.
+    verified: false,
+  }));
+
+  return {
+    fullName: p.fullName ?? '',
+    role: '',
+    phone: p.phone,
+    preferredArea: p.preferredArea ?? '',
+    availability: p.availability ?? '',
+    identityVerified: p.identityVerified,
+    identityMethod: '',
+    identityDate: '',
+    workRecords,
+    skills,
+    languages: p.languages,
+    safetyQualifications: [],
+    shareEnabled: false,
+    demo: true,
+  };
+}
+
+// ---- Public API -----------------------------------------------------------------
+
+export async function fetchJobs(): Promise<DemoJob[]> {
+  const data = await apiRequest<{ jobs: ApiJob[] }>(API_ENDPOINTS.worker.jobs);
+  return (data.jobs ?? []).map(mapJob);
+}
+
+export async function fetchJob(id: string): Promise<DemoJob | null> {
+  try {
+    const j = await apiRequest<ApiJob>(API_ENDPOINTS.worker.job(id));
+    return mapJob(j);
+  } catch {
+    return null;
+  }
+}
+
+export async function fetchApplications(workerId = DEMO_WORKER_ID): Promise<DemoApplication[]> {
+  const data = await apiRequest<{ applications: ApiApplication[] }>(
+    API_ENDPOINTS.worker.applications(workerId),
+  );
+  return (data.applications ?? []).map(mapApplication);
+}
+
+export async function fetchPassport(workerId = DEMO_WORKER_ID): Promise<DemoPassport | null> {
+  try {
+    const p = await apiRequest<ApiPassport>(API_ENDPOINTS.worker.passport(workerId));
+    return mapPassport(p);
+  } catch {
+    return null;
+  }
+}
+
+export async function submitApplication(
+  jobId: string,
+  workerId = DEMO_WORKER_ID,
+  shareWorkRecords = false,
+): Promise<{ applicationId: string; status: string }> {
+  const data = await apiRequest<{ applicationId: string; status: string }>(
+    API_ENDPOINTS.worker.apply,
+    {
+      method: 'POST',
+      body: { workerId, jobId, shareWorkRecords },
+    },
+  );
+  return data;
+}

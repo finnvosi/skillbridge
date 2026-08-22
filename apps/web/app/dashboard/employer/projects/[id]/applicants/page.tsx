@@ -201,6 +201,33 @@ export default function ApplicantsPage() {
                       maxLength={2000}
                     />
                   </div>
+                  {a.student?.certificates?.length ? (
+                    <div className="mt-3">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+                        Verified certificates
+                      </p>
+                      <ul className="mt-1 space-y-1">
+                        {a.student.certificates
+                          .filter((c) => c.verificationStatus === "verified")
+                          .map((c) => (
+                            <li
+                              key={c.id}
+                              className="flex flex-wrap items-center gap-2 text-sm text-gray-700"
+                            >
+                              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
+                                ✓ Verified
+                              </span>
+                              <span className="font-medium">{c.title}</span>
+                              {c.verifiedAt && (
+                                <span className="text-xs text-gray-400">
+                                  {new Date(c.verifiedAt).toLocaleDateString()}
+                                </span>
+                              )}
+                            </li>
+                          ))}
+                      </ul>
+                    </div>
+                  ) : null}
                   <p className="mt-2 text-xs text-gray-400">
                     Applied {new Date(a.createdAt).toLocaleDateString()}
                   </p>

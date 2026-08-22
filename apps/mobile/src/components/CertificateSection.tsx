@@ -132,11 +132,11 @@ export default function CertificateSection() {
 
   return (
     <Card style={styles.container}>
-      <Text style={styles.sectionTitle}>Certificates</Text>
+      <AppText style={styles.sectionTitle}>Certificates</AppText>
 
       {/* Upload Form */}
       <View style={styles.form}>
-        <Text style={styles.label}>Title</Text>
+        <AppText style={styles.label}>Title</AppText>
         <TextInput
           style={styles.input}
           placeholder="e.g. AWS Certified Developer"
@@ -144,7 +144,7 @@ export default function CertificateSection() {
           onChangeText={setTitle}
         />
 
-        <Text style={styles.label}>Description (optional)</Text>
+        <AppText style={styles.label}>Description (optional)</AppText>
         <TextInput
           style={[styles.input, styles.textArea]}
           placeholder="What is this certification for?"
@@ -156,12 +156,12 @@ export default function CertificateSection() {
 
         {/* Placeholder for file picker — replace with expo-document-picker in production */}
         <View style={styles.filePlaceholder}>
-          <Text style={styles.filePlaceholderText}>
+          <AppText style={styles.filePlaceholderText}>
             {fileName || 'Tap to select a file (PDF, image, etc.)'}
-          </Text>
-          <Text style={styles.fileHint}>
+          </AppText>
+          <AppText style={styles.fileHint}>
             Max 10MB. File will be base64-encoded before upload.
-          </Text>
+          </AppText>
           <TouchableOpacity
             style={styles.filePickerBtn}
             onPress={() => Alert.alert(
@@ -170,7 +170,7 @@ export default function CertificateSection() {
               [{ text: 'OK' }]
             )}
           >
-            <Text style={styles.filePickerText}>Select File</Text>
+            <AppText style={styles.filePickerText}>Select File</AppText>
           </TouchableOpacity>
         </View>
 
@@ -182,7 +182,7 @@ export default function CertificateSection() {
           {uploading ? (
             <ActivityIndicator color="#fff" size="small" />
           ) : (
-            <Text style={styles.uploadBtnText}>Upload Certificate</Text>
+            <AppText style={styles.uploadBtnText}>Upload Certificate</AppText>
           )}
         </TouchableOpacity>
       </View>
@@ -195,15 +195,15 @@ export default function CertificateSection() {
           {certificates.map((cert) => (
             <View key={cert.id} style={styles.certItem}>
               <View style={styles.certInfo}>
-                <Text style={styles.certIcon}>{getTypeIcon(cert.mimeType)}</Text>
+                <AppText style={styles.certIcon}>{getTypeIcon(cert.mimeType)}</AppText>
                 <View style={styles.certDetails}>
-                  <Text style={styles.certTitle}>{cert.title}</Text>
+                  <AppText style={styles.certTitle}>{cert.title}</AppText>
                   {cert.description ? (
-                    <Text style={styles.certDesc}>{cert.description}</Text>
+                    <AppText style={styles.certDesc}>{cert.description}</AppText>
                   ) : null}
-                  <Text style={styles.certMeta}>
+                  <AppText style={styles.certMeta}>
                     {formatFileSize(cert.fileSize)} · {new Date(cert.createdAt).toLocaleDateString()}
-                  </Text>
+                  </AppText>
                 </View>
                 {cert.verified && <Badge label="Verified" color={colors.success} backgroundColor="#E4F7E4" />}
               </View>
@@ -211,12 +211,12 @@ export default function CertificateSection() {
                 style={styles.deleteBtn}
                 onPress={() => handleDelete(cert.id)}
               >
-                <Text style={styles.deleteText}>✕</Text>
+                <AppText style={styles.deleteText}>✕</AppText>
               </TouchableOpacity>
             </View>
           ))}
           {certificates.length === 0 && !loading && (
-            <Text style={styles.empty}>No certificates uploaded yet.</Text>
+            <AppText style={styles.empty}>No certificates uploaded yet.</AppText>
           )}
         </View>
       )}
@@ -227,6 +227,7 @@ export default function CertificateSection() {
 // Inline TextInput for React Native (avoids import issues)
 const { TextInput } = require('react-native');
 
+import { AppText } from './ui';
 const styles = StyleSheet.create({
   container: { padding: spacing.lg, gap: spacing.md },
   sectionTitle: {

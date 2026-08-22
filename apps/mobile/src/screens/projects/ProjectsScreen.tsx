@@ -17,6 +17,7 @@ import { useAuthStore } from '../../store/auth';
 import type { RootStackParamList } from '../../App';
 import { colors, spacing, typography, radius } from '../../theme';
 
+import { AppText } from './../../components/ui';
 type ProjectsScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Projects'>;
 
 const TYPE_LABELS: Record<string, string> = {
@@ -95,26 +96,26 @@ export default function ProjectsScreen({ navigation }: Props) {
     <TouchableOpacity activeOpacity={0.9} onPress={() => navigation.navigate('ProjectDetail', { projectId: item.id })}>
       <Card style={styles.card}>
         <View style={styles.cardHead}>
-          <Text style={styles.cardTitle} numberOfLines={2}>{item.title}</Text>
+          <AppText style={styles.cardTitle} numberOfLines={2}>{item.title}</AppText>
           <Badge
             label={TYPE_LABELS[item.type] || item.type}
             color={colors.primary}
             backgroundColor={TYPE_COLORS[item.type] || colors.primaryLight}
           />
         </View>
-        <Text style={styles.cardDesc} numberOfLines={2}>{item.description}</Text>
+        <AppText style={styles.cardDesc} numberOfLines={2}>{item.description}</AppText>
         <View style={styles.cardMeta}>
-          <Text style={styles.cardBudget}>{item.budget ? `$${item.budget}` : 'Budget TBD'}</Text>
-          <Text style={styles.cardSkills} numberOfLines={1}>
+          <AppText style={styles.cardBudget}>{item.budget ? `$${item.budget}` : 'Budget TBD'}</AppText>
+          <AppText style={styles.cardSkills} numberOfLines={1}>
             {item.skillsRequired.join(' · ')}
-          </Text>
+          </AppText>
         </View>
         {item.location ? (
-          <Text style={styles.cardLocation}>
+          <AppText style={styles.cardLocation}>
             📍 {item.location}{item.remote ? ' · Remote' : ''}
-          </Text>
+          </AppText>
         ) : item.remote ? (
-          <Text style={styles.cardLocation}>🌐 Remote</Text>
+          <AppText style={styles.cardLocation}>🌐 Remote</AppText>
         ) : null}
         <Button
           variant={user?.role === 'student' ? 'primary' : 'secondary'}
@@ -139,7 +140,7 @@ export default function ProjectsScreen({ navigation }: Props) {
   return (
     <View style={styles.flex}>
       <View style={styles.headerBar}>
-        <Text style={styles.headerTitle}>Projects</Text>
+        <AppText style={styles.headerTitle}>Projects</AppText>
       </View>
       <FlatList
         data={projects}
@@ -147,7 +148,7 @@ export default function ProjectsScreen({ navigation }: Props) {
         keyExtractor={(i) => i.id}
         contentContainerStyle={styles.list}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={load} tintColor={colors.primary} />}
-        ListEmptyComponent={<Text style={styles.empty}>No projects available yet.</Text>}
+        ListEmptyComponent={<AppText style={styles.empty}>No projects available yet.</AppText>}
       />
     </View>
   );

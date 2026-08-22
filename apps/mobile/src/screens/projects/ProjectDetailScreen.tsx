@@ -9,6 +9,7 @@ import { useAuthStore } from '../../store/auth';
 import type { RootStackParamList } from '../../App';
 import { colors, spacing, typography, radius } from '../../theme';
 
+import { AppText } from './../../components/ui';
 const TYPE_LABELS: Record<string, string> = {
   internship: 'Internship',
   part_time: 'Part-time',
@@ -84,7 +85,7 @@ export default function ProjectDetailScreen({ navigation, route }: Props) {
   if (!project) {
     return (
       <View style={styles.center}>
-        <Text style={styles.notFound}>Project not found.</Text>
+        <AppText style={styles.notFound}>Project not found.</AppText>
       </View>
     );
   }
@@ -92,28 +93,28 @@ export default function ProjectDetailScreen({ navigation, route }: Props) {
   return (
     <ScrollView style={styles.flex} contentContainerStyle={styles.container}>
       <View style={styles.head}>
-        <Text style={styles.title}>{project.title}</Text>
+        <AppText style={styles.title}>{project.title}</AppText>
         <Badge label={TYPE_LABELS[project.type] || project.type} color={colors.primary} backgroundColor={colors.primaryLight} />
       </View>
 
       <Card style={styles.block}>
-        <Text style={styles.label}>Description</Text>
-        <Text style={styles.body}>{project.description}</Text>
+        <AppText style={styles.label}>Description</AppText>
+        <AppText style={styles.body}>{project.description}</AppText>
       </Card>
 
       <View style={styles.row}>
         <Card style={styles.stat}>
-          <Text style={styles.statValue}>{project.budget ? `$${project.budget}` : 'TBD'}</Text>
-          <Text style={styles.statLabel}>Budget</Text>
+          <AppText style={styles.statValue}>{project.budget ? `$${project.budget}` : 'TBD'}</AppText>
+          <AppText style={styles.statLabel}>Budget</AppText>
         </Card>
         <Card style={styles.stat}>
-          <Text style={styles.statValue}>{project.remote ? 'Remote' : project.location || 'Onsite'}</Text>
-          <Text style={styles.statLabel}>Location</Text>
+          <AppText style={styles.statValue}>{project.remote ? 'Remote' : project.location || 'Onsite'}</AppText>
+          <AppText style={styles.statLabel}>Location</AppText>
         </Card>
       </View>
 
       <Card style={styles.block}>
-        <Text style={styles.label}>Skills required</Text>
+        <AppText style={styles.label}>Skills required</AppText>
         <View style={styles.skills}>
           {project.skillsRequired.map((s) => (
             <Badge key={s} label={s} color={colors.textSecondary} backgroundColor={colors.surface} />
@@ -123,8 +124,8 @@ export default function ProjectDetailScreen({ navigation, route }: Props) {
 
       {project.employer?.user?.name ? (
         <Card style={styles.block}>
-          <Text style={styles.label}>Posted by</Text>
-          <Text style={styles.body}>{project.employer.user.name}</Text>
+          <AppText style={styles.label}>Posted by</AppText>
+          <AppText style={styles.body}>{project.employer.user.name}</AppText>
         </Card>
       ) : null}
 

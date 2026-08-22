@@ -13,15 +13,20 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Pressable, Text, StyleSheet, View, ActivityIndicator } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { ScrollView } from 'react-native';
 
-import { colors, typography, spacing, TAP_MIN, shadow } from './theme';
+import { colors, typography, spacing, TAP_MIN, shadow, radius } from './theme';
 import { useWorkerFonts } from './theme_fonts';
 import { useAppStore } from './store/useAppStore';
+import { useAuthStore } from './store/auth';
 import { useT } from './hooks/useT';
 import { Icon, IconName } from './components/Icon';
 
 import { RootStackParamList, MainTabParamList } from './navigation';
 import WelcomeScreen from './screens/WelcomeScreen';
+import LoginScreen from './screens/auth/LoginScreen';
+import RegisterScreen from './screens/auth/RegisterScreen';
 import JobsScreen from './screens/JobsScreen';
 import ApplicationsScreen from './screens/ApplicationsScreen';
 import PassportScreen from './screens/PassportScreen';
@@ -158,11 +163,59 @@ function JobLoader({
   return <>{children(job)}</>;
 }
 
+/**
+ * Shown when a persisted session exists but the account is not a worker
+ * (this is the worker-only app). SEC-1 enforces worker identity server-side,
+ * so a student/employer token must never reach the worker tabs. We ask the
+ * user to sign out and log in with a worker account.
+ */
+function WrongAccountScreen({ onSignOut }: { onSignOut: () => void }) {
+  const { t } = useT();
+  return (
+    <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
+      <ScrollView contentContainerStyle={styles.wrongContainer} keyboardShouldPersistTaps="handled">
+        <View style={styles.heroIcon}>
+          <Icon name="shieldCheck" size={40} color={colors.primary} />
+        </View>
+        <AppText weight="display" style={styles.title}>{t('auth.wrongAccountTitle')}</AppText>
+        <AppText style={styles.subtitle}>{t('auth.wrongAccountBody')}</AppText>
+        <Pressable
+          accessibilityRole="button"
+          onPress={onSignOut}
+          style={({ pressed }) => [styles.wrongCta, pressed && styles.wrongCtaPressed]}
+        >
+          <Icon name="arrowRight" size={20} color={colors.white} />
+          <AppText style={styles.wrongCtaText}>{t('auth.signOut')}</AppText>
+        </Pressable>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
 export default function App() {
   const fontsReady = useWorkerFonts();
   const hasChosenLanguage = useAppStore((s) => s.hasChosenLanguage);
+  const token = useAuthStore((s) => s.token);
+  const user = useAuthStore((s) => s.user);
+  const fetchMe = useAuthStore((s) => s.fetchMe);
+  const logout = useAuthStore((s) => s.logout);
+  const [booting, setBooting] = useState(true);
 
-  if (!fontsReady) {
+  // Resolve the persisted session into a full user (incl. role) so the gate
+  // can enforce worker-only access. SEC-1 requires a worker identity.
+  useEffect(() => {
+    let alive = true;
+    if (token && !user) {
+      fetchMe().finally(() => alive && setBooting(false));
+    } else {
+      setBooting(false);
+    }
+    return () => {
+      alive = false;
+    };
+  }, [token, user, fetchMe]);
+
+  if (!fontsReady || booting) {
     // Avoid a flash of system fonts / layout shift before Khmer + Inter load.
     return (
       <View style={styles.boot}>
@@ -171,13 +224,16 @@ export default function App() {
     );
   }
 
+  // A logged-in non-worker token must never reach the worker tabs.
+  const isWorker = !!token && user?.role === 'worker';
+
   return (
     <NavigationContainer>
       <StatusBar style="dark" />
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {!hasChosenLanguage ? (
           <Stack.Screen name="Welcome" component={WelcomeScreen} />
-        ) : (
+        ) : isWorker ? (
           <>
             <Stack.Screen name="Main" component={MainTabs} />
             <Stack.Screen name="JobDetail">
@@ -217,6 +273,15 @@ export default function App() {
               )}
             </Stack.Screen>
           </>
+        ) : token && user && user.role !== 'worker' ? (
+          <Stack.Screen name="WrongAccount">
+            {() => <WrongAccountScreen onSignOut={() => logout()} />}
+          </Stack.Screen>
+        ) : (
+          <>
+            <Stack.Screen name="Login" component={LoginScreen} />
+            <Stack.Screen name="Register" component={RegisterScreen} />
+          </>
         )}
       </Stack.Navigator>
     </NavigationContainer>
@@ -227,4 +292,50 @@ const styles = StyleSheet.create({
   boot: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background },
   fallback: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background },
   fallbackText: { fontSize: typography.size.base, color: colors.muted },
+  safe: { flex: 1, backgroundColor: colors.background },
+  wrongContainer: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.xxxl,
+    gap: spacing.md,
+  },
+  heroIcon: {
+    width: 72,
+    height: 72,
+    borderRadius: 20,
+    backgroundColor: colors.primarySoft,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.sm,
+  },
+  title: {
+    fontSize: typography.size.xxl,
+    fontWeight: typography.weight.bold as any,
+    color: colors.ink,
+    letterSpacing: -0.4,
+  },
+  subtitle: {
+    fontSize: typography.size.base,
+    color: colors.muted,
+    lineHeight: typography.size.base * typography.lineHeight.relaxed,
+    marginBottom: spacing.sm,
+  },
+  wrongCta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    backgroundColor: colors.primary,
+    borderRadius: radius.sm,
+    minHeight: 52,
+    paddingVertical: spacing.md,
+    marginTop: spacing.md,
+  },
+  wrongCtaPressed: { opacity: 0.9 },
+  wrongCtaText: {
+    color: colors.white,
+    fontSize: typography.size.md,
+    fontWeight: typography.weight.semibold as any,
+  },
 });

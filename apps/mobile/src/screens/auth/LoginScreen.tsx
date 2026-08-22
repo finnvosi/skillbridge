@@ -12,7 +12,7 @@ import {
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Button, Input } from '@skillbridge/ui';
 import { useAuthStore } from '../../store/auth';
-import type { RootStackParamList } from '../../App';
+import type { RootStackParamList } from '../../navigation';
 import { colors, spacing, typography, radius } from '../../theme';
 
 import { AppText } from './../../components/ui';

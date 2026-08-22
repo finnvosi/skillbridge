@@ -132,7 +132,7 @@ const styles = StyleSheet.create({
   brand: { marginBottom: spacing.xl },
   logo: {
     fontSize: typography.size.xxl,
-    fontWeight: typography.weight.bold as any,
+    fontWeight: typography.weight.bold,
     color: colors.textPrimary,
     letterSpacing: -0.4,
   },
@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
   roleBlock: { marginTop: spacing.sm },
   roleLabel: {
     fontSize: typography.size.sm,
-    fontWeight: typography.weight.medium as any,
+    fontWeight: typography.weight.medium,
     color: colors.textSecondary,
     marginBottom: spacing.xs,
     marginLeft: spacing.xs,
@@ -163,10 +163,10 @@ const styles = StyleSheet.create({
   roleOptionText: {
     fontSize: typography.size.base,
     color: colors.textSecondary,
-    fontWeight: typography.weight.medium as any,
+    fontWeight: typography.weight.medium,
   },
-  roleOptionTextActive: { color: colors.primary, fontWeight: typography.weight.semibold as any },
+  roleOptionTextActive: { color: colors.primary, fontWeight: typography.weight.semibold },
   linkRow: { marginTop: spacing.xl, alignItems: 'center' },
   linkText: { fontSize: typography.size.base, color: colors.textSecondary },
-  linkAccent: { color: colors.primary, fontWeight: typography.weight.semibold as any },
+  linkAccent: { color: colors.primary, fontWeight: typography.weight.semibold },
 });

@@ -232,13 +232,13 @@ const styles = StyleSheet.create({
   container: { padding: spacing.lg, gap: spacing.md },
   sectionTitle: {
     fontSize: typography.size.lg,
-    fontWeight: typography.weight.semibold as any,
+    fontWeight: typography.weight.semibold,
     color: colors.textPrimary,
   },
   form: { gap: spacing.sm },
   label: {
     fontSize: typography.size.sm,
-    fontWeight: typography.weight.medium as any,
+    fontWeight: typography.weight.medium,
     color: colors.textSecondary,
   },
   input: {
@@ -284,7 +284,7 @@ const styles = StyleSheet.create({
   filePickerText: {
     color: '#fff',
     fontSize: typography.size.sm,
-    fontWeight: typography.weight.medium as any,
+    fontWeight: typography.weight.medium,
   },
   uploadBtn: {
     backgroundColor: colors.success,
@@ -298,7 +298,7 @@ const styles = StyleSheet.create({
   uploadBtnText: {
     color: '#fff',
     fontSize: typography.size.base,
-    fontWeight: typography.weight.semibold as any,
+    fontWeight: typography.weight.semibold,
   },
   loader: { marginVertical: spacing.xl },
   list: { gap: spacing.sm },
@@ -315,7 +315,7 @@ const styles = StyleSheet.create({
   certDetails: { flex: 1, gap: 2 },
   certTitle: {
     fontSize: typography.size.base,
-    fontWeight: typography.weight.semibold as any,
+    fontWeight: typography.weight.semibold,
     color: colors.textPrimary,
   },
   certDesc: {

@@ -73,7 +73,7 @@ function MainTabs({ navigation, route }: any) {
         },
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.muted,
-        tabBarLabelStyle: { fontSize: 11, fontWeight: typography.weight.medium as any, marginTop: 2 },
+        tabBarLabelStyle: { fontSize: 11, fontWeight: typography.weight.medium, marginTop: 2 },
         tabBarButton: (props: any) => (
           <Pressable
             accessibilityRole="button"
@@ -411,7 +411,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: typography.size.xxl,
-    fontWeight: typography.weight.bold as any,
+    fontWeight: typography.weight.bold,
     color: colors.ink,
     letterSpacing: -0.4,
   },
@@ -436,6 +436,6 @@ const styles = StyleSheet.create({
   wrongCtaText: {
     color: colors.white,
     fontSize: typography.size.md,
-    fontWeight: typography.weight.semibold as any,
+    fontWeight: typography.weight.semibold,
   },
 });

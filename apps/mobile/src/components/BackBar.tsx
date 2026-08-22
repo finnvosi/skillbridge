@@ -55,13 +55,13 @@ const styles = StyleSheet.create({
   backPressed: { opacity: 0.7 },
   backText: {
     fontSize: typography.size.base,
-    fontWeight: typography.weight.semibold as any,
+    fontWeight: typography.weight.semibold,
     color: colors.white,
   },
   title: {
     flex: 1,
     fontSize: typography.size.md,
-    fontWeight: typography.weight.semibold as any,
+    fontWeight: typography.weight.semibold,
     color: colors.white,
   },
   right: { flexDirection: 'row', alignItems: 'center' },

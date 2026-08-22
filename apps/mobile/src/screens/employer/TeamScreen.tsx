@@ -232,7 +232,7 @@ const styles = StyleSheet.create({
   container: { padding: spacing.xl, paddingBottom: spacing.xxxl, gap: spacing.md },
   title: {
     fontSize: typography.size.xl,
-    fontWeight: typography.weight.bold as any,
+    fontWeight: typography.weight.bold,
     color: colors.textPrimary,
   },
   subtitle: { fontSize: typography.size.base, color: colors.textSecondary },
@@ -253,7 +253,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     borderRadius: radius.full,
   },
-  roleText: { fontSize: typography.size.sm, fontWeight: typography.weight.medium as any },
+  roleText: { fontSize: typography.size.sm, fontWeight: typography.weight.medium },
   memberList: { gap: spacing.sm },
   memberItem: {
     flexDirection: 'row',
@@ -270,9 +270,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  avatarText: { fontSize: 13, fontWeight: typography.weight.bold as any },
+  avatarText: { fontSize: 13, fontWeight: typography.weight.bold },
   memberInfo: { flex: 1, minWidth: 0, gap: 2 },
-  memberName: { fontSize: typography.size.base, fontWeight: typography.weight.semibold as any, color: colors.textPrimary },
+  memberName: { fontSize: typography.size.base, fontWeight: typography.weight.semibold, color: colors.textPrimary },
   memberSub: { fontSize: typography.size.sm, color: colors.textSecondary },
   memberStatus: { fontSize: typography.size.xs, color: colors.textTertiary },
   removeBtn: {
@@ -281,7 +281,7 @@ const styles = StyleSheet.create({
   },
   removeText: {
     fontSize: typography.size.sm,
-    fontWeight: typography.weight.semibold as any,
+    fontWeight: typography.weight.semibold,
     color: colors.danger,
   },
   empty: { textAlign: 'center', color: colors.textTertiary, marginTop: spacing.md, fontSize: typography.size.base },

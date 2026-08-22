@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
   checkedDate: { fontSize: typography.size.xs, color: colors.muted },
   title: {
     fontSize: typography.size.lg,
-    fontWeight: typography.weight.semibold as any,
+    fontWeight: typography.weight.semibold,
     color: colors.ink,
     marginTop: spacing.xs,
   },
@@ -105,13 +105,13 @@ const styles = StyleSheet.create({
     fontSize: typography.size.xs,
     color: colors.muted,
   },
-  factValue: { fontSize: typography.size.md, fontWeight: typography.weight.semibold as any, color: colors.ink },
+  factValue: { fontSize: typography.size.md, fontWeight: typography.weight.semibold, color: colors.ink },
   factUnit: { fontSize: typography.size.xs, color: colors.muted },
   distRow: { flexDirection: 'row', alignItems: 'center', gap: 3 },
   matchRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, marginTop: spacing.xs },
   matchText: {
     fontSize: typography.size.base,
-    fontWeight: typography.weight.medium as any,
+    fontWeight: typography.weight.medium,
     color: colors.success,
   },
   footer: {
@@ -132,7 +132,7 @@ const styles = StyleSheet.create({
   viewRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
   viewLabel: {
     fontSize: typography.size.base,
-    fontWeight: typography.weight.semibold as any,
+    fontWeight: typography.weight.semibold,
     color: colors.primary,
   },
 });

@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
   },
   brandText: {
     fontSize: typography.size.lg,
-    fontWeight: typography.weight.bold as any,
+    fontWeight: typography.weight.bold,
     color: colors.white,
     letterSpacing: 0.2,
   },
@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
   },
   langText: {
     fontSize: typography.size.sm,
-    fontWeight: typography.weight.semibold as any,
+    fontWeight: typography.weight.semibold,
     color: colors.white,
   },
   bell: {

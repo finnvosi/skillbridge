@@ -180,7 +180,7 @@ export default function ReportScreen({
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   scroll: { padding: spacing.lg, gap: spacing.md },
-  label: { fontSize: typography.size.sm, fontWeight: typography.weight.semibold as any, color: colors.muted, marginTop: spacing.sm },
+  label: { fontSize: typography.size.sm, fontWeight: typography.weight.semibold, color: colors.muted, marginTop: spacing.sm },
   cats: { gap: spacing.sm, marginTop: spacing.xs },
   cat: {
     flexDirection: 'row',
@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
   catActive: { backgroundColor: colors.accentSoft, borderColor: colors.accent },
   catPressed: { opacity: 0.85 },
   catText: { flex: 1, fontSize: typography.size.base, color: colors.ink },
-  catTextActive: { fontWeight: typography.weight.semibold as any, color: colors.accent },
+  catTextActive: { fontWeight: typography.weight.semibold, color: colors.accent },
   inputBox: {
     backgroundColor: colors.surface,
     borderWidth: 1,
@@ -211,7 +211,7 @@ const styles = StyleSheet.create({
   cta: { gap: spacing.sm, marginTop: spacing.sm, alignItems: 'stretch' },
   confirmWrap: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: spacing.xl, gap: spacing.md },
   confirmIcon: { width: 72, height: 72, borderRadius: 36, alignItems: 'center', justifyContent: 'center' },
-  confirmTitle: { fontSize: typography.size.lg, fontWeight: typography.weight.bold as any, color: colors.ink, textAlign: 'center' },
+  confirmTitle: { fontSize: typography.size.lg, fontWeight: typography.weight.bold, color: colors.ink, textAlign: 'center' },
   confirmBox: { width: '100%', gap: spacing.sm },
   confirmRow: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm },
   confirmText: { flex: 1, fontSize: typography.size.sm, color: colors.ink, lineHeight: typography.size.sm * typography.lineHeight.relaxed },

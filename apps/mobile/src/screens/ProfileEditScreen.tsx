@@ -225,7 +225,7 @@ import { DemoTag } from '../components/ui';
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   scroll: { padding: spacing.lg, gap: spacing.lg },
-  title: { fontSize: typography.size.xl, fontWeight: typography.weight.bold as any, color: colors.ink },
+  title: { fontSize: typography.size.xl, fontWeight: typography.weight.bold, color: colors.ink },
   subtitle: {
     fontSize: typography.size.sm,
     color: colors.muted,
@@ -273,7 +273,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.lg,
   },
-  addBtnText: { fontSize: typography.size.sm, fontWeight: typography.weight.semibold as any, color: colors.primary },
+  addBtnText: { fontSize: typography.size.sm, fontWeight: typography.weight.semibold, color: colors.primary },
   hit: { top: 8, bottom: 8, left: 12, right: 12 },
   errorBox: {
     flexDirection: 'row',

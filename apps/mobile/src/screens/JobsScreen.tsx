@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
   chipText: {
     fontSize: typography.size.sm,
     lineHeight: 22,
-    fontWeight: typography.weight.semibold as any,
+    fontWeight: typography.weight.semibold,
     color: colors.muted,
   },
   chipTextActive: { color: colors.accent },
@@ -207,11 +207,11 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: typography.size.sm,
     lineHeight: 22,
-    fontWeight: typography.weight.semibold as any,
+    fontWeight: typography.weight.semibold,
     color: colors.muted,
   },
   list: { paddingHorizontal: spacing.lg, gap: spacing.lg },
   empty: { alignItems: 'center', paddingVertical: spacing.xxxl, paddingHorizontal: spacing.xl },
-  emptyTitle: { fontSize: typography.size.md, fontWeight: typography.weight.semibold as any, color: colors.ink, textAlign: 'center' },
+  emptyTitle: { fontSize: typography.size.md, fontWeight: typography.weight.semibold, color: colors.ink, textAlign: 'center' },
   emptySub: { fontSize: typography.size.base, color: colors.muted, textAlign: 'center', marginTop: spacing.sm },
 });

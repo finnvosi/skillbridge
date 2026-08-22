@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
   brand: { marginBottom: spacing.xxxl, alignItems: 'flex-start' },
   logo: {
     fontSize: typography.size.display,
-    fontWeight: typography.weight.bold as any,
+    fontWeight: typography.weight.bold,
     color: colors.textPrimary,
     letterSpacing: -0.5,
   },
@@ -118,6 +118,6 @@ const styles = StyleSheet.create({
   linkText: { fontSize: typography.size.base, color: colors.textSecondary },
   linkAccent: {
     color: colors.primary,
-    fontWeight: typography.weight.semibold as any,
+    fontWeight: typography.weight.semibold,
   },
 });

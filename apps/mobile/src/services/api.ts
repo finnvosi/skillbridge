@@ -30,7 +30,7 @@ function buildUrl(path: string, query?: RequestOptions['query']): string {
   return url.toString();
 }
 
-export async function apiRequest<T = any>(
+export async function apiRequest<T = unknown>(
   path: string,
   { method = 'GET', body, token, query }: RequestOptions = {}
 ): Promise<T> {
@@ -47,7 +47,7 @@ export async function apiRequest<T = any>(
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
 
-  let data: any = null;
+  let data: unknown = null;
   const text = await res.text();
   if (text) {
     try {
@@ -58,9 +58,13 @@ export async function apiRequest<T = any>(
   }
 
   if (!res.ok) {
+    const errObj =
+      typeof data === 'object' && data !== null ? (data as Record<string, unknown>) : {};
     const message =
-      (data && (data.error || data.message)) || `Request failed (${res.status})`;
-    throw new ApiError(message, res.status, data?.details);
+      (typeof errObj.error === 'string' && errObj.error) ||
+      (typeof errObj.message === 'string' && errObj.message) ||
+      `Request failed (${res.status})`;
+    throw new ApiError(message, res.status, errObj.details);
   }
 
   return data as T;

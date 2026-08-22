@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: typography.size.xxl,
-    fontWeight: typography.weight.bold as any,
+    fontWeight: typography.weight.bold,
     color: colors.ink,
     letterSpacing: -0.4,
   },
@@ -114,14 +114,14 @@ const styles = StyleSheet.create({
   uvp: {
     fontSize: typography.size.base,
     color: colors.primary,
-    fontWeight: typography.weight.semibold as any,
+    fontWeight: typography.weight.semibold,
     lineHeight: typography.size.base * typography.lineHeight.relaxed,
     marginTop: spacing.xs,
   },
   chooseWrap: { gap: spacing.md },
   chooseLabel: {
     fontSize: typography.size.sm,
-    fontWeight: typography.weight.semibold as any,
+    fontWeight: typography.weight.semibold,
     color: colors.muted,
   },
   langCard: {
@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
   langTextWrap: { flex: 1 },
   langName: {
     fontSize: typography.size.md,
-    fontWeight: typography.weight.semibold as any,
+    fontWeight: typography.weight.semibold,
     color: colors.ink,
   },
   langHint: { fontSize: typography.size.sm, color: colors.muted, marginTop: 2 },
@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
   continueText: {
     color: colors.white,
     fontSize: typography.size.md,
-    fontWeight: typography.weight.semibold as any,
+    fontWeight: typography.weight.semibold,
   },
   demoNote: {
     fontSize: typography.size.sm,

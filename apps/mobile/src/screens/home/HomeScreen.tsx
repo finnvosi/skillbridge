@@ -66,7 +66,7 @@ const styles = StyleSheet.create({
   header: { marginBottom: spacing.xl },
   greeting: {
     fontSize: typography.size.xxl,
-    fontWeight: typography.weight.bold as any,
+    fontWeight: typography.weight.bold,
     color: colors.textPrimary,
     letterSpacing: -0.4,
   },
@@ -83,7 +83,7 @@ const styles = StyleSheet.create({
   actionText: { flex: 1 },
   actionLabel: {
     fontSize: typography.size.md,
-    fontWeight: typography.weight.semibold as any,
+    fontWeight: typography.weight.semibold,
     color: colors.textPrimary,
   },
   actionSub: { fontSize: typography.size.sm, color: colors.textSecondary, marginTop: 2 },
@@ -91,6 +91,6 @@ const styles = StyleSheet.create({
   logoutText: {
     fontSize: typography.size.base,
     color: colors.danger,
-    fontWeight: typography.weight.medium as any,
+    fontWeight: typography.weight.medium,
   },
 });

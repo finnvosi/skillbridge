@@ -99,11 +99,11 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   scroll: { padding: spacing.lg, gap: spacing.lg },
   head: { gap: spacing.xs },
-  title: { fontSize: typography.size.xl, fontWeight: typography.weight.bold as any, color: colors.ink },
+  title: { fontSize: typography.size.xl, fontWeight: typography.weight.bold, color: colors.ink },
   subtitle: { fontSize: typography.size.base, color: colors.muted },
   promise: { flexDirection: 'row', gap: spacing.sm, backgroundColor: colors.primarySoft, borderWidth: 1, borderColor: colors.primary },
   promiseText: { flex: 1, fontSize: typography.size.sm, color: colors.primary, lineHeight: typography.size.sm * typography.lineHeight.relaxed },
-  scamTitle: { fontSize: typography.size.sm, fontWeight: typography.weight.semibold as any, color: colors.muted },
+  scamTitle: { fontSize: typography.size.sm, fontWeight: typography.weight.semibold, color: colors.muted },
   cats: { gap: spacing.sm },
   cat: {
     flexDirection: 'row',
@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
   },
   catPressed: { backgroundColor: colors.surfaceMuted },
   catIcon: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
-  catText: { flex: 1, fontSize: typography.size.base, fontWeight: typography.weight.medium as any, color: colors.ink },
+  catText: { flex: 1, fontSize: typography.size.base, fontWeight: typography.weight.medium, color: colors.ink },
   cta: { gap: spacing.sm, marginTop: spacing.sm },
   noApply: { fontSize: typography.size.sm, color: colors.muted, textAlign: 'center', lineHeight: typography.size.sm * typography.lineHeight.relaxed },
   logout: {
@@ -134,5 +134,5 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
   },
   logoutPressed: { backgroundColor: colors.surfaceMuted },
-  logoutText: { fontSize: typography.size.base, color: colors.muted, fontWeight: typography.weight.medium as any },
+  logoutText: { fontSize: typography.size.base, color: colors.muted, fontWeight: typography.weight.medium },
 });

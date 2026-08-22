@@ -213,13 +213,13 @@ const styles = StyleSheet.create({
   },
   avatarText: {
     fontSize: 13,
-    fontWeight: typography.weight.bold as any,
+    fontWeight: typography.weight.bold,
     color: colors.background,
   },
   cardInfo: { flex: 1, minWidth: 0 },
   cardName: {
     fontSize: typography.size.base,
-    fontWeight: typography.weight.semibold as any,
+    fontWeight: typography.weight.semibold,
     color: colors.textPrimary,
   },
   cardSub: { fontSize: typography.size.sm, color: colors.textSecondary },

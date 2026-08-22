@@ -108,7 +108,7 @@ export function Button({
             style={{
               color: fg,
               fontSize: typography.size.base,
-              fontWeight: typography.weight.semibold as any,
+              fontWeight: typography.weight.semibold,
             }}
           >
             {children}
@@ -171,7 +171,7 @@ export function VerifyBadge({ level, label }: VerifyBadgeProps) {
       ]}
     >
       <Icon name={verified ? 'checkCircle' : 'info'} size={16} color={fg} />
-      <AppText style={[styles.pillText, { color: verified ? colors.ink : colors.muted, fontWeight: typography.weight.semibold as any }]}>
+      <AppText style={[styles.pillText, { color: verified ? colors.ink : colors.muted, fontWeight: typography.weight.semibold }]}>
         {label}
       </AppText>
     </View>
@@ -204,7 +204,7 @@ export function StatusPill({
   return (
     <View style={[styles.pill, { backgroundColor: t.bg, borderWidth: 1, borderColor: t.border }]}>
       <Icon name={icon} size={15} color={t.fg} />
-      <AppText style={[styles.pillText, { color: t.fg, fontWeight: typography.weight.semibold as any }]}>
+      <AppText style={[styles.pillText, { color: t.fg, fontWeight: typography.weight.semibold }]}>
         {label}
       </AppText>
     </View>
@@ -225,7 +225,7 @@ export function DemoTag({ onDark = false }: { onDark?: boolean }) {
       ]}
     >
       <Icon name="info" size={14} color={onDark ? colors.white : colors.muted} />
-      <AppText style={[styles.pillText, { color: onDark ? colors.white : colors.muted, fontWeight: typography.weight.medium as any }]}>
+      <AppText style={[styles.pillText, { color: onDark ? colors.white : colors.muted, fontWeight: typography.weight.medium }]}>
         {t('common.demo')}
       </AppText>
     </View>
@@ -364,7 +364,7 @@ const styles = StyleSheet.create({
   },
   stateTitle: {
     fontSize: typography.size.md,
-    fontWeight: typography.weight.semibold as any,
+    fontWeight: typography.weight.semibold,
     color: colors.ink,
     textAlign: 'center',
   },
@@ -377,7 +377,7 @@ const styles = StyleSheet.create({
   },
   sectionLabel: {
     fontSize: typography.size.sm,
-    fontWeight: typography.weight.semibold as any,
+    fontWeight: typography.weight.semibold,
     color: colors.muted,
     marginBottom: spacing.sm,
   },

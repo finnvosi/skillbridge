@@ -2,7 +2,7 @@
 // verification date/provenance, and a local demo share toggle.
 // Stays on-device; nothing is sent to a server.
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, Switch, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, Switch, Pressable, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors, typography, spacing, radius } from '../theme';
 import { useT } from '../hooks/useT';
@@ -15,7 +15,7 @@ import { USE_REMOTE_API } from '../config';
 import { useAuthStore } from '../store/auth';
 import { DemoPassport } from '../types';
 import { AppText } from './../components/ui';
-export default function PassportScreen() {
+export default function PassportScreen({ onEditPassport }: { onEditPassport?: () => void }) {
   const { t, formatDate } = useT();
   const storePassport = useAppStore((s) => s.passport);
   const setShareEnabled = useAppStore((s) => s.setShareEnabled);
@@ -44,7 +44,26 @@ export default function PassportScreen() {
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
-      <Header right={<DemoTag onDark />} />
+      <Header
+        right={
+          <View style={styles.headerRight}>
+            {onEditPassport ? (
+              <Pressable
+                accessibilityRole="button"
+                onPress={onEditPassport}
+                style={({ pressed }: { pressed: boolean }) => [
+                  styles.editBtn,
+                  pressed && { opacity: 0.7 },
+                ]}
+              >
+                <Icon name="edit" size={16} color={colors.white} />
+                <AppText style={styles.editBtnText}>{t('passport.edit')}</AppText>
+              </Pressable>
+            ) : null}
+            <DemoTag onDark />
+          </View>
+        }
+      />
       <ScrollView contentContainerStyle={styles.scroll}>
         <Card elevated style={styles.identity}>
           <View style={styles.identityTop}>
@@ -238,4 +257,22 @@ const styles = StyleSheet.create({
   shareDemoText: { flex: 1, fontSize: typography.size.sm, color: colors.ink, lineHeight: typography.size.sm * typography.lineHeight.relaxed },
   demoNote: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm, padding: spacing.md, borderRadius: radius.sm },
   demoNoteText: { flex: 1, fontSize: typography.size.sm, color: colors.muted, lineHeight: typography.size.sm * typography.lineHeight.relaxed },
+  headerRight: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  editBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.md,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.35)',
+    backgroundColor: 'rgba(255,255,255,0.10)',
+    minHeight: 36,
+  },
+  editBtnText: {
+    fontSize: typography.size.sm,
+    fontWeight: typography.weight.semibold,
+    color: colors.white,
+  },
 });

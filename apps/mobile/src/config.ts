@@ -56,6 +56,9 @@ export const API_ENDPOINTS = {
     apply: '/worker/applications',
     applications: '/worker/me/applications',
     passport: '/worker/me/passport',
+    updatePassport: '/worker/me/passport',
+    notifications: '/worker/me/notifications',
+    notificationRead: (id: string) => `/worker/me/notifications/${id}/read`,
   },
 } as const;
 

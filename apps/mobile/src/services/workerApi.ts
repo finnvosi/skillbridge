@@ -239,3 +239,61 @@ export async function submitApplication(
   );
   return data;
 }
+
+export interface PassportEditable {
+  fullName?: string;
+  preferredArea?: string;
+  availability?: string;
+  skills?: string[];
+  languages?: string[];
+}
+
+export async function updatePassport(
+  body: PassportEditable,
+  token?: string | null,
+): Promise<DemoPassport | null> {
+  try {
+    const p = await apiRequest<ApiPassport>(
+      API_ENDPOINTS.worker.updatePassport,
+      {
+        method: 'PATCH',
+        body,
+        ...(token ? { token } : {}),
+      },
+    );
+    return mapPassport(p);
+  } catch {
+    return null;
+  }
+}
+
+// ---- Notifications -----------------------------------------------------------
+
+export interface AppNotification {
+  id: string;
+  type: string;
+  title: string;
+  body: string;
+  readAt: string | null;
+  createdAt: string;
+}
+
+export async function fetchNotifications(
+  token?: string | null,
+): Promise<AppNotification[]> {
+  const data = await apiRequest<{ notifications: AppNotification[] }>(
+    API_ENDPOINTS.worker.notifications,
+    token ? { method: 'GET', token } : { method: 'GET' },
+  );
+  return data.notifications ?? [];
+}
+
+export async function markNotificationRead(
+  id: string,
+  token?: string | null,
+): Promise<void> {
+  await apiRequest(API_ENDPOINTS.worker.notificationRead(id), {
+    method: 'POST',
+    ...(token ? { token } : {}),
+  });
+}

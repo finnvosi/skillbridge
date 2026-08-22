@@ -30,7 +30,8 @@ export type IconName =
   | 'money'
   | 'language'
   | 'list'
-  | 'bell';
+  | 'bell'
+  | 'edit';
 
 interface IconProps {
   name: IconName;
@@ -308,6 +309,13 @@ const BUILDERS: Record<IconName, Builder> = {
       {dot(12, 4, 1.6, c)}
       {box(6, 6, 12, 10, { tl: 6, tr: 6, bl: 1, br: 1 }, c, true)}
       {dot(12, 18.5, 1.8, c)}
+    </>
+  ),
+  edit: (c, t) => (
+    <>
+      {seg(14, 4, 20, 10, t, c)}
+      {seg(4, 20, 15, 9, t, c)}
+      {seg(15, 9, 12, 6, t, c)}
     </>
   ),
 };

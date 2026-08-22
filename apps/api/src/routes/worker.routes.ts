@@ -142,7 +142,10 @@ router.post(
       .workerProfileId;
     const { jobId, shareWorkRecords } = (req as any).body;
 
-    const job = await prisma.job.findUnique({ where: { id: jobId } });
+    const job = await prisma.job.findUnique({
+      where: { id: jobId },
+      include: { company: true },
+    });
     if (!job) return res.status(404).json({ error: 'Job not found' });
 
     const existing = await prisma.workerApplication.findUnique({
@@ -157,6 +160,18 @@ router.post(
     const application = await prisma.workerApplication.create({
       data: { workerId, jobId, status: 'submitted' },
     });
+
+    // In-app notification for the worker (notification center + push updates).
+    if (req.user) {
+      await prisma.notification.create({
+        data: {
+          userId: req.user.id,
+          type: 'application_status_changed',
+          title: 'Application submitted',
+          body: `Applied to ${job.title} at ${job.company.name}`,
+        },
+      });
+    }
 
     res.status(201).json({
       applicationId: application.id,
@@ -233,6 +248,102 @@ router.get(
         provenance: r.provenance,
       })),
     });
+  }),
+);
+
+// ---- PATCH /api/v1/worker/me/passport (AUTH) ------------------------------
+// Worker edits their own Passport profile. Identity is derived from the resolved
+// WorkerProfile (SEC-1); the caller can only update fields on their own record.
+// `identityVerified` and `workRecords` are intentionally NOT writable here — they
+// are operator/verifier-managed and must never be self-asserted by a worker.
+
+const updatePassportSchema = z.object({
+  body: z.object({
+    fullName: z.string().min(1).max(120).optional(),
+    preferredArea: z.string().max(120).optional(),
+    availability: z.string().max(120).optional(),
+    skills: z.array(z.string().min(1).max(60)).max(40).optional(),
+    languages: z.array(z.string().min(1).max(60)).max(40).optional(),
+  }),
+});
+
+router.patch(
+  '/me/passport',
+  requireWorker,
+  validate(updatePassportSchema),
+  asyncHandler(async (req: AuthRequest, res: Response) => {
+    const workerId = (req as AuthRequest & { workerProfileId: string })
+      .workerProfileId;
+    const { fullName, preferredArea, availability, skills, languages } = (req as any)
+      .body;
+
+    // Only set the fields that were actually provided, so a partial update does
+    // not clobber fields the worker did not intend to change.
+    const data: Record<string, unknown> = {};
+    if (fullName !== undefined) data.fullName = fullName;
+    if (preferredArea !== undefined) data.preferredArea = preferredArea;
+    if (availability !== undefined) data.availability = availability;
+    if (skills !== undefined) data.skills = skills;
+    if (languages !== undefined) data.languages = languages;
+
+    const updated = await prisma.workerProfile.update({
+      where: { id: workerId },
+      data,
+      select: {
+        id: true,
+        fullName: true,
+        phone: true,
+        preferredArea: true,
+        availability: true,
+        identityVerified: true,
+        skills: true,
+        languages: true,
+      },
+    });
+
+    res.json({ passport: updated });
+  }),
+);
+
+// ---- GET /api/v1/worker/me/notifications (AUTH) ----------------------------
+// In-app notification center (blueprint §7 must-ship: push notification plus
+// in-app notification center). Worker-scoped via the JWT identity.
+
+router.get(
+  '/me/notifications',
+  requireWorker,
+  asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user!.id;
+    const notifications = await prisma.notification.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      take: 50,
+    });
+    res.json({
+      notifications: notifications.map((n) => ({
+        id: n.id,
+        type: n.type,
+        title: n.title,
+        body: n.body,
+        readAt: n.readAt,
+        createdAt: n.createdAt,
+      })),
+    });
+  }),
+);
+
+// ---- POST /api/v1/worker/me/notifications/:id/read (AUTH) ------------------
+
+router.post(
+  '/me/notifications/:id/read',
+  requireWorker,
+  asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user!.id;
+    const updated = await prisma.notification.updateMany({
+      where: { id: req.params.id, userId, readAt: null },
+      data: { readAt: new Date() },
+    });
+    res.json({ updated: updated.count });
   }),
 );
 

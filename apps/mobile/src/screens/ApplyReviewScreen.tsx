@@ -9,6 +9,7 @@ import { DemoJob, DemoApplication } from '../types';
 import { useT } from '../hooks/useT';
 import { useAppStore } from '../store/useAppStore';
 import { submitApplication as submitApplicationApi } from '../services/workerApi';
+import { requestNotificationPermission, showLocalNotification } from '../services/notifications';
 import { ApiError } from '../services/api';
 import { USE_REMOTE_API } from '../config';
 import { useAuthStore } from '../store/auth';
@@ -58,6 +59,14 @@ export default function ApplyReviewScreen({
     };
     // Persist locally so the Applications tab shows it even if the API is down.
     submitApplication(app);
+
+    // Local notification on native devices (no-op on web); the first apply is
+    // the natural moment to ask for notification permission.
+    requestNotificationPermission().then((granted) => {
+      if (granted) {
+        showLocalNotification(t('apply.done'), `${job.title} · ${job.company}`);
+      }
+    });
 
     const finish = () => {
       setSubmitting(false);

@@ -1,8 +1,8 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { apiRequest, ApiError } from '../services/api';
 import { API_ENDPOINTS } from '../config';
+import { secureStorage } from './secureStorage';
 
 /**
  * Shape of the user object returned by the SkillBridge Express API.
@@ -207,7 +207,9 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'auth-storage',
-      storage: createJSONStorage(() => AsyncStorage),
+      // Tokens live in the secure store on native (Keychain/Keystore) so a
+      // device-level compromise doesn't expose session material as plaintext.
+      storage: createJSONStorage(() => secureStorage),
       partialize: (state) => ({
         user: state.user,
         token: state.token,

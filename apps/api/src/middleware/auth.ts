@@ -112,6 +112,9 @@ export async function requireWorker(
       role: string;
     };
     userId = decoded.id;
+    // Attach the authenticated user so worker handlers can reference it
+    // (e.g. create notifications) without re-deriving identity.
+    req.user = decoded;
   } catch (error) {
     return res.status(403).json({ error: 'Invalid or expired token' });
   }

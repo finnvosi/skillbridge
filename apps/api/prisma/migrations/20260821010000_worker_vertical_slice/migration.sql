@@ -10,77 +10,120 @@ CREATE TYPE "EmploymentType" AS ENUM ('full_time', 'contract', 'seasonal');
 -- CreateEnum
 CREATE TYPE "WorkerApplicationStatus" AS ENUM ('submitted', 'reviewing', 'shortlisted', 'interview', 'hired', 'rejected', 'withdrawn');
 
+-- REPAIR: TeamMember and PhoneOtp were created on the live DB out-of-band (prisma db push)
+-- and no migration ever contained their CREATE TABLE. This migration is the earliest one
+-- referencing them, so splice the tables in here (current-schema shape) so a fresh replay
+-- can build them. TeamMember is created WITHOUT the legacy `invitedById` column / `email_idx`
+-- index (dropped below), so those DROP statements are guarded with IF EXISTS below.
+CREATE TABLE "TeamMember" (
+    "id" TEXT NOT NULL,
+    "employerId" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+    "role" TEXT NOT NULL DEFAULT 'recruiter',
+    "status" TEXT NOT NULL DEFAULT 'invited',
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "TeamMember_pkey" PRIMARY KEY ("id")
+);
+
+CREATE INDEX "TeamMember_employerId_idx" ON "TeamMember"("employerId");
+
+ALTER TABLE "TeamMember"
+  ADD CONSTRAINT "TeamMember_employerId_fkey"
+  FOREIGN KEY ("employerId") REFERENCES "Employer"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+CREATE TABLE "PhoneOtp" (
+    "id" TEXT NOT NULL,
+    "phone" TEXT NOT NULL,
+    "codeHash" TEXT NOT NULL,
+    "expiresAt" TIMESTAMP(3) NOT NULL,
+    "attempts" INTEGER NOT NULL DEFAULT 0,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "verifiedAt" TIMESTAMP(3),
+
+    CONSTRAINT "PhoneOtp_pkey" PRIMARY KEY ("id")
+);
+
+CREATE INDEX "PhoneOtp_phone_createdAt_idx" ON "PhoneOtp"("phone", "createdAt");
+CREATE INDEX "PhoneOtp_phone_expiresAt_idx" ON "PhoneOtp"("phone", "expiresAt");
+
+-- REPAIR: the Conversation/Interview/Message/SkillAttestation tables (and their legacy
+-- columns/indexes/types below) were created out-of-band and dropped on the live DB; no
+-- migration ever created them, so a fresh replay has nothing to drop. All DROP statements
+-- for those objects are guarded with IF EXISTS to replay cleanly from an empty database.
 -- DropForeignKey
-ALTER TABLE "Conversation" DROP CONSTRAINT "Conversation_applicationId_fkey";
+ALTER TABLE IF EXISTS "Conversation" DROP CONSTRAINT IF EXISTS "Conversation_applicationId_fkey";
 
 -- DropForeignKey
-ALTER TABLE "Conversation" DROP CONSTRAINT "Conversation_employerId_fkey";
+ALTER TABLE IF EXISTS "Conversation" DROP CONSTRAINT IF EXISTS "Conversation_employerId_fkey";
 
 -- DropForeignKey
-ALTER TABLE "Conversation" DROP CONSTRAINT "Conversation_projectId_fkey";
+ALTER TABLE IF EXISTS "Conversation" DROP CONSTRAINT IF EXISTS "Conversation_projectId_fkey";
 
 -- DropForeignKey
-ALTER TABLE "Conversation" DROP CONSTRAINT "Conversation_studentId_fkey";
+ALTER TABLE IF EXISTS "Conversation" DROP CONSTRAINT IF EXISTS "Conversation_studentId_fkey";
 
 -- DropForeignKey
-ALTER TABLE "Interview" DROP CONSTRAINT "Interview_applicationId_fkey";
+ALTER TABLE IF EXISTS "Interview" DROP CONSTRAINT IF EXISTS "Interview_applicationId_fkey";
 
 -- DropForeignKey
-ALTER TABLE "Interview" DROP CONSTRAINT "Interview_employerId_fkey";
+ALTER TABLE IF EXISTS "Interview" DROP CONSTRAINT IF EXISTS "Interview_employerId_fkey";
 
 -- DropForeignKey
-ALTER TABLE "Interview" DROP CONSTRAINT "Interview_projectId_fkey";
+ALTER TABLE IF EXISTS "Interview" DROP CONSTRAINT IF EXISTS "Interview_projectId_fkey";
 
 -- DropForeignKey
-ALTER TABLE "Interview" DROP CONSTRAINT "Interview_studentId_fkey";
+ALTER TABLE IF EXISTS "Interview" DROP CONSTRAINT IF EXISTS "Interview_studentId_fkey";
 
 -- DropForeignKey
-ALTER TABLE "Message" DROP CONSTRAINT "Message_conversationId_fkey";
+ALTER TABLE IF EXISTS "Message" DROP CONSTRAINT IF EXISTS "Message_conversationId_fkey";
 
 -- DropForeignKey
-ALTER TABLE "SkillAttestation" DROP CONSTRAINT "SkillAttestation_employerId_fkey";
+ALTER TABLE IF EXISTS "SkillAttestation" DROP CONSTRAINT IF EXISTS "SkillAttestation_employerId_fkey";
 
 -- DropForeignKey
-ALTER TABLE "SkillAttestation" DROP CONSTRAINT "SkillAttestation_studentId_fkey";
+ALTER TABLE IF EXISTS "SkillAttestation" DROP CONSTRAINT IF EXISTS "SkillAttestation_studentId_fkey";
 
 -- DropIndex
-DROP INDEX "TeamMember_email_idx";
+DROP INDEX IF EXISTS "TeamMember_email_idx";
 
 -- AlterTable
-ALTER TABLE "Application" DROP COLUMN "stage";
+ALTER TABLE "Application" DROP COLUMN IF EXISTS "stage";
 
 -- AlterTable
-ALTER TABLE "Project" DROP COLUMN "publishedAt";
+ALTER TABLE "Project" DROP COLUMN IF EXISTS "publishedAt";
 
 -- AlterTable
 ALTER TABLE "Student" DROP COLUMN "bio";
 
 -- AlterTable
-ALTER TABLE "TeamMember" DROP COLUMN "invitedById";
+ALTER TABLE "TeamMember" DROP COLUMN IF EXISTS "invitedById";
 
 -- DropTable
-DROP TABLE "Conversation";
+DROP TABLE IF EXISTS "Conversation";
 
 -- DropTable
-DROP TABLE "Interview";
+DROP TABLE IF EXISTS "Interview";
 
 -- DropTable
-DROP TABLE "Message";
+DROP TABLE IF EXISTS "Message";
 
 -- DropTable
-DROP TABLE "SkillAttestation";
+DROP TABLE IF EXISTS "SkillAttestation";
 
 -- DropEnum
-DROP TYPE "ApplicationStage";
+DROP TYPE IF EXISTS "ApplicationStage";
 
 -- DropEnum
-DROP TYPE "InterviewRecommendation";
+DROP TYPE IF EXISTS "InterviewRecommendation";
 
 -- DropEnum
-DROP TYPE "InterviewStatus";
+DROP TYPE IF EXISTS "InterviewStatus";
 
 -- DropEnum
-DROP TYPE "InterviewType";
+DROP TYPE IF EXISTS "InterviewType";
 
 -- CreateTable
 CREATE TABLE "Company" (

@@ -28,13 +28,16 @@ export function effectiveStatus(app: DemoApplication): ApplicationStatus {
 interface AppState {
   locale: Locale;
   hasChosenLanguage: boolean;
+  hasConsented: boolean;
   applications: DemoApplication[];
   passport: DemoPassport;
   setLocale: (locale: Locale) => void;
   chooseLanguage: (locale: Locale) => void;
+  consentToTerms: () => void;
   submitApplication: (app: DemoApplication) => void;
   hasAppliedToJob: (jobId: string) => boolean;
   setShareEnabled: (enabled: boolean) => void;
+  setPassport: (passport: DemoPassport) => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -42,11 +45,13 @@ export const useAppStore = create<AppState>()(
     (set, get) => ({
       locale: 'km',
       hasChosenLanguage: false,
+      hasConsented: false,
       applications: [],
       passport: DEMO_PASSPORT,
 
       setLocale: (locale) => set({ locale }),
       chooseLanguage: (locale) => set({ locale, hasChosenLanguage: true }),
+      consentToTerms: () => set({ hasConsented: true }),
 
       submitApplication: (app) => {
         // Demo only: avoid duplicate applications for the same job.
@@ -66,6 +71,8 @@ export const useAppStore = create<AppState>()(
 
       setShareEnabled: (enabled) =>
         set((s) => ({ passport: { ...s.passport, shareEnabled: enabled } })),
+
+      setPassport: (passport) => set((s) => ({ passport: { ...s.passport, ...passport } })),
     }),
     {
       name: 'worker-app-preferences-v2',
@@ -77,6 +84,7 @@ export const useAppStore = create<AppState>()(
       partialize: (state) => ({
         locale: state.locale,
         hasChosenLanguage: state.hasChosenLanguage,
+        hasConsented: state.hasConsented,
         applications: state.applications,
       }),
     }

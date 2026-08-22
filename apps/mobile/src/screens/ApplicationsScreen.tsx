@@ -1,7 +1,8 @@
 // Applications tab — local demo applications with a status tracker.
 // Honest label: this is a local demo; nothing was sent to a real employer.
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors, typography, spacing, radius } from '../theme';
 import { ApplicationStatus, DemoApplication } from '../types';
@@ -77,66 +78,69 @@ export default function ApplicationsScreen({ onOpenJob }: { onOpenJob?: (jobId: 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <Header right={<DemoTag onDark />} />
-      <ScrollView contentContainerStyle={styles.scroll}>
-        <View style={styles.titleWrap}>
-          <AppText style={styles.title} weight="display">{t('applications.title')}</AppText>
-          <AppText style={styles.subtitle}>{t('applications.demo')} · {applications.length}</AppText>
-        </View>
-
-        {applications.length === 0 ? (
+      <FlashList
+        data={applications}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={styles.scroll}
+        ListHeaderComponent={
+          <View style={styles.titleWrap}>
+            <AppText style={styles.title} weight="display">{t('applications.title')}</AppText>
+            <AppText style={styles.subtitle}>{t('applications.demo')} · {applications.length}</AppText>
+          </View>
+        }
+        ListEmptyComponent={
           <EmptyState
             icon="doc"
             title={t('applications.empty')}
             subtitle={t('applications.emptySub')}
           />
-        ) : (
-          applications.map((a) => {
-            // Derive the live stage from submission time so the tracker visibly
-            // advances (submitted -> under review -> interview -> accepted).
-            const status = effectiveStatus(a);
-            const stepIndex = STATUS_ORDER.indexOf(status);
-            return (
-              <Card key={a.id} style={styles.card}>
-                <View style={styles.cardTop}>
-                  <View style={{ flex: 1 }}>
-                    <AppText style={styles.jobTitle}>{a.jobTitle}</AppText>
-                    <AppText style={styles.company}>{a.company}</AppText>
-                  </View>
-                  <StatusPill icon={STATUS_ICON[status]} label={t(STATUS_KEY[status])} tone={STATUS_TONE[status]} />
+        }
+        ListFooterComponent={<View style={{ height: spacing.xxxl }} />}
+        renderItem={({ item: a }) => {
+          // Derive the live stage from submission time so the tracker visibly
+          // advances (submitted -> under review -> interview -> accepted).
+          const status = effectiveStatus(a);
+          const stepIndex = STATUS_ORDER.indexOf(status);
+          return (
+            <Card style={styles.card}>
+              <View style={styles.cardTop}>
+                <View style={{ flex: 1 }}>
+                  <AppText style={styles.jobTitle}>{a.jobTitle}</AppText>
+                  <AppText style={styles.company}>{a.company}</AppText>
                 </View>
+                <StatusPill icon={STATUS_ICON[status]} label={t(STATUS_KEY[status])} tone={STATUS_TONE[status]} />
+              </View>
 
-                <View style={styles.tracker}>
-                  {STATUS_ORDER.map((s, i) => {
-                    const done = i <= stepIndex;
-                    return (
-                      <View key={s} style={styles.step}>
-                        <View style={[styles.dot, done ? styles.dotDone : styles.dotTodo]}>
-                          <Icon name={STATUS_ICON[s]} size={14} color={done ? colors.white : colors.mutedLight} />
-                        </View>
-                        <AppText style={[styles.stepLabel, done ? styles.stepLabelDone : styles.stepLabelTodo]}>
-                          {t(STATUS_KEY[s])}
-                        </AppText>
-                        {i < STATUS_ORDER.length - 1 ? (
-                          <View style={[styles.connector, i < stepIndex ? styles.connectorDone : styles.connectorTodo]} />
-                        ) : null}
+              <View style={styles.tracker}>
+                {STATUS_ORDER.map((s, i) => {
+                  const done = i <= stepIndex;
+                  return (
+                    <View key={s} style={styles.step}>
+                      <View style={[styles.dot, done ? styles.dotDone : styles.dotTodo]}>
+                        <Icon name={STATUS_ICON[s]} size={14} color={done ? colors.white : colors.mutedLight} />
                       </View>
-                    );
-                  })}
-                </View>
+                      <AppText style={[styles.stepLabel, done ? styles.stepLabelDone : styles.stepLabelTodo]}>
+                        {t(STATUS_KEY[s])}
+                      </AppText>
+                      {i < STATUS_ORDER.length - 1 ? (
+                        <View style={[styles.connector, i < stepIndex ? styles.connectorDone : styles.connectorTodo]} />
+                      ) : null}
+                    </View>
+                  );
+                })}
+              </View>
 
-                <View style={styles.meta}>
-                  <Icon name="clock" size={14} color={colors.muted} />
-                  <AppText style={styles.metaText}>{t('applications.submittedAt', { date: formatDate(a.submittedAt) })}</AppText>
-                  {onOpenJob ? (
-                    <PressableRow onPress={() => onOpenJob(a.jobId)} label={t('applications.viewJob')} />
-                  ) : null}
-                </View>
-              </Card>
-            );
-          })
-        )}
-        <View style={{ height: spacing.xxxl }} />
-      </ScrollView>
+              <View style={styles.meta}>
+                <Icon name="clock" size={14} color={colors.muted} />
+                <AppText style={styles.metaText}>{t('applications.submittedAt', { date: formatDate(a.submittedAt) })}</AppText>
+                {onOpenJob ? (
+                  <PressableRow onPress={() => onOpenJob(a.jobId)} label={t('applications.viewJob')} />
+                ) : null}
+              </View>
+            </Card>
+          );
+        }}
+      />
     </SafeAreaView>
   );
 }

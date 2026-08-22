@@ -483,7 +483,7 @@ White on Steel Navy has a 13.13:1 contrast ratio, Ink on Warm Canvas 14.98:1, Mu
 - **Sentry** for crash and release monitoring, with sensitive fields scrubbed
 - **EAS Build / Submit / Update** with staged releases and rollback controls
 
-Expo SDK 57 targets React Native 0.86 and React 19.2.3, matching the current mobile package. Its documented minimum Node version is 22.13.x, so the repository's current `node >=18` declaration must be tightened before reproducible mobile builds.[4]
+Expo SDK 57 targets React Native 0.86 and React 19.2.3, matching the current mobile package. Its documented minimum Node version is 22.13.x; the repository now declares `node >=22.13.0` (root and `apps/mobile`) to keep mobile builds reproducible.[4]
 
 ### Backend
 

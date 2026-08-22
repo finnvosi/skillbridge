@@ -25,6 +25,8 @@ import { Icon, IconName } from './components/Icon';
 
 import { RootStackParamList, MainTabParamList } from './navigation';
 import WelcomeScreen from './screens/WelcomeScreen';
+import PhoneSignInScreen from './screens/auth/PhoneSignInScreen';
+import OtpVerifyScreen from './screens/auth/OtpVerifyScreen';
 import LoginScreen from './screens/auth/LoginScreen';
 import RegisterScreen from './screens/auth/RegisterScreen';
 import JobsScreen from './screens/JobsScreen';
@@ -279,6 +281,10 @@ export default function App() {
           </Stack.Screen>
         ) : (
           <>
+            {/* Phone OTP is the default worker sign-in (blueprint §12);
+                email/password stays reachable as the secondary path. */}
+            <Stack.Screen name="PhoneSignIn" component={PhoneSignInScreen} />
+            <Stack.Screen name="OtpVerify" component={OtpVerifyScreen} />
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="Register" component={RegisterScreen} />
           </>

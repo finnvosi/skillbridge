@@ -68,10 +68,11 @@ enum NotificationType {
 
 model User {
   id            String   @id @default(cuid())
-  email         String   @unique
-  passwordHash  String
+  email         String?  @unique
+  passwordHash  String?
+  phone         String?  @unique
   role          UserRole
-  name          String
+  name          String   @default("")
   avatar        String?
   emailVerified Boolean  @default(false)
   suspended     Boolean   @default(false)
@@ -528,4 +529,20 @@ model WorkRecord {
 
   @@index([workerId])
   @@index([verified])
+}
+
+// Phone OTP for phone-first worker sign-in (blueprint §12: phone OTP is the
+// default worker path; email is optional recovery, not first access).
+// Codes are stored hashed, expire quickly, and are consumed/attempt-limited.
+model PhoneOtp {
+  id        String    @id @default(cuid())
+  phone     String
+  codeHash  String
+  expiresAt DateTime
+  attempts  Int       @default(0)
+  createdAt DateTime  @default(now())
+  verifiedAt DateTime?
+
+  @@index([phone, createdAt])
+  @@index([phone, expiresAt])
 }

@@ -20,6 +20,11 @@ export const API_ENDPOINTS = {
     me: '/auth/me',
     refresh: '/auth/refresh',
     logout: '/auth/logout',
+    // Phone OTP — the default worker sign-in path (blueprint §12).
+    otp: {
+      request: '/auth/otp/request',
+      verify: '/auth/otp/verify',
+    },
   },
   users: {
     profile: '/users/profile',

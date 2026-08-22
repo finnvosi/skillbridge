@@ -12,6 +12,8 @@ export type MainTabParamList = {
 
 export type RootStackParamList = {
   Welcome: undefined;
+  PhoneSignIn: undefined;
+  OtpVerify: { phone: string; demoCode?: string };
   Login: undefined;
   Register: undefined;
   WrongAccount: undefined;

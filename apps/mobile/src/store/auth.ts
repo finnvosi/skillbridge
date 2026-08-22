@@ -6,12 +6,13 @@ import { API_ENDPOINTS } from '../config';
 
 /**
  * Shape of the user object returned by the SkillBridge Express API.
- * The API uses `name` (camelCase) — NOT `full_name` (which the old
- * Supabase-based Next.js auth used).
+ * Phone-first (OTP) accounts have `email === null`; `phone` is the unique
+ * identity for workers.
  */
 export interface ApiUser {
   id: string;
-  email: string;
+  email: string | null;
+  phone?: string | null;
   name: string;
   role: 'student' | 'employer' | 'factory' | 'admin' | 'worker';
 }
@@ -31,6 +32,10 @@ interface AuthState {
     name: string,
     role: 'student' | 'employer' | 'worker'
   ) => Promise<void>;
+  requestOtp: (
+    phone: string
+  ) => Promise<{ demoCode?: string; expiresInMs: number } | undefined>;
+  verifyOtp: (phone: string, code: string) => Promise<boolean>;
   logout: () => Promise<void>;
   fetchMe: () => Promise<void>;
   updateUser: (userData: Partial<ApiUser>) => void;
@@ -101,6 +106,59 @@ export const useAuthStore = create<AuthState>()(
             loading: false,
             initialized: true,
           });
+        }
+      },
+
+      requestOtp: async (phone) => {
+        set({ loading: true, error: null });
+        try {
+          const data = await apiRequest<{
+            message: string;
+            provider: string;
+            demoCode?: string;
+            expiresInMs: number;
+          }>(API_ENDPOINTS.auth.otp.request, {
+            method: 'POST',
+            body: { phone },
+          });
+          set({ loading: false });
+          return { demoCode: data.demoCode, expiresInMs: data.expiresInMs };
+        } catch (error) {
+          set({
+            error: error instanceof ApiError ? error.message : 'Could not send code',
+            loading: false,
+            initialized: true,
+          });
+          return undefined;
+        }
+      },
+
+      verifyOtp: async (phone, code) => {
+        set({ loading: true, error: null });
+        try {
+          const data = await apiRequest<{
+            user: ApiUser;
+            token: string;
+            refreshToken: string;
+          }>(API_ENDPOINTS.auth.otp.verify, {
+            method: 'POST',
+            body: { phone, code },
+          });
+          set({
+            user: data.user,
+            token: data.token,
+            refreshToken: data.refreshToken,
+            initialized: true,
+            loading: false,
+          });
+          return true;
+        } catch (error) {
+          set({
+            error: error instanceof ApiError ? error.message : 'Verification failed',
+            loading: false,
+            initialized: true,
+          });
+          return false;
         }
       },
 

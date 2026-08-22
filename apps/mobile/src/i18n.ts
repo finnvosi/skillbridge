@@ -92,6 +92,7 @@ const km: Dict = {
   'apply.done': 'ពាក្យសុំបានដាក់',
   'apply.doneSub': 'អ្នកអាចតាមដានស្ថានភាពនៅផ្ទាំង "ពាក្យសុំ"។',
   'apply.viewApplications': 'មើលពាក្យសុំរបស់ខ្ញុំ',
+  'apply.alreadyApplied': 'អ្នកបានដាក់ពាក្យសុំការងារនេះរួចហើយ។',
 
   'applications.title': 'ពាក្យសុំរបស់ខ្ញុំ',
   'applications.empty': 'អ្នកមិនទាន់ដាក់ពាក្យសុំទេ។',
@@ -246,6 +247,7 @@ const en: Dict = {
   'apply.done': 'Application submitted',
   'apply.doneSub': 'Track status in the Applications tab.',
   'apply.viewApplications': 'View my applications',
+  'apply.alreadyApplied': "You've already applied to this job.",
 
   'applications.title': 'My applications',
   'applications.empty': 'You have not applied yet.',

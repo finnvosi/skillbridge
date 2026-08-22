@@ -30,7 +30,9 @@ export default function JobsScreen({ onOpenJob }: { onOpenJob: (job: DemoJob) =>
     setLoading(true);
     fetchJobs()
       .then((data) => {
-        if (alive && data.length) setJobs(data);
+        // A remote EMPTY array is a real result — show the honest empty state,
+        // don't silently keep the demo fixtures.
+        if (alive) setJobs(data.length ? data : []);
       })
       .catch(() => {
         // API unreachable — keep fixture fallback.

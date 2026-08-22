@@ -3,6 +3,7 @@
 // fixtures if the API is unreachable (keeps the prototype demoable).
 import React, { useState, useMemo, useEffect } from 'react';
 import { View, Text, Pressable, TextInput, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors, typography, spacing, radius, TAP_MIN } from '../theme';
 import { DEMO_JOBS } from '../data/fixtures';
@@ -17,7 +18,13 @@ import { fetchJobs } from '../services/workerApi';
 import { USE_REMOTE_API } from '../config';
 type Filter = 'none' | 'near' | 'day' | 'salary';
 
-export default function JobsScreen({ onOpenJob }: { onOpenJob: (job: DemoJob) => void }) {
+export default function JobsScreen({
+  onOpenJob,
+  onOpenNotifications,
+}: {
+  onOpenJob: (job: DemoJob) => void;
+  onOpenNotifications?: () => void;
+}) {
   const { t } = useT();
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<Filter>('none');
@@ -65,7 +72,7 @@ export default function JobsScreen({ onOpenJob }: { onOpenJob: (job: DemoJob) =>
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
-      <Header />
+      <Header showBell={!!onOpenNotifications} onBell={onOpenNotifications} />
       <View style={styles.searchWrap}>
         <View style={styles.searchBox}>
           <Icon name="search" size={18} color={colors.muted} />
@@ -111,17 +118,20 @@ export default function JobsScreen({ onOpenJob }: { onOpenJob: (job: DemoJob) =>
         {loading ? <ActivityIndicator size="small" color={colors.muted} /> : <DemoTag />}
       </View>
 
-      <ScrollView contentContainerStyle={styles.list} keyboardShouldPersistTaps="handled">
-        {filtered.length === 0 ? (
+      <FlashList
+        data={filtered}
+        renderItem={({ item }) => <JobCard job={item} onPress={() => onOpenJob(item)} />}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={styles.list}
+        keyboardShouldPersistTaps="handled"
+        ListEmptyComponent={
           <View style={styles.empty}>
             <AppText style={styles.emptyTitle} weight="display">{t('jobs.empty')}</AppText>
             <AppText style={styles.emptySub}>{t('jobs.emptySub')}</AppText>
           </View>
-        ) : (
-          filtered.map((job) => <JobCard key={job.id} job={job} onPress={() => onOpenJob(job)} />)
-        )}
-        <View style={{ height: spacing.xxxl }} />
-      </ScrollView>
+        }
+        ListFooterComponent={<View style={{ height: spacing.xxxl }} />}
+      />
     </SafeAreaView>
   );
 }

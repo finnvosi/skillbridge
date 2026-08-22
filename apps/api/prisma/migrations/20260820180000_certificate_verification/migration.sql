@@ -45,9 +45,23 @@ ALTER TABLE "Certificate" ALTER COLUMN "verificationStatus"
   SET DEFAULT 'pending';
 
 -- Backfill explicit status from the legacy boolean for any row not already set.
-UPDATE "Certificate"
-SET "verificationStatus" = CASE WHEN "verified" = TRUE THEN 'verified' ELSE 'pending' END
-WHERE "verificationStatus" IS NULL OR "verificationStatus" = '';
+-- REPAIR: guarded so it only runs while the column is still TEXT. After the enum
+-- conversion above, `"verificationStatus" = ''` would be an invalid-input error on
+-- an enum column, so a fresh replay skips this backfill (the USING cast already
+-- produced valid enum values and the column is NOT NULL).
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'Certificate'
+      AND column_name = 'verificationStatus'
+      AND udt_name = 'text'
+  ) THEN
+    UPDATE "Certificate"
+    SET "verificationStatus" = CASE WHEN "verified" = TRUE THEN 'verified' ELSE 'pending' END
+    WHERE "verificationStatus" IS NULL OR "verificationStatus" = '';
+  END IF;
+END $$;
 
 -- Index for the admin pending queue.
 CREATE INDEX IF NOT EXISTS "Certificate_verificationStatus_idx"

@@ -7,6 +7,7 @@ import { jwtConfig } from '@skillbridge/config';
 import { prisma } from '../db/prisma';
 import { asyncHandler, validate } from '../middleware/validation';
 import { authenticate, AuthRequest } from '../middleware/auth';
+import { signTokens, publicUser } from '../services/auth-tokens';
 
 const router = Router();
 
@@ -42,38 +43,6 @@ const loginSchema = z.object({
     password: z.string().min(1),
   }),
 });
-
-function signTokens(user: { id: string; email: string; role: string }) {
-  const token = jwt.sign(
-    { id: user.id, email: user.email, role: user.role },
-    jwtConfig.secret,
-    { expiresIn: '7d' }
-  );
-  const refreshToken = jwt.sign(
-    { id: user.id, email: user.email, role: user.role },
-    jwtConfig.refreshSecret,
-    { expiresIn: '30d' }
-  );
-  return { token, refreshToken };
-}
-
-function publicUser(user: {
-  id: string;
-  email: string;
-  name: string;
-  role: string;
-  onboardingStep: number;
-  onboardingCompletedAt: Date | null;
-}) {
-  return {
-    id: user.id,
-    email: user.email,
-    name: user.name,
-    role: user.role,
-    onboardingStep: user.onboardingStep,
-    onboardingCompleted: Boolean(user.onboardingCompletedAt),
-  };
-}
 
 // Register
 router.post(
@@ -134,7 +103,8 @@ router.post(
     const { email, password } = req.body;
 
     const user = await prisma.user.findUnique({ where: { email } });
-    if (!user) {
+    // Phone-first accounts have no password and cannot use email login.
+    if (!user || !user.passwordHash) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 

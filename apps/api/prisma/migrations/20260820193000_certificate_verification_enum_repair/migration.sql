@@ -1,9 +1,12 @@
 -- Repair certificate verification state after the original migration was recorded
 -- without creating the enum type in the live database.
+-- REPAIR: typname check made case-insensitive — a quoted CREATE TYPE stores the
+-- mixed-case name in pg_type, so the lowercase-only check missed the existing enum
+-- and re-created it (error 42710 "type already exists").
 DO $$
 BEGIN
   IF NOT EXISTS (
-    SELECT 1 FROM pg_type WHERE typname = 'certificateverificationstatus'
+    SELECT 1 FROM pg_type WHERE typname IN ('certificateverificationstatus', 'CertificateVerificationStatus')
   ) THEN
     CREATE TYPE "CertificateVerificationStatus" AS ENUM ('pending', 'verified', 'rejected');
   END IF;

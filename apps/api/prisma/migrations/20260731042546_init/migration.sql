@@ -2,7 +2,9 @@
 CREATE TYPE "UserRole" AS ENUM ('student', 'employer', 'admin', 'factory', 'worker');
 
 -- CreateEnum
-CREATE TYPE "ProjectStatus" AS ENUM ('open', 'in_progress', 'completed', 'cancelled');
+-- REPAIR: enum values aligned with prisma/schema.prisma (was: 'open','in_progress','completed','cancelled').
+-- The live DB had these extra/missing values applied out-of-band; a fresh replay must end at the schema.
+CREATE TYPE "ProjectStatus" AS ENUM ('draft', 'open', 'paused', 'completed', 'cancelled', 'expired');
 
 -- CreateEnum
 CREATE TYPE "ProjectType" AS ENUM ('internship', 'part_time', 'freelance', 'full_time');
@@ -11,14 +13,19 @@ CREATE TYPE "ProjectType" AS ENUM ('internship', 'part_time', 'freelance', 'full
 CREATE TYPE "ApplicationStatus" AS ENUM ('pending', 'accepted', 'rejected', 'withdrawn');
 
 -- CreateTable
+-- REPAIR: User columns reconciled with prisma/schema.prisma. `phone` and `suspended`
+-- were created on the live DB out-of-band (db push) and no migration ever added them;
+-- `email`/`passwordHash` are nullable and `name` defaults to '' per the current schema.
 CREATE TABLE "User" (
     "id" TEXT NOT NULL,
-    "email" TEXT NOT NULL,
-    "passwordHash" TEXT NOT NULL,
+    "email" TEXT,
+    "passwordHash" TEXT,
+    "phone" TEXT,
     "role" "UserRole" NOT NULL,
-    "name" TEXT NOT NULL,
+    "name" TEXT NOT NULL DEFAULT '',
     "avatar" TEXT,
     "emailVerified" BOOLEAN NOT NULL DEFAULT false,
+    "suspended" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -169,6 +176,10 @@ CREATE TABLE "CareerRecommendation" (
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
+
+-- CreateIndex
+-- REPAIR: unique index for the out-of-band `phone` column added above.
+CREATE UNIQUE INDEX "User_phone_key" ON "User"("phone");
 
 -- CreateIndex
 CREATE INDEX "User_role_idx" ON "User"("role");

@@ -25,6 +25,10 @@ import { Icon, IconName } from './components/Icon';
 
 import { RootStackParamList, MainTabParamList } from './navigation';
 import WelcomeScreen from './screens/WelcomeScreen';
+import ConsentScreen from './screens/ConsentScreen';
+import OnboardingPreferencesScreen from './screens/OnboardingPreferencesScreen';
+import PhoneSignInScreen from './screens/auth/PhoneSignInScreen';
+import OtpVerifyScreen from './screens/auth/OtpVerifyScreen';
 import LoginScreen from './screens/auth/LoginScreen';
 import RegisterScreen from './screens/auth/RegisterScreen';
 import JobsScreen from './screens/JobsScreen';
@@ -34,6 +38,9 @@ import HelpScreen from './screens/HelpScreen';
 import JobDetailScreen from './screens/JobDetailScreen';
 import ApplyReviewScreen from './screens/ApplyReviewScreen';
 import ReportScreen from './screens/ReportScreen';
+import NotificationCenterScreen from './screens/NotificationCenterScreen';
+import AddWorkRecordScreen from './screens/AddWorkRecordScreen';
+import ProfileEditScreen from './screens/ProfileEditScreen';
 import { DEMO_JOBS } from './data/fixtures';
 import { DemoApplication, DemoJob } from './types';
 import { fetchJob } from './services/workerApi';
@@ -86,6 +93,7 @@ function MainTabs({ navigation, route }: any) {
             onOpenJob={(job: DemoJob) =>
               navigation.navigate('JobDetail', { jobId: job.id })
             }
+            onOpenNotifications={() => navigation.navigate('NotificationCenter')}
           />
         )}
       </Tab.Screen>
@@ -104,8 +112,18 @@ function MainTabs({ navigation, route }: any) {
       <Tab.Screen
         name="Passport"
         options={{ title: t('tab.passport'), tabBarIcon: ({ focused }) => <TabBarIcon name="shieldCheck" focused={focused} /> }}
-        component={PassportScreen}
-      />
+      >
+        {({ navigation }) => (
+          <PassportScreen
+            onEditPassport={() =>
+              navigation.navigate('ProfileEdit', {
+                passport: useAppStore.getState().passport,
+              })
+            }
+            onAddWorkRecord={() => navigation.navigate('AddWorkRecord')}
+          />
+        )}
+      </Tab.Screen>
 
       <Tab.Screen
         name="Help"
@@ -195,6 +213,7 @@ function WrongAccountScreen({ onSignOut }: { onSignOut: () => void }) {
 export default function App() {
   const fontsReady = useWorkerFonts();
   const hasChosenLanguage = useAppStore((s) => s.hasChosenLanguage);
+  const hasConsented = useAppStore((s) => s.hasConsented);
   const token = useAuthStore((s) => s.token);
   const user = useAuthStore((s) => s.user);
   const fetchMe = useAuthStore((s) => s.fetchMe);
@@ -233,6 +252,12 @@ export default function App() {
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {!hasChosenLanguage ? (
           <Stack.Screen name="Welcome" component={WelcomeScreen} />
+        ) : !hasConsented ? (
+          /* Safety promise + consent gate (blueprint flow order). */
+          <Stack.Screen name="Consent" component={ConsentScreen} />
+        ) : isWorker && !user?.onboardingCompleted ? (
+          /* Worker preferences onboarding (blueprint §7 must-ship). */
+          <Stack.Screen name="Onboarding" component={OnboardingPreferencesScreen} />
         ) : isWorker ? (
           <>
             <Stack.Screen name="Main" component={MainTabs} />
@@ -272,6 +297,31 @@ export default function App() {
                 />
               )}
             </Stack.Screen>
+            <Stack.Screen name="ProfileEdit">
+              {({ navigation }) => (
+                <ProfileEditScreen
+                  passport={useAppStore.getState().passport}
+                  onSaved={(next) => {
+                    useAppStore.getState().setPassport(next);
+                    navigation.goBack();
+                  }}
+                  onCancel={() => navigation.goBack()}
+                />
+              )}
+            </Stack.Screen>
+            <Stack.Screen name="NotificationCenter">
+              {({ navigation }) => (
+                <NotificationCenterScreen onBack={() => navigation.goBack()} />
+              )}
+            </Stack.Screen>
+            <Stack.Screen name="AddWorkRecord">
+              {({ navigation }) => (
+                <AddWorkRecordScreen
+                  onBack={() => navigation.goBack()}
+                  onSaved={() => navigation.goBack()}
+                />
+              )}
+            </Stack.Screen>
           </>
         ) : token && user && user.role !== 'worker' ? (
           <Stack.Screen name="WrongAccount">
@@ -279,6 +329,10 @@ export default function App() {
           </Stack.Screen>
         ) : (
           <>
+            {/* Phone OTP is the default worker sign-in (blueprint §12);
+                email/password stays reachable as the secondary path. */}
+            <Stack.Screen name="PhoneSignIn" component={PhoneSignInScreen} />
+            <Stack.Screen name="OtpVerify" component={OtpVerifyScreen} />
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="Register" component={RegisterScreen} />
           </>

@@ -3,7 +3,11 @@
 
 export type Locale = 'km' | 'en';
 
-export type VerificationLevel = 'job_checked' | 'company_checked' | 'identity_checked';
+export type VerificationLevel =
+  | 'none'
+  | 'job_checked'
+  | 'company_checked'
+  | 'identity_checked';
 
 export type ShiftType = 'day' | 'night' | 'rotating' | 'flexible';
 

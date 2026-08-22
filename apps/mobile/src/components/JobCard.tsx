@@ -15,6 +15,7 @@ const SHIFT_LABEL: Record<DemoJob['shift'], string> = {
 };
 
 const VERIFY_LABEL: Record<DemoJob['verificationLevel'], string> = {
+  none: 'jobs.notVerified',
   job_checked: 'jobs.jobChecked',
   company_checked: 'jobs.companyChecked',
   identity_checked: 'jobs.identityChecked',

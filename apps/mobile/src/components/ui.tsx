@@ -152,22 +152,26 @@ export function Card({ children, padded = true, style, border = true, elevated =
 /* ----------------------- Verification badge ----------------------- */
 
 interface VerifyBadgeProps {
-  level: 'job_checked' | 'company_checked' | 'identity_checked';
+  level: 'none' | 'job_checked' | 'company_checked' | 'identity_checked';
   label: string;
 }
 
+// 'none' is an honest, non-green state: we never show a check mark for a job
+// we have not verified. It reads as a muted "Not verified" pill instead of
+// fabricating trust.
 export function VerifyBadge({ level, label }: VerifyBadgeProps) {
-  const fg = colors.success;
-  const bg = colors.successSoft;
+  const verified = level !== 'none';
+  const fg = verified ? colors.success : colors.muted;
+  const bg = verified ? colors.successSoft : colors.surfaceMuted;
   return (
     <View
       style={[
         styles.pill,
-        { backgroundColor: bg, borderWidth: 1, borderColor: colors.success },
+        { backgroundColor: bg, borderWidth: 1, borderColor: verified ? colors.success : colors.border },
       ]}
     >
-      <Icon name="checkCircle" size={16} color={fg} />
-      <AppText style={[styles.pillText, { color: colors.ink, fontWeight: typography.weight.semibold as any }]}>
+      <Icon name={verified ? 'checkCircle' : 'info'} size={16} color={fg} />
+      <AppText style={[styles.pillText, { color: verified ? colors.ink : colors.muted, fontWeight: typography.weight.semibold as any }]}>
         {label}
       </AppText>
     </View>
